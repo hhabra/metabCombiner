@@ -70,7 +70,6 @@ imputeVals <- function(data, samples, imputeVal){
             imputedData <- mlr::impute(values, classes = list(
                   numeric = mlr::imputeConstant(imputeVal),
                   integer = mlr::imputeConstant(imputeVal)))$data
-        
         else
           imputedData <- apply(values, 1, function(row){
               as.numeric(ifelse(is.na(row), imputeVal, row))
@@ -148,20 +147,10 @@ findDuplicates <- function(data, counts, missing, duplicate){
 #' 
 #' @param duplicate                                                                         
 
-
-filterData <- function(data, samples, misspc, measure, rtmin, rtmax, zero,
+adjustData <- function(data, samples, misspc, measure, rtmin, rtmax, zero,
                        impute, imputeVal, duplicate){
-    #parameter checks
-    if (misspc >= 100 | misspc < 0 | !is.numeric(misspc))
-        stop("Parameter 'misspc' must be a numeric value from [0,100)")
-    
-    if(!is.logical(zero))
-        zero = FALSE
-    
-    if(!is.logical(impute))
-        warning("Parameter 'impute' is non-logical. Setting to default (FALSE)")
-  
-  
+
+    ##filtering by RT region
     data = filterRT(data, rtmin = rtmin, rtmax = rtmax)
   
     missingpc <- apply(table, 1, function(row){
@@ -176,7 +165,7 @@ filterData <- function(data, samples, misspc, measure, rtmin, rtmax, zero,
     data = data[keepIndices,]
     missingpc = missingpc[keepIndices]
     
-    ##imputing missing values; setting all missingpc to 0
+    ##optional imputation of missing values; setting missing % to 0
     if(impute & any(missingpc > 0)){
         data = imputeVals(data = data, samples = samples, imputeVal = imputeVal)
       
@@ -190,15 +179,17 @@ filterData <- function(data, samples, misspc, measure, rtmin, rtmax, zero,
     else
         stop("parameter 'measure' must be 'median' or 'mean'")
     
+    ##removing duplicate features
     duplicates = findDuplicates(data = data, counts = counts, missing = missingpc, 
                                 duplicate = duplicate)
     
     data = data[-duplicates,]
-  
     counts = counts[-duplicates,]
   
-  
-  
+    ##calculating quantiles
+    data$Q <- (rank(counts) - 0.5) / length(counts)
+    
+    return(data)
 }
 
 

@@ -28,7 +28,6 @@ readData <- function(file){
 }
 
 
-
 #' detect
 #'
 #' Helper function for metabData() constructor, used to detect column corresponding to 
@@ -272,20 +271,24 @@ filterMissingness <- function(data, missing, zero){
 #'
 #'@param rtmax
 #'
-#'@param missing
+#'@param misspc
 #'
 #'@param zero
 #'
-#'@measure 
+#'@param measure
+#'
+#'@param impute
+#'
+#'@param imputeVal
+#'
+#'@param duplicate        
 #'
 metabData <- function(table, mz = "mz", rt = "rt", id = "id",
                       adduct = "adduct", samples = "detect", extra = NULL,
-                      rtmin = "min", rtmax = "max", missing = 50, zero = FALSE, 
+                      rtmin = "min", rtmax = "max", misspc = 50, zero = FALSE, 
                       measure = c("median", "mean"), impute = FALSE, imputeVal = 100,
                       duplicate = c(0.003, 0.05))
 {  
-    newData <- methods::new("metabData")
-    
     if(missing(table))
         stop("required argument 'table' is missing with no default")
     
@@ -307,6 +310,9 @@ metabData <- function(table, mz = "mz", rt = "rt", id = "id",
     if(!is.character(extra))
         extra = NULL
     
+    if (misspc >= 100 | misspc < 0 | !is.numeric(misspc))
+        stop("Parameter 'misspc' must be a numeric value from [0,100)")
+    
     if(typeof(table) == "character")
         table <- readData(table)
     else if(class(table) != "data.frame")
@@ -317,7 +323,14 @@ metabData <- function(table, mz = "mz", rt = "rt", id = "id",
         zero = FALSE
     }
     
+    if(!is.logical(impute)){
+        warning("Parameter 'impute' is non-logical. Setting to default (FALSE)")
+        impute = FALSE
+    }
+    
     measure = match.arg(measure)
+    
+    newData <- methods::new("metabData")
     
     ###exclude: integer vector to ensure that each column is used once, at most
     exclude <- integer(ncol(table))
@@ -348,14 +361,13 @@ metabData <- function(table, mz = "mz", rt = "rt", id = "id",
     if(!is.null(idCol))
         exclude[3] = idCol
     
-    
     ##detecting (optional) adduct column; empty column if missing or null
     adductCol = detect(adduct, names = names(table), types = coltypes, exclude = exclude)
+    
     new_adduct <- selectAdduct(table, col = adductCol)
     
     if(!is.null(adductCol))
        exclude[4] = adductCol
-    
     
     ##removing excluded columns
     table = table[,-exclude]
@@ -379,8 +391,8 @@ metabData <- function(table, mz = "mz", rt = "rt", id = "id",
       
         samples = detectSamples(names(table), coltypes)
     }else{
-        if(!any(samples %in% names(table)))
-            stop("At least one name in 'samples' field undefined or used more than once")
+        if(!any(samples %in% names(table)) | any(duplicated(samples)))
+            stop("At least one name in 'samples' undefined or non-unique")
     }
     
     new_values = table[,samples]
@@ -400,14 +412,10 @@ metabData <- function(table, mz = "mz", rt = "rt", id = "id",
     if(length(extra) > 0)
         newData@data[,extra] = new_extra
     
-    
-    newData = filterRT(newData, rtmin = rtmin, rtmax = rtmax)
-    newData = filterMissingness(newData, missing = missing, zero = zero)
-    
-    ##newData = filterDuplcates(newData)   Not Yet Implemented
-    ##newData = imputeVals(newData)      Not Yet Implemented
-    
-    newData = calcQs(newData, measure = measure)
+    newData@data = adjustData(data = newData@data, samples = samples, misspc = misspc,
+                              measure = measure, rtmin = rtmin, rtmax = rtmax,
+                              zero = zero, impute = impute, imputeVal = imputeVal,
+                              duplicate = duplicate)
     
     return(newData)
 }
