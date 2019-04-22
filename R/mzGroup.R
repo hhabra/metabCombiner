@@ -1,4 +1,4 @@
-## The m/z grouping function 
+## mzGroup 
 #' @title Binning of mass spectral features in m/z dimension  
 #'
 #' @description The \code{mzGroup} merges m/z values of xdata &
@@ -12,57 +12,59 @@
 #' 
 #' @param binGap numeric. 
 #' 
-#' 
-
+## 
 mzGroup <- function(object, binGap = 0.005){
     if(class(object) != "metabCombiner")
-        stop(paste(object, "is not a metabCombiner object"), sep = " ")
+        stop(base::paste(object, "is not a metabCombiner object"), sep = " ")
   
-    xdata = getData(object, "x")
-    ydata = getData(object, "y")
+    xdata = getData(object, "x") %>% dplyr::mutate(index = 1:nrow(xdata)) 
+    ydata = getData(object, "y") %>% dplyr::mutate(index = 1:nrow(ydata)) 
     
     if(nrow(xdata) == 0 | nrow(ydata) == 0)
-        stop("missing xdata or ydata")
+        stop(base::paste("missing xdata or ydata in object", object, sep = " "))
     
     if(!("mz" %in% names(xdata)) | !("mz" %in% names(ydata)))
         stop("m/z column missing in either xdata or ydata")
     
-    object@binGap = binGap
-    
-    if(is.null(object@binGap) | length(object@binGap) == 0)
+    if(is.null(binGap) | length(binGap) == 0)
         stop("parameter 'binGap' must be defined")
     
-    if(object@binGap <= 0 | !is.numeric(object@binGap))
+    if(binGap <= 0 | !is.numeric(binGap))
         stop("parameter 'binGap' must be a positive numeric constant")
     
-    if(object@binGap > 0.1)
-        warning("Parameter 'binGap' is very high. Recommend value less than 0.1")
+    if(binGap > 0.1)
+        warning("parameter 'binGap' is very high. A value less than 0.1 is recommended.")
     
-    xdata <- dplyr::mutate(index = 1:nrow(xdata)) %>% dplyr::arrange(mz) 
-    ydata <- dplyr::mutate(index = 1:nrow(ydata)) %>% dplyr::arrange(mz) 
+    object@binGap = binGap
     
     
-    ####### pick up from here!!!!!! ##########
-    
-    mzGrp <- rbind(dplyr::select(object@xdata@data, mz), 
-                   dplyr::select(object@ydata@data, mz)) %>% 
-                   dplyr::mutate(dataset = c(rep("x", nrow(object@xdata@data)),
-                                rep("y", nrow(object@ydata@data)))) %>%
-                   dplyr::arrange(mz)
+    #forming m/z groups table
+    mzGrps <- rbind(dplyr::select(xdata, mz, index), dplyr::select(ydata, mz, index)) %>% 
+              dplyr::mutate(set = c(rep("x", nrow(xdata)),rep("y", nrow(ydata)))) %>%
+              dplyr::arrange(mz)
     
     
     if(!is.numeric(mzGrp$mz) | any(is.na(mzGrp$mz)) | any(mzGrp$mz < 0)){
-      stop("At least one negative, missing, or non-numeric m/z value")
+        stop("At least one negative, missing, or non-numeric m/z value")
     }
     
-    mzGrp$groups <- .Call("binByMZ", mzGrp$mz, nrow(mzGrp), mzGrp$dataset, object@binGap)
+    mzGrps$groups <- .Call("binByMZ", 
+                           mz = mzGrp$mz, 
+                           length = nrow(mzGrp), 
+                           datasets = mzGrp$set, 
+                           gap = binGap)
     
-    object@xdata@data$group <- dplyr::filter(mzGrp, dataset == "x")$groups 
-    object@ydata@data$group <- dplyr::filter(mzGrp, dataset == "y")$groups
+    mzGrpsX <- dplyr::filter(mzGrp, set == "x") %>% dplyr::arrange(index)
+    mzGrpsY <- dplyr::filter(mzGrp, set == "y") %>% dplyr::arrange(index)
+    
+    object@xdata@data$group <- mzGrpX$groups
+    object@ydata@data$group <- mzGrpY$groups
+    
+    object = formCombinerTable(object)
     
     return(object)
 }
-)
+
 
 
 
