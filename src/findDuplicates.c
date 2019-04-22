@@ -4,9 +4,10 @@
 
 /*
 * File Description:
+* ------------------
 *
-* Contains function for labeling features that are deemed duplicates, to be removed in
-* the R interface.
+* Contains function for finding and labeling duplicate metabolomics features, to be removed in
+* the R function adjustData().
 *
 */
 

@@ -2,8 +2,24 @@
 #include <Rdefines.h>
 #include <Rmath.h>
 
-// 
-//
+/*
+* File Description:
+* ------------------
+*
+* Contains function to bin metabolomics features by m/z values, 
+* to be used within mzGroup() function. Each m/z group must contain features 
+* from both datasets.
+*/
+
+/*
+* Function: binByMZ
+* ------------------- 
+*
+* binByMZ performs continuous binning of features by m/z (pre-sorted). 
+* Features with m/z values within 'gap' Daltons are considered for a potential 
+* mzGroup; increment bin count if group contains features from both datasets.
+* 
+*/
 SEXP binByMZ(SEXP mz, SEXP length, SEXP datasets, SEXP gap){
 	//obtaining C types
 	double *rmz = REAL(mz);
@@ -15,7 +31,7 @@ SEXP binByMZ(SEXP mz, SEXP length, SEXP datasets, SEXP gap){
 	int *rgroups = INTEGER(groups);
 	memset(rgroups, 0, rlength * sizeof(int));    
 
-	//initiating variables before loop
+	//initiating loop variables
 	double diff;
 	int cond1 = 0, cond2 = 0, bin = 1, start, count;
 	const char *d1, *d2;
@@ -46,7 +62,7 @@ SEXP binByMZ(SEXP mz, SEXP length, SEXP datasets, SEXP gap){
 			}
 		}
 	
-		//reset and update group count, if cond2 met
+		//reset and update group count, if condition 2 met
 		if(diff > rgap || i == (rlength - 1)){
 			cond1 = 0;
 			
