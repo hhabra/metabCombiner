@@ -22,10 +22,10 @@
  * is named a duplicate.
 */
 void comparePair(int i, int j, double *RT, double rtolRT, double *rmissing, 
-double *rcounts, int *rlabels)
+				 double *rcounts, int *rduplicates)
 {
 	double eps = 1e-6;
-	if(rlabels[i] == 1 || rlabels[j] == 1)
+	if(rduplicates[i] == 1 || rduplicates[j] == 1)
 		return;
 		
 	if(fabs(RT[i] - RT[j]) > rtolRT + eps)
@@ -33,19 +33,19 @@ double *rcounts, int *rlabels)
 	
 	//duplicate condition detected if above statement is false
 	if(rmissing[i] > rmissing[j])
-	    rlabels[i] = 1;
+	    rduplicates[i] = 1;
 	
 	else if(rmissing[i] < rmissing[j])
-	    rlabels[j] = 1;
+	    rduplicates[j] = 1;
 	    
     else if (rcounts[i] > rcounts[j])
-        rlabels[j] = 1;
+        rduplicates[j] = 1;
         
     else if (rcounts[i] < rcounts[j])
-        rlabels[i] = 1;
+        rduplicates[i] = 1;
 	 
 	else
-		rlabels[j] = 1;
+		rduplicates[j] = 1;
 		
 	return;
 }
@@ -60,8 +60,9 @@ double *rcounts, int *rlabels)
  * Returns a vector of characters labeled 'o' (okay) or 'd' (duplicate)
 */
 SEXP findDuplicates(SEXP mz, SEXP rt, SEXP length, SEXP tolMZ, SEXP tolRT, 
-SEXP missing, SEXP counts)
+					SEXP missing, SEXP counts)
 {
+	//obtaining C types
     double *rmz = REAL(mz);
     double *RT = REAL(rt);
     int rlength = INTEGER(length)[0];
@@ -72,17 +73,17 @@ SEXP missing, SEXP counts)
     
     double eps = 1e-6;
 	
-    SEXP labels = PROTECT(allocVector(INTSXP, rlength));
-    int *rlabels = INTEGER(labels);
-    memset(rlabels, 0, rlength * sizeof(int));
+    SEXP duplicates = PROTECT(allocVector(INTSXP, rlength));
+    int *rduplicates = INTEGER(duplicates);
+    memset(rduplicates, 0, rlength * sizeof(int));
     
     for(int i = 0; i < rlength-2; i++){
-        if(rlabels[i] == 1)
+        if(rduplicates[i] == 1)
             continue;
         int k = 1;
         
         while(rmz[i + k] - rmz[i] < rtolMZ + eps){
-            comparePair(i, i+k, RT, rtolRT, rmissing, rcounts, rlabels);
+            comparePair(i, i+k, RT, rtolRT, rmissing, rcounts, rduplicates);
             
             k = k+1;
             if((i + k) > rlength - 1)      //handling boundary condition
@@ -92,5 +93,5 @@ SEXP missing, SEXP counts)
          
     UNPROTECT(1);
     
-    return labels;
+    return duplicates;
 }

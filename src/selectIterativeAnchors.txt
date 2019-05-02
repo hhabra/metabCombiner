@@ -1,0 +1,45 @@
+#include <R.h>
+#include <Rdefines.h>
+#include <Rmath.h>
+
+
+void updateAnchors(SEXP anchors, int feat, double windrX, double windrY, double* rts)
+{
+	label = CHAR(STRING_ELT(anchors, feat)); 
+			
+	if(strcmp(label,"P") == 0){
+		if(abs(RTx[feat] - rts[1]) < windrX || abs(RTy[feat] - rts[2]) < windrY){
+			SET_STRING_ELT(anchors, feat, mkChar("N"));
+		}
+	}
+			
+	return;		
+}
+
+int findMaxQ(double* 
+
+
+
+
+SEXP selectIterativeAnchors(SEXP anchors, SEXP equalIds, SEXP rtx, SEXP rty, SEXP Q,  
+							SEXP windX, SEXP windY, SEXP length, SEXP numIds)
+{
+							
+	
+	
+
+
+	
+							
+							
+							
+							
+							
+							
+							
+
+}
+
+
+
+

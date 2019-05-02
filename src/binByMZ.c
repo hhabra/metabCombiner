@@ -20,7 +20,8 @@
 * mzGroup; increment bin count if group contains features from both datasets.
 * 
 */
-SEXP binByMZ(SEXP mz, SEXP length, SEXP datasets, SEXP gap){
+SEXP binByMZ(SEXP mz, SEXP length, SEXP datasets, SEXP gap)
+{
 	//obtaining C types
 	double *rmz = REAL(mz);
 	int rlength = INTEGER(length)[0];	
@@ -34,7 +35,7 @@ SEXP binByMZ(SEXP mz, SEXP length, SEXP datasets, SEXP gap){
 	//initiating loop variables
 	double diff;
 	int cond1 = 0, cond2 = 0, bin = 1, start, count;
-	const char *d1, *d2;
+	const char *set1, *set2;
 	
 	//bin by MZ and assign new groups if:
 	//condition 1: consecutive mz gap less than gap
@@ -54,10 +55,10 @@ SEXP binByMZ(SEXP mz, SEXP length, SEXP datasets, SEXP gap){
 			count++;
 			
 			if(!cond2){
-				d1 = CHAR(STRING_ELT(datasets, i));
-				d2 = CHAR(STRING_ELT(datasets, i+1));
+				set1 = CHAR(STRING_ELT(datasets, i));
+				set2 = CHAR(STRING_ELT(datasets, i+1));
 				
-				if(abs(strcmp(d1,d2)))    //compare strings
+				if(abs(strcmp(set1,set2)))    //compare strings
 					cond2 = 1;
 			}
 		}
