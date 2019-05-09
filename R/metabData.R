@@ -248,8 +248,6 @@ filterMissingness <- function(data, missing, zero){
 }
 
 
-
-
 #'metabData
 #'Constructor for the metabData object.
 #'
