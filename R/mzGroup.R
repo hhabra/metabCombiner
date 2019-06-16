@@ -34,20 +34,20 @@ mzGroup <- function(object, binGap = 0.005){
     if(binGap <= 0 | !is.numeric(binGap))
         stop("parameter 'binGap' must be a positive numeric constant")
     
-    if(binGap >= 0.25)
+    if(binGap >= 0.3)
         stop("parameter 'binGap' is too high")
     
-    if(binGap > 0.1)
-        warning("parameter 'binGap' is very high. A value less than 0.1 is recommended.")
+    if(binGap > 0.05)
+        warning("parameter 'binGap' is very high. binGap < 0.05 is recommended.")
     
     object@binGap = binGap
     
-    
     #forming m/z groups table
-    mzGrps <- rbind(dplyr::select(xdata, mz, index), dplyr::select(ydata, mz, index)) %>% 
-              dplyr::mutate(set = c(rep("x", nrow(xdata)),rep("y", nrow(ydata)))) %>%
+    mzGrps <- rbind(dplyr::select(xdata, mz, index), 
+                    dplyr::select(ydata, mz, index)) %>% 
+              dplyr::mutate(set = c(rep("x", nrow(xdata)),
+                                    rep("y", nrow(ydata)))) %>%
               dplyr::arrange(mz)
-    
     
     if(!is.numeric(mzGrps$mz) | any(is.na(mzGrps$mz)) | any(mzGrps$mz < 0))
         stop("At least one negative, missing, or non-numeric m/z value")
@@ -63,7 +63,6 @@ mzGroup <- function(object, binGap = 0.005){
     
     object@xdata@data$group <- mzGrpsX$groups
     object@ydata@data$group <- mzGrpsY$groups
-    object = formCombinerTable(object)
     
     return(object)
 }
