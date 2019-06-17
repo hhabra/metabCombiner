@@ -1,16 +1,16 @@
 ##Methods for metabCombiner object
 
-## combinerTable
+## Get combinerTable from metabCombiner object.
 #'
 #' @param object metabCombiner object.
 #'
-#' @returns   constructed metabCombiner table. 
+#' @return   constructed metabCombiner table. 
 ## 
 setMethod("combinerTable", signature = "metabCombiner", function(object){
     return(object@combinerTable)
 })
 
-## getData
+## Get 'x' or 'y' dataset from metabCombiner object.
 #'
 #' @description  
 #'
@@ -18,11 +18,10 @@ setMethod("combinerTable", signature = "metabCombiner", function(object){
 #' 
 #' @param data    Either one of 'x' or 'y'. 
 #'
-#' @returns If data is "x", returns data from xdata; if "y", returns data from ydata.
+#' @return If data is "x", returns x dataset ; if "y", returns y dataset.
 #'
 ##
 setMethod("getData", signature = "metabCombiner", function(object, data = c("x", "y")){
-  
     data = match.arg(data)
   
     if(data == "x")
@@ -32,15 +31,15 @@ setMethod("getData", signature = "metabCombiner", function(object, data = c("x",
         return(object@ydata@data)
 })
 
-## getData
+## Get fitted regression model from metabCombiner object.
 #'
 #' @description  
 #'
 #' @param object  metabCombiner object
 #' 
-#' @param data    Either one of 'x' or 'y'. 
+#' @param fit   Choice of model. Either "loess" or "gam". 
 #'
-#' @returns If data is "x", returns data from xdata; if "y", returns data from ydata.
+#' @return Nonlinear retention time fitting model.
 #'
 ##
 setMethod("getModel", signature = "metabCombiner", function(object, fit = c("loess", "gam")){
@@ -55,14 +54,12 @@ setMethod("getModel", signature = "metabCombiner", function(object, fit = c("loe
 })
 
 
-
-
-## getSamples
+## Get 'x' or 'y' sample names from metabCombiner object.
 #'
-#' @param object metabCombiner object
-#'
-#' @param data Either one of 'x' or 'y'.
-#'
+#' @param object  metabCombiner object
+#' 
+#' @param data    Either one of 'x' or 'y'.
+#' 
 #' @returns If data is "x", returns sample names from xdata; if "y", returns sample names from ydata.
 ## 
 setMethod("getSamples", signature = "metabCombiner", function(object, data = c("x", "y")){
@@ -76,11 +73,11 @@ setMethod("getSamples", signature = "metabCombiner", function(object, data = c("
         return(object@ydata@samples)
 })
 
-## getAnchors
+## Get list of "anchor" ordered retention time pairs
 #'
 #' @param object metabCombiner object
 #' 
-#' @returns Anchor set constructed using selectAnchors().
+#' @returns anchor set constructed using selectAnchors().
 #'  
 ##
 setMethod("getAnchors", signature = "metabCombiner", function(object){
@@ -89,11 +86,13 @@ setMethod("getAnchors", signature = "metabCombiner", function(object){
 
 
 
-## plot
+## plot nonlinear retention time curve 
 #'
-#' @param 
+#' @param object metabCombiner object
 #'
+#' @param fit Choice of model. Either "loess" or "gam".
 #' 
+#' @param ... Other variables passed into graphics::plot
 ##
 setMethod("plot", signature = "metabCombiner", function(object, fit = c("loess", "gam"),...){
     model = getModel(object, fit = fit)
@@ -107,8 +106,3 @@ setMethod("plot", signature = "metabCombiner", function(object, fit = c("loess",
     graphics::plot(table$rtx, table$rty, type = "p", xlab = "rtx", ylab = "rty",...)
     lines(x = table$rtx, y = table$pred, col = "red", lwd = 4)
 })
-
-
-
-
-
