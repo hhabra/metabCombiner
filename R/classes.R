@@ -5,11 +5,13 @@
 
 setClass("metabData", slots = c(data = "data.frame",
                                 samples = "character",
-                                extra = "character"),
+                                extra = "character",
+                                stats = "list"),
                       prototype = prototype(
                                  data = data.frame(),
                                  samples = character(),
-                                 extra = character()
+                                 extra = character(),
+                                 stats = list()
                       )
 )
 

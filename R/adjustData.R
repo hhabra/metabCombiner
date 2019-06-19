@@ -47,7 +47,8 @@ filterRT <- function(data, rtmin, rtmax){
 #' 
 #' @param imputeVal  
 
-imputeVals <- function(data, samples, imputeVal){
+imputeVals <- function(data, samples, imputeVal)
+{
     cols <- which(names(data) %in% samples)
     values = data[,cols]
   
@@ -86,24 +87,23 @@ imputeVals <- function(data, samples, imputeVal){
    return(data)
 }
 
-#'findDuplicates
+#' Find features that are duplicates 
 #'
 #' @description  
 #' 
-#' @param data   constructed metabolomics data frame.
+#' @param data     Constructed metabolomics data frame.
 #'
-#' @param counts 
+#' @param counts   Numeric vector. Central measure for each feature. 
 #' 
-#' @param missing
+#' @param missing  Numeric vector. Percent missingness for each feature.
 #' 
-#' @param duplicate   Ordered numeric pair (tolMZ, tolRT). Tolerance parameters for m/z (tolMZ) and
+#' @param duplicate   Ordered numeric pair (m/z, RT) tolerance parameters.
 #' 
-#' 
-#'   
-
-findDuplicates <- function(data, counts, missing, duplicate){
+findDuplicates <- function(data, counts, missing, duplicate)
+{
     if(length(duplicate)!= 2)  
-        stop("Parameter 'duplicate' must be a numeric, positive ordered pair (tolMZ, tolRT)")
+        stop("Parameter 'duplicate' must be a numeric, positive ordered pair
+             (tolMZ, tolRT)")
   
     tolMZ = duplicate[1]
     tolRT = duplicate[2]
@@ -159,12 +159,20 @@ findDuplicates <- function(data, counts, missing, duplicate){
 #' 
 #' @param duplicate                                                                         
 
-adjustData <- function(data, samples, misspc, measure, rtmin, rtmax, zero,
+adjustData <- function(Data, samples, misspc, measure, rtmin, rtmax, zero,
                        impute, imputeVal, duplicate){
 
+    data = getData(Data)
+    
+    stats = list()
+    stats$input_size = nrow(data)
+  
     ##filtering by RT region
     data = filterRT(data, rtmin = rtmin, rtmax = rtmax)
   
+    stats$filtered_by_rt = stats$input_size - nrow(data) 
+    
+    ##filtering by % missingness
     missingpc <- apply(data, 1, function(row){
         if(zero)
             row[row <= 0] <- NA
@@ -172,27 +180,33 @@ adjustData <- function(data, samples, misspc, measure, rtmin, rtmax, zero,
         sum(is.na(row)) / length(row) * 100
     })
     
-    keepIndices = which(missingpc < misspc)
+    keepIndices = which(missingpc <= misspc)
     
     data = data[keepIndices,]
     missingpc = missingpc[keepIndices]
     
-    ##optional imputation of missing values; setting missing % to 0
+    stats$filtered_by_missingness = nrow(data) - keepIndices
+    
+    ##optional imputation of missing values
     if(impute & any(missingpc > 0)){
-        data = imputeVals(data = data, samples = samples, imputeVal = imputeVal)
-      
-        missingpc = rep(0, nrow(data))
+        data = imputeVals(data = data, 
+                          samples = samples, 
+                          imputeVal = imputeVal)
     }
     
     if(measure == "median")
-        counts <- apply(data[,samples], 1, median, na.rm = TRUE) %>% as.numeric()    
+        counts <- apply(data[,samples], 1, median, na.rm = TRUE) %>% 
+                  as.numeric()    
     else if(measure == "mean")
-        counts <- apply(data[,samples], 1, mean, na.rm = TRUE) %>% as.numeric()
+        counts <- apply(data[,samples], 1, mean, na.rm = TRUE) %>% 
+                  as.numeric()
     else
         stop("parameter 'measure' must be 'median' or 'mean'")
     
     ##removing duplicate features
-    duplicates = findDuplicates(data = data, counts = counts, missing = missingpc, 
+    duplicates = findDuplicates(data = data, 
+                                counts = counts, 
+                                missing = missingpc, 
                                 duplicate = duplicate)
     
     if(length(duplicates) > 0){
@@ -200,13 +214,15 @@ adjustData <- function(data, samples, misspc, measure, rtmin, rtmax, zero,
         counts = counts[-duplicates]
     }
     
-    ##calculating quantiles
+    stats$filtered_as_duplicates = length(duplicates)
+    
+    stats$final_count = nrow(data)
+    
+    ##calculating abundance quantiles
     data$Q <- (rank(counts) - 0.5) / length(counts)
     
-    return(data)
+    Data@data = data
+    Data@stats = stats
+    
+    return(Data)
 }
-
-
-
-
-
