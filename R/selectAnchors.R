@@ -1,26 +1,34 @@
+## Combine unequal names or merge identical strings
+#' 
+#'
+##
+combine_strings <- function(s1, s2){
+    ifelse(tolower(s1) == tolower(s2), s1, paste(s1,s2, sep = ";"))
+}
 
-## identityAnchorSelection
+## Select common pre-identified compounds as anchors.
 #'
 #'
 ## 
-
 identityAnchorSelection <- function(cTable, windX, windY, useID){
     if(useID != TRUE)
         return(cTable)
       
     length = nrow(cTable)
     
-    mismatchIds = grep(";", cTable$id)
-    emptyIds = which(combinerTable$id == "")
+    ids = combine_strings(cTable$idx, cTable$idy)
     
-    nonIds = c(unequalIds, mismatchIds)
+    mismatchIds = grep(";", ids)
+    emptyIds = which(ids == "")
+    nonIds = c(emptyIds, mismatchIds)
     
-    Ids = !((1:length) %in% nonIds)
-
-    ####something to fix later: what if there are identical ID labels?
+    matches = which(!((1:length) %in% nonIds))
+    duplicateIds = matches[duplicated(tolower(cTable$idx[matches]))]
     
     if(length(Ids) > 0){
-        cTable$labels[Ids] = "I"
+        cTable$labels[matches] = "I"
+        
+        cTable$labels[duplicateIds] = "N"
         
         cTable$labels = .Call("selectAnchorsByID",
                               labels = cTable$labels,
