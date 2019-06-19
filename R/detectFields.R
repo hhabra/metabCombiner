@@ -231,8 +231,6 @@ selectAdduct <- function(table, col = NULL){
 #'
 #'@param extra      Character. Names of (additional) user-supplied columns.
 #'  
-#'  
-#'  
 detectFields <- function(Data, table, mz, rt, id, adduct, samples, extra)
 {  
     #exclude: integer vector ensures that each column is used at most one time
@@ -316,9 +314,10 @@ detectFields <- function(Data, table, mz, rt, id, adduct, samples, extra)
                            check.names = FALSE, stringsAsFactors = FALSE)
     
     if(length(extra) > 0)
-        newData@data[,extra] = new_extra
+        Data@data[,extra] = new_extra
     
-    return(newData)
+    return(Data)
+    
 }
 
 

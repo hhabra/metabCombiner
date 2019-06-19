@@ -85,11 +85,11 @@ metabData <- function(table, mz = "mz", rt = "rt", id = "id",
     
     newData <- methods::new("metabData")
     
-    newData = detectFields(newData = newData, table = table,
+    newData = detectFields(Data = newData, table = table,
                            mz = mz, rt = rt, id, adduct = adduct, 
                            samples = samples, extra = extra)
     
-    newData = adjustData(data = newData, samples = samples, misspc = misspc, 
+    newData = adjustData(Data = newData, samples = samples, misspc = misspc, 
                          measure = measure, rtmin = rtmin, rtmax = rtmax,
                          zero = zero, impute = impute, imputeVal = imputeVal,
                          duplicate = duplicate)

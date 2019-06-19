@@ -185,7 +185,7 @@ adjustData <- function(Data, samples, misspc, measure, rtmin, rtmax, zero,
     data = data[keepIndices,]
     missingpc = missingpc[keepIndices]
     
-    stats$filtered_by_missingness = nrow(data) - keepIndices
+    stats$filtered_by_missingness = nrow(data) - length(keepIndices)
     
     ##optional imputation of missing values
     if(impute & any(missingpc > 0)){
@@ -219,7 +219,7 @@ adjustData <- function(Data, samples, misspc, measure, rtmin, rtmax, zero,
     stats$final_count = nrow(data)
     
     ##calculating abundance quantiles
-    data$Q <- (rank(counts) - 0.5) / length(counts)
+    data$Q <- round((rank(counts) - 0.5) / length(counts),4)
     
     Data@data = data
     Data@stats = stats
