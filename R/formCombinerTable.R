@@ -18,37 +18,36 @@ formCombinerTable <- function(object){
     xdata = getData(object, "x") %>% filter(group > 0)
     ydata = getData(object, "y") %>% filter(group > 0)
     
-    maxGroup = max(xdata$group)
+    maxGrp = max(xdata$group)
   
     ##form individual m/z group information
-    combinerTables = lapply(1:maxGroup, function(number){
-        xgroup = dplyr::filter(xdata, group == number)
-        ygroup = dplyr::filter(ydata, group == number)
+    combinerTables = lapply(1:maxGrp, function(number){
+        xGrp = dplyr::filter(xdata, group == number)
+        yGrp = dplyr::filter(ydata, group == number)
     
-        rankX_Y = rep(1, times = nrow(xgroup) * nrow(ygroup))
-        rankY_X = rep(1, times = nrow(xgroup) * nrow(ygroup))
+        rankX_Y = rep(1, times = nrow(xGrp) * nrow(yGrp))
+        rankY_X = rep(1, times = nrow(xGrp) * nrow(yGrp))
     
-        xsamps = xgroup[,7:ncol(xgroup)] %>% slice(rep(1:n(), times = nrow(ygroup))) %>% 
+        xsamps = xGrp[,7:ncol(xGrp)] %>% slice(rep(1:n(), times = nrow(yGrp))) %>% 
                  as.data.frame()
-        ysamps = ygroup[,7:ncol(ygroup)] %>% slice(rep(1:n(), each = nrow(xgroup))) %>% 
+        ysamps = yGrp[,7:ncol(yGrp)] %>% slice(rep(1:n(), each = nrow(xGrp))) %>% 
                  as.data.frame()
     
-        id = as.vector(outer(xgroup$id, ygroup$id, combine_strings))
-        adduct = as.vector(outer(xgroup$adduct, ygroup$adduct, combine_strings))
-    
-        groupTable = data.frame(id = id,
-                                adduct = adduct,
-                                mzx = rep(xgroup$mz, times = nrow(ygroup)),
-                                mzy = rep(ygroup$mz, each = nrow(xgroup)),
-                                rtx = rep(xgroup$rt, times = nrow(ygroup)),
-                                rty = rep(ygroup$rt, each = nrow(xgroup)),
-                                rtProj = rep(0, times = nrow(xgroup) * nrow(ygroup)),
-                                Qx = rep(xgroup$Q, times = nrow(ygroup)),
-                                Qy = rep(ygroup$Q, each = nrow(xgroup)),
-                                group = rep(number, times = nrow(xgroup) * nrow(ygroup)),
-                                score = rep(0, times = nrow(xgroup) * nrow(ygroup)),
+        groupTable = data.frame(idx = rep(xGrp$id, times = nrow(yGrp)),
+                                idy = rep(yGrp$id, each = nrow(yGrp)),
+                                mzx = rep(xGrp$mz, times = nrow(yGrp)),
+                                mzy = rep(yGrp$mz, each = nrow(xGrp)),
+                                rtx = rep(xGrp$rt, times = nrow(yGrp)),
+                                rty = rep(yGrp$rt, each = nrow(xGrp)),
+                                rtProj = rep(0, times = nrow(xGrp)*nrow(yGrp)),
+                                Qx = rep(xGrp$Q, times = nrow(yGrp)),
+                                Qy = rep(yGrp$Q, each = nrow(xGrp)),
+                                group = rep(number, times = nrow(xGrp)*nrow(yGrp)),
+                                score = rep(0, times = nrow(xGrp)*nrow(yGrp)),
                                 rankX_Y = as.vector(rankX_Y),
                                 rankY_X = as.vector(rankY_X),
+                                adductx = rep(xGrp$adduct, times = nrow(yGrp)),
+                                adducty = rep(xGrp$adduct, each = nrow(yGrp)),
                                 xsamps, ysamps, 
                                 stringsAsFactors = FALSE, check.names = FALSE)
     
