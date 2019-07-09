@@ -25,14 +25,14 @@ identityAnchorSelection <- function(cTable, windX, windY, useID){
     matches = which(!((1:length) %in% nonIds))
     duplicateIds = matches[duplicated(tolower(cTable$idx[matches]))]
     
-    if(length(Ids) > 0){
+    if(length(matches) > 0){
         cTable$labels[matches] = "I"
         
         cTable$labels[duplicateIds] = "N"
         
         cTable$labels = .Call("selectAnchorsByID",
                               labels = cTable$labels,
-                              Ids = Ids,
+                              Ids = matches,
                               rtx = cTable$rtx,
                               rty = cTable$rty,
                               windX = windX,
@@ -43,7 +43,7 @@ identityAnchorSelection <- function(cTable, windX, windY, useID){
     
 }
 
-##iterativeAnchorsSelection
+## Iteratively select ordered pair features to anchor RT model
 #'
 #'
 #'
@@ -76,8 +76,13 @@ iterativeAnchorSelection <- function(cTable, windX, windY, swap = FALSE){
 }
 
 
-## selectAnchors()
+## Select ordered pair features for nonlinear retention time spline modeling 
 #'
+#' @param object metabCombiner object.
+#'
+#' @param useID logical. Option to use IDs to guide anchor selection process.
+#' 
+#' @param 
 #'
 ##
 selectAnchors <- function(object, useID = FALSE, tolMZ = 0.005, tolQ = 0.5, 
@@ -96,18 +101,31 @@ selectAnchors <- function(object, useID = FALSE, tolMZ = 0.005, tolQ = 0.5,
     if(nrow(cTable) == 0)
         stop("Empty Combiner table. mzGroup() has not been called yet.")
     
-    cTable = dplyr::select(cTable, id, adduct, mzx, mzy,rtx, rty, Qx, Qy, group) %>%
+    #bug fix for duplicated column names
+    cTable = cTable[ , !duplicated(colnames(cTable))] 
+    
+    cTable = dplyr::select(cTable, idx, idy, mzx, mzy,rtx, rty, 
+                           Qx, Qy, adductx, adducty,group) %>%
              dplyr::mutate(mzdiff = abs(mzx - mzy), 
                            Qdiff = abs(Qx - Qy), 
                            labels = rep("P", nrow(cTable))) %>%
-             identityAnchorSelection(windX = windX, windY = windY, useID = useID) %>% 
-             dplyr::filter((abs(mzdiff) < tolMZ & abs(Qdiff) < tolQ) | labels == "I") %>%
+             identityAnchorSelection(windX = windX, 
+                                     windY = windY, 
+                                     useID = useID) %>% 
+             dplyr::filter((abs(mzdiff) < tolMZ & abs(Qdiff) < tolQ) | 
+                             labels == "I") %>%
              dplyr::filter(labels != "N") %>%
              dplyr::select(-c(mzdiff, Qdiff))
   
 
-    anchorlistXY <- iterativeAnchorSelection(cTable, windX = windX, windY = windY, swap = FALSE)
-    anchorlistYX <- iterativeAnchorSelection(cTable, windX = windX, windY = windY, swap = TRUE)
+    anchorlistXY <- iterativeAnchorSelection(cTable = cTable, 
+                                             windX = windX, 
+                                             windY = windY, 
+                                             swap = FALSE)
+    anchorlistYX <- iterativeAnchorSelection(cTable = cTable, 
+                                             windX = windX, 
+                                             windY = windY, 
+                                             swap = TRUE)
     
     anchorlist <- dplyr::intersect(anchorlistXY, anchorlistYX)
     
