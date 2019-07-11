@@ -89,8 +89,8 @@ metabData <- function(table, mz = "mz", rt = "rt", id = "id",
                            mz = mz, rt = rt, id, adduct = adduct, 
                            samples = samples, extra = extra)
     
-    newData = adjustData(Data = newData, samples = samples, misspc = misspc, 
-                         measure = measure, rtmin = rtmin, rtmax = rtmax,
+    newData = adjustData(Data = newData, misspc = misspc, measure = measure, 
+                         rtmin = rtmin, rtmax = rtmax,
                          zero = zero, impute = impute, imputeVal = imputeVal,
                          duplicate = duplicate)
     

@@ -159,10 +159,11 @@ findDuplicates <- function(data, counts, missing, duplicate)
 #' 
 #' @param duplicate                                                                         
 
-adjustData <- function(Data, samples, misspc, measure, rtmin, rtmax, zero,
+adjustData <- function(Data, misspc, measure, rtmin, rtmax, zero,
                        impute, imputeVal, duplicate){
 
     data = getData(Data)
+    samples = getSamples(Data)
     
     stats = list()
     stats$input_size = nrow(data)
@@ -173,7 +174,7 @@ adjustData <- function(Data, samples, misspc, measure, rtmin, rtmax, zero,
     stats$filtered_by_rt = stats$input_size - nrow(data) 
     
     ##filtering by % missingness
-    missingpc <- apply(data, 1, function(row){
+    missingpc <- apply(data[samples], 1, function(row){
         if(zero)
             row[row <= 0] <- NA
         
@@ -182,10 +183,11 @@ adjustData <- function(Data, samples, misspc, measure, rtmin, rtmax, zero,
     
     keepIndices = which(missingpc <= misspc)
     
+    stats$filtered_by_missingness = nrow(data) - length(keepIndices)
+    
     data = data[keepIndices,]
     missingpc = missingpc[keepIndices]
     
-    stats$filtered_by_missingness = nrow(data) - length(keepIndices)
     
     ##optional imputation of missing values
     if(impute & any(missingpc > 0)){
@@ -200,8 +202,6 @@ adjustData <- function(Data, samples, misspc, measure, rtmin, rtmax, zero,
     else if(measure == "mean")
         counts <- apply(data[,samples], 1, mean, na.rm = TRUE) %>% 
                   as.numeric()
-    else
-        stop("parameter 'measure' must be 'median' or 'mean'")
     
     ##removing duplicate features
     duplicates = findDuplicates(data = data, 
@@ -219,7 +219,7 @@ adjustData <- function(Data, samples, misspc, measure, rtmin, rtmax, zero,
     stats$final_count = nrow(data)
     
     ##calculating abundance quantiles
-    data$Q <- round((rank(counts) - 0.5) / length(counts),4)
+    data["Q"] <- round((rank(counts) - 0.5) / length(counts),4)
     
     Data@data = data
     Data@stats = stats
