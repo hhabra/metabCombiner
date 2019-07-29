@@ -1,14 +1,4 @@
-## combine_strings
-#' 
-#' For combining unequal strings or merging identical strings
-#'
-#'
-##
-combine_strings <- function(s1, s2){
-    ifelse(s1 == s2, s1, paste(s1,s2, sep = ";"))
-}
-
-##formCombinerTable
+## Form a combinerTable from computed m/z groups.
 #' 
 #' @param object
 #' 
@@ -34,7 +24,7 @@ formCombinerTable <- function(object){
                  as.data.frame()
     
         groupTable = data.frame(idx = rep(xGrp$id, times = nrow(yGrp)),
-                                idy = rep(yGrp$id, each = nrow(yGrp)),
+                                idy = rep(yGrp$id, each = nrow(xGrp)),
                                 mzx = rep(xGrp$mz, times = nrow(yGrp)),
                                 mzy = rep(yGrp$mz, each = nrow(xGrp)),
                                 rtx = rep(xGrp$rt, times = nrow(yGrp)),
@@ -47,7 +37,7 @@ formCombinerTable <- function(object){
                                 rankX_Y = as.vector(rankX_Y),
                                 rankY_X = as.vector(rankY_X),
                                 adductx = rep(xGrp$adduct, times = nrow(yGrp)),
-                                adducty = rep(xGrp$adduct, each = nrow(yGrp)),
+                                adducty = rep(yGrp$adduct, each = nrow(xGrp)),
                                 xsamps, ysamps, 
                                 stringsAsFactors = FALSE, check.names = FALSE)
     
