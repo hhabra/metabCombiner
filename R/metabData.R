@@ -34,13 +34,14 @@
 #'
 #'@param imputeVal  Imputed value. One of "median", "mean", or numeric value.
 #'
-#'@param duplicate  Numeric ordered (mz, rt) tolerance pair for duplicate features.   
+#'@param duplicate  Numeric ordered pair (mz, rt) tolerances for duplicate features.   
 #'
 metabData <- function(table, mz = "mz", rt = "rt", id = "id",
-                      adduct = "adduct", samples = "detect", extra = NULL,
-                      rtmin = "min", rtmax = "max", misspc = 50, zero = FALSE, 
-                      measure = c("median", "mean"), impute = FALSE, imputeVal = 100,
-                      duplicate = c(0.003, 0.05))
+                      adduct = "adduct", samples = "detect", Q = NULL, 
+                      extra = NULL, rtmin = "min", rtmax = "max", 
+                      misspc = 50, measure = c("median", "mean"),
+                      zero = FALSE, impute = FALSE, imputeVal = 100,
+                      duplicate = c(0.0025, 0.05))
 {  
     if(missing(table))
         stop("required argument 'table' is missing with no default")
@@ -68,7 +69,9 @@ metabData <- function(table, mz = "mz", rt = "rt", id = "id",
     
     if(typeof(table) == "character")
         table <- readData(table)
-    else if(class(table) != "data.frame")
+    else if(dplyr::is.tbl(table))     #handling tbl error
+        table <- as.data.frame(table)
+    else if(!is.data.frame(table))
         stop("argument 'table' must be a data.frame or path to data file")
     
     if(!is.logical(zero)){
@@ -87,7 +90,7 @@ metabData <- function(table, mz = "mz", rt = "rt", id = "id",
     
     newData = detectFields(Data = newData, table = table,
                            mz = mz, rt = rt, id, adduct = adduct, 
-                           samples = samples, extra = extra)
+                           samples = samples, extra = extra, Q = Q)
     
     newData = adjustData(Data = newData, misspc = misspc, measure = measure, 
                          rtmin = rtmin, rtmax = rtmax,

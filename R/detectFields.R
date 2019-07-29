@@ -150,66 +150,66 @@ selectMZ <- function(table, col){
 #' @return          rt value vector
 #' 
 #' @examples
-
 selectRT <- function(table, col){
+    if(is.null(col))
+        stop("Retention Time column undefined or used more than once.")
+  
     rts <- table[,col]
     
     if(class(rts) != "numeric")  
         stop("retention time column must be numeric")
     
-    if(any(rts <= 0)) 
-        stop("retention time values must be positive")
+    if(any(rts <= 0) | any(is.na(rts))) 
+        stop("retention time values must be positive with no missing values")
     
     if(any(rts > 100))
-        warning("Default retention time program values are in minutes. Be sure to use correct values
-                if time units are in seconds!")
+        warning("Default program values expect time in minutes.
+                Be sure to use correct values if time units are in seconds!")
     
     return(rts)
 }  
+
+selectQ <- function(table, col){
+    if(is.null(col)){
+        Q = rep(0, nrow(table))
+        return(Q)
+    }
+  
+    Q <- table[,col]
+      if(!is.numeric(Q))
+        stop("Q column must be numeric")
+  
+    if(any(is.na(Q)))
+        stop("Q column must not have missing values")
+  
+  
+    return(Q)
+}
+
+
 
 
 #' Optional function to allow for a column of user-supplied IDs.
 #'
 #' @param table      An untargeted metabolomics data frame received as input
 #'
-#' @param col       Column from input data that contains the IDs
+#' @param col       Column from input data that contains a character field
 #' 
 #' @return          vector of ids
 #' 
 #' @examples
-selectID <- function(table, col = NULL){
-    if (!is.numeric(col)){
-        ids <-  rep("", nrow(table))
-        return(ids)
+selectColumn <- function(table, col = NULL){
+    if (is.null(col)){
+        column <-  rep("", nrow(table))
+        return(column)
     }
+  
+    column <- table[,col] %>% as.character()
     
-    ids <- table[,col] %>% as.character()
-    
-    return(ids)
+    return(column)
 }
 
-
-#' Optional function to allow for a column of user-supplied annotations.
-#'
-#' @param table     An untargeted metabolomics data frame received as input
-#' @param col       Column from input table that contains the IDs
-#' 
-#' @return          vector of adducts
-#' 
-selectAdduct <- function(table, col = NULL){
-    if (!is.numeric(col)){
-        adducts <-  rep("", nrow(table))
-        return(adducts)
-    }
-    
-    adducts <- table[,col] %>% as.character()
-    
-    return(adducts)
-}
-
-
-#'metabData
-#'Constructor for the metabData object.
+## detect required and optional fields from input
 #'
 #'@param table      Path to file containing feature table or data.frame object 
 #'                  containing features
@@ -231,10 +231,10 @@ selectAdduct <- function(table, col = NULL){
 #'
 #'@param extra      Character. Names of (additional) user-supplied columns.
 #'  
-detectFields <- function(Data, table, mz, rt, id, adduct, samples, extra)
+detectFields <- function(Data, table, mz, rt, id, adduct, samples, extra, Q)
 {  
-    #exclude: integer vector ensures that each column is used at most one time
-    exclude <- integer(ncol(table))
+    #exclude: integer vector ensuring each column is used at most once
+    exclude <- integer(5)
     coltypes <- as.character(lapply(table, class))
     
     ##detecting m/z value column
@@ -249,15 +249,12 @@ detectFields <- function(Data, table, mz, rt, id, adduct, samples, extra)
     ##detecting rt value column
     rtCol = detect(rt, names = names(table), types = coltypes, exclude = exclude)
     
-    if(is.null(rtCol))
-        stop("Retention Time column undefined or used more than once.")
-    
     new_rt <- selectRT(table, col = rtCol)
     exclude[2] = rtCol        ##updating excluded indices
     
     ##detecting (optional) identities column; empty column if missing or null
     idCol = detect(id, names = names(table), types = coltypes, exclude = exclude)
-    new_id <- selectID(table, col = idCol)
+    new_id <- selectColumn(table, col = idCol)
     
     if(!is.null(idCol))
         exclude[3] = idCol
@@ -265,26 +262,32 @@ detectFields <- function(Data, table, mz, rt, id, adduct, samples, extra)
     ##detecting (optional) adduct column; empty column if missing or null
     adductCol = detect(adduct, names = names(table), types = coltypes,
                        exclude = exclude)
+    new_adduct <- selectColumn(table, col = adductCol)
     
-    new_adduct <- selectAdduct(table, col = adductCol)
-    
-    if(!is.null(adductCol))
+    if(!is.null(adductCol))  
         exclude[4] = adductCol
+    
+    ##detecting (optional) Q column
+    QCol = detect(Q, names = names(table), types = coltypes,
+                       exclude = exclude)
+    new_Q <- selectQ(table, col = QCol)
+
+    if(!is.null(QCol))  
+        exclude[5] = QCol
     
     ##removing excluded columns
     table = table[,-exclude]
     
     ##finding (optional) extra columns
-    if(is.null(extra)){
-        new_extra = base::rep("", nrow(table))
-        extra = character(0)
-    }else{
+    if(!is.null(extra)){
         if(!any(extra %in% names(table)))
-            stop("At least one name in 'extra' field undefined or used more than once")
+            stop("At least one name in 'extra' field undefined or used 
+                 more than once")
       
         new_extra = table[,extra]
         table = table[, !names(table) %in% extra]
-    }
+    } else  
+        extra = character(0)
     
     Data@extra = extra
     
@@ -309,7 +312,7 @@ detectFields <- function(Data, table, mz, rt, id, adduct, samples, extra)
     Data@samples = samples
     
     Data@data = data.frame(id = new_id, mz = new_mz, rt = new_rt, 
-                           adduct = new_adduct, Q = rep(0, nrow(table)), 
+                           adduct = new_adduct, Q = new_Q, 
                            group = rep(0, nrow(table)),new_values, 
                            check.names = FALSE, stringsAsFactors = FALSE)
     

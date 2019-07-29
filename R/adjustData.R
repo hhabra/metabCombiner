@@ -219,7 +219,8 @@ adjustData <- function(Data, misspc, measure, rtmin, rtmax, zero,
     stats$final_count = nrow(data)
     
     ##calculating abundance quantiles
-    data["Q"] <- round((rank(counts) - 0.5) / length(counts),4)
+    if(identical(data[["Q"]], rep(0, nrow(data))))
+        data["Q"] <- round((rank(counts) - 0.5) / length(counts),4)
     
     Data@data = data
     Data@stats = stats
