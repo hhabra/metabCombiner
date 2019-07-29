@@ -5,8 +5,8 @@
 #' @return 
 ## 
 formCombinerTable <- function(object){
-    xdata = getData(object, "x") %>% filter(group > 0)
-    ydata = getData(object, "y") %>% filter(group > 0)
+    xdata = getData(object, "x") %>% dplyr::filter(group > 0)
+    ydata = getData(object, "y") %>% dplyr::filter(group > 0)
     
     maxGrp = max(xdata$group)
   
@@ -49,6 +49,69 @@ formCombinerTable <- function(object){
   
     return(object)
 }
+
+
+
+
+## Form a combinerTable from computed m/z groups.
+#' 
+#' @param object
+#' 
+#' @return 
+## 
+formCombinerTable <- function(object){
+    xdata = getData(object, "x") %>% dplyr::filter(group > 0) %>% arrange(group)
+    ydata = getData(object, "y") %>% dplyr::filter(group > 0) %>% arrange(group)
+  
+    maxGrp = max(xdata[["group"]])
+    
+    grpCountX = as.integer(table(xdata[["group"]]))
+    grpCountY = as.integer(table(ydata[["group"]]))
+    totalRows = sum(grpCountX * grpCountY)
+    
+    xreps = rep(grpCountY, times = grpCountX)
+
+    xCombine = dplyr::slice(xdata, rep(1:n(), times = xreps))
+    
+    yreps = lapply(1:maxGrp, function(number){
+        counts = rep(which(ydata$group == number), times = grpCountX[number])
+      
+        return(counts)
+    }) %>% unlist()
+    
+    yCombine = ydata[yreps,]
+    
+    cTable = data.frame(idx = xCombine[["id"]], idy = yCombine[["id"]],
+                        mzx = xCombine[["mz"]], mzy = yCombine[["mz"]],
+                        rtx = xCombine[["rt"]], rty = yCombine[["rt"]],
+                        rtProj = numeric(totalRows),
+                        Qx = xCombine[["Q"]], Qy = yCombine[["Q"]],
+                        group = xCombine[["group"]],
+                        score = numeric(totalRows),
+                        rankX_Y = numeric(totalRows),
+                        rankY_X = numeric(totalRows),
+                        adductx = xCombine[["adduct"]], 
+                        adducty = yCombine[["adduct"]],
+                        xCombine[,7:ncol(xCombine)],
+                        yCombine[,7:ncol(yCombine)],
+                        stringsAsFactors = FALSE, check.names = FALSE
+    )
+                        
+  
+    #combine groups into data frame
+    object@combinerTable = cTable
+  
+    return(object)
+}
+
+
+
+
+
+
+
+
+
 
 
 
