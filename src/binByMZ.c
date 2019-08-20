@@ -40,7 +40,7 @@ SEXP binByMZ(SEXP mz, SEXP length, SEXP datasets, SEXP gap)
 	//bin by MZ and assign new groups if:
 	//condition 1: consecutive mz gap less than gap
 	//condition 2: at least one feature from both datasets
-	for(int i = 0; i < rlength; i++){
+	for(int i = 0; i < rlength-1; i++){
 		diff = rmz[i+1] - rmz[i];
 		
 		//initiate a potential group
@@ -64,7 +64,7 @@ SEXP binByMZ(SEXP mz, SEXP length, SEXP datasets, SEXP gap)
 		}
 	
 		//reset and update group count, if condition 2 met
-		if(diff > rgap || i == (rlength - 1)){
+		if(diff > rgap || i == (rlength - 2)){
 			cond1 = 0;
 			
 			if(cond2){
