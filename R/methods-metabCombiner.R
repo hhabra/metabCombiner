@@ -10,6 +10,17 @@ setMethod("combinerTable", signature = "metabCombiner", function(object){
     return(object@combinerTable)
 })
 
+## Get list of "anchor" ordered retention time pairs
+#'
+#' @param object metabCombiner object
+#' 
+#' @returns anchor set constructed using selectAnchors().
+#'  
+##
+setMethod("getAnchors", signature = "metabCombiner", function(object){
+    return(object@anchors)
+})
+
 ## Get 'x' or 'y' dataset from metabCombiner object.
 #'
 #' @description  
@@ -42,8 +53,7 @@ setMethod("getData", signature = "metabCombiner", function(object, data = c("x",
 #' @return Nonlinear retention time fitting model.
 #'
 ##
-setMethod("getModel", signature = "metabCombiner", function(object, fit = c("loess", "gam")){
-  
+setMethod("getModel", signature = "metabCombiner", function(object, fit = c("gam", "loess")){
     fit = match.arg(fit)
   
     if(fit == "loess")
@@ -60,7 +70,7 @@ setMethod("getModel", signature = "metabCombiner", function(object, fit = c("loe
 #' 
 #' @param data    Either one of 'x' or 'y'.
 #' 
-#' @returns If data is "x", returns sample names from xdata; if "y", returns sample names from ydata.
+#' @return If data is "x", returns sample names from xdata; if "y", returns sample names from ydata.
 ## 
 setMethod("getSamples", signature = "metabCombiner", function(object, data = c("x", "y")){
   
@@ -73,36 +83,56 @@ setMethod("getSamples", signature = "metabCombiner", function(object, data = c("
         return(object@ydata@samples)
 })
 
-## Get list of "anchor" ordered retention time pairs
+
+## Get statistics field of metabCombiner object.
 #'
-#' @param object metabCombiner object
+#' @param object  metabCombiner object
 #' 
-#' @returns anchor set constructed using selectAnchors().
-#'  
+#' @return A list containing statistics from metabCombiner object.
 ##
-setMethod("getAnchors", signature = "metabCombiner", function(object){
-    return(object@anchors)
+setMethod("getStats", signature = "metabCombiner", function(object){
+    return(object@stats)
 })
 
 
-
-## plot nonlinear retention time curve 
+## plot nonlinear retention time fitting curve between feature tables
 #'
 #' @param object metabCombiner object
 #'
-#' @param fit Choice of model. Either "loess" or "gam".
+#' @param fit Choice of model. Either "gam" or "loess".
+#' 
+#' @param pcol color of the points (ordered pairs) in the plot.
+#' 
+#' @param lcol color of the fitted line in the plot
 #' 
 #' @param ... Other variables passed into graphics::plot
+#' 
 ##
-setMethod("plot", signature = "metabCombiner", function(object, fit = c("loess", "gam"),...){
+setMethod("plot", signature = "metabCombiner", 
+          function(object, fit = c("gam","loess"), pcol, lcol, lwd,...){
+    
+    fit = match.arg(fit)  
     model = getModel(object, fit = fit)
     
     if(is.null(model))
         stop("missing model in metabCombiner object")
     
-    table = data.frame(rtx = model$x, rty = model$y, pred = model$fitted)
-    table = dplyr::arrange(table, rtx)
+    if(fit == "loess")
+        data = data.frame(rtx = model$x, rty = model$y, pred = model$fitted,
+                           weights = model$weights)
+    else if (fit == "gam")
+        data = data.frame(rtx = model$model$rtx, rty = model$model$rty,
+                           pred = model$fitted.values, weights = model$prior.weights)
     
-    graphics::plot(table$rtx, table$rty, type = "p", xlab = "rtx", ylab = "rty",...)
-    lines(x = table$rtx, y = table$pred, col = "red", lwd = 4)
+    data = dplyr::arrange(data, rtx)
+    
+    if(missing(pcol))
+        pcol = "black"
+    if(missing(lcol))
+        lcol = "red"
+    if(missing(lwd))
+        lwd = 4
+      
+    graphics::plot(data$rtx, data$rty, type = "p", col = pcol,...)
+    lines(x = data$rtx, y = data$pred, col = lcol, lwd = lwd,...)
 })

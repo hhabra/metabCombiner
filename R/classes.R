@@ -17,11 +17,12 @@ setClass("metabData", slots = c(data = "data.frame",
 
 setClass("metabCombiner", slots = c(xdata = "metabData",
                                     ydata = "metabData",
+                                    combinerTable = "data.frame",
                                     binGap = "numeric",
                                     anchors = "data.frame",
                                     model = "list",
                                     scores = "list",
-                                    combinerTable = "data.frame"
+                                    stats = "list"
                           ),
                           prototype = prototype(
                                    xdata = new("metabData"),
@@ -30,7 +31,8 @@ setClass("metabCombiner", slots = c(xdata = "metabData",
                                    anchors = data.frame(),
                                    model = list(),
                                    scores = list(),
-                                   combinerTable = data.frame()
+                                   combinerTable = data.frame(),
+                                   stats = list()
                           )
 )
 
