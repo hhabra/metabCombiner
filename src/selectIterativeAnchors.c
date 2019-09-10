@@ -68,10 +68,10 @@ int stopCondition(SEXP labels, int length)
 		label = CHAR(STRING_ELT(labels, feat));
 		
 		if(strcmp(label, "P") == 0)
-			return 1;
+			return 0;
 	}
 	
-	return 0;
+	return 1;
 }
 
 
@@ -147,7 +147,7 @@ SEXP selectIterativeAnchors(SEXP labels, SEXP rtx, SEXP rty, SEXP Qx, SEXP Qy,
 	int nextAnchor;
 	double rts[2];
 		
-	while(stopCondition(labels_copy, length)){
+	while(!stopCondition(labels_copy, length)){
 		nextAnchor = findMaxQ(labels_copy, rQx, rQy, RTx, length);
 				
 		SET_STRING_ELT(labels_copy, nextAnchor, mkChar("A"));
