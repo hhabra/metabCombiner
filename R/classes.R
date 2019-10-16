@@ -1,8 +1,10 @@
 ##class descriptions go in here
 #
 
-############################# Classes ##################### 
+############################# Classes #####################
 
+#'
+#' @exportClass
 setClass("metabData", slots = c(data = "data.frame",
                                 samples = "character",
                                 extra = "character",
@@ -15,23 +17,25 @@ setClass("metabData", slots = c(data = "data.frame",
                       )
 )
 
+#'
+#' @exportClass
 setClass("metabCombiner", slots = c(xdata = "metabData",
                                     ydata = "metabData",
                                     combinerTable = "data.frame",
                                     binGap = "numeric",
                                     anchors = "data.frame",
                                     model = "list",
-                                    scores = "list",
+                                    coefficients = "list",
                                     stats = "list"
                           ),
                           prototype = prototype(
                                    xdata = new("metabData"),
                                    ydata = new("metabData"),
+                                   combinerTable = data.frame(),
                                    binGap = numeric(),
                                    anchors = data.frame(),
                                    model = list(),
-                                   scores = list(),
-                                   combinerTable = data.frame(),
+                                   coefficients = list(),
                                    stats = list()
                           )
 )

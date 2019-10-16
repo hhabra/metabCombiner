@@ -1,8 +1,10 @@
-############  Generics sorted in alphabetical order #############
+############  Generics put in this file in alphabetical order #############
 
 setGeneric("combinerTable", function(object) standardGeneric("combinerTable"))
 
 setGeneric("getAnchors", function(object) standardGeneric("getAnchors"))
+
+setGeneric("getCoefficients", function(object) standardGeneric("getCoefficients"))
 
 setGeneric("getModel", function(object, fit = c("gam", "loess")) standardGeneric("getModel"))
 
@@ -14,8 +16,8 @@ setGeneric("getSamples", function(object, data = c("x", "y")) standardGeneric("g
 
 setGeneric("getStats", function(object) standardGeneric("getStats"))
 
-#may want to remove this
 setGeneric("plot", function(object, ...) standardGeneric("plot"))
+
 
 
 
