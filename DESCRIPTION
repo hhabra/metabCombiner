@@ -1,0 +1,21 @@
+Package: Combiner
+Version: 0.99.0
+Date: 2019-09-27
+Title: Method for Combining LC-MS Metabolomics Feature Measurements
+Author: Authors@R: c(
+	   person("Habra", "Hani", email = "hhabra1@gmail.com", role = c("aut","cre")),
+	   person("Karnovsky", "Alla", email = "akarnovs@med.umich.edu", role = "ths"))
+Maintainer: Hani Habra <hhabra1@gmail.com>
+License: GPL-3
+Description: Takes two untargeted metabolomics feature lists (consisting of m/z,
+  rt, and sample intensity measurements, plus optional identifiers, adduct 
+	labels, and extras) and outputs a merged feature list consisting of potential 
+	compound matches, ranked by a similarity score for groups of features. Inputs 
+	tables are assumed to be derived from biologically similar samples analyzed 
+	with a similar analytical method.
+Depends: R (>= 3.2.0)
+Imports: methods, dplyr, mgcv, caret, S4Vectors, mlr
+BugReports: https://www.github.com/hhabra/Combiner/issues
+NeedsCompilation: yes
+RoxygenNote: 6.1.1
+Encoding: UTF-8
