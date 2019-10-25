@@ -16,6 +16,3 @@ Processed metabolomics feature data frame.
 \description{
 Extracts the formatted feature table contained within metabData object.
 }
-\examples{
-
-}

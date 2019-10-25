@@ -16,7 +16,3 @@ Feature statistics from metabData object
 \description{
 Obtain metabData Statistics
 }
-\examples{
-
- @exportMethod
-}

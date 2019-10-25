@@ -2,7 +2,7 @@
 % Please edit documentation in R/fit_loess.R
 \name{fit_loess}
 \alias{fit_loess}
-\title{Fit a LOESS Through Retention Time Ordered Pairs}
+\title{Fit RT Projection Model With LOESS}
 \usage{
 fit_loess(object, useID = FALSE, spans = seq(0.2, 0.4, by = 0.05),
   iterFilter = 2, ratio = 2, frac = 0.5, iterLoess = 10,
@@ -17,10 +17,11 @@ fit_loess(object, useID = FALSE, spans = seq(0.2, 0.4, by = 0.05),
 
 \item{iterFilter}{integer. Number of residual filtering iterations to perform.}
 
-\item{ratio}{numeric residual multiplier for determining outliers.}
+\item{ratio}{numeric. A point is considered an outlier if ratio of residual to
+mean residual of a fit exceeds this value. Must be greater than 1.}
 
-\item{frac}{numeric. Threshold proportion of fits needed to determine if
-ordered pair is an outlier.}
+\item{frac}{numeric. A point is excluded if deemed a residual in more than
+this fraction value times the number of fits. Must be between 0 & 1.}
 
 \item{iterLoess}{integer. Number of robustness iterations to perform in
 \code{loess()}.See ?loess.control for more details.}
@@ -31,5 +32,11 @@ must be #num_anchors + 2 (first and last are endpoints).}
 \item{seed}{integer. Psuedo-random seed generator for cross validation.}
 }
 \description{
+Fits a local regression smoothing spline curve through a set of ordered pair
+retention times. One dataset's retention times (ydata) serve as the dependent
+variable, fitted as a function of retention times of the other (xdata).
 
+Filtering iterations of high residual points are performed, controlled by
+\code{iterFilter}, and multiple acceptable values of \code{span} used, with
+one value chosen using 10-fold cross validation.
 }

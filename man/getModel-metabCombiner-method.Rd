@@ -16,5 +16,9 @@
 Nonlinear retention time fitting model.
 }
 \description{
-
+This returns the last fitted RT projected model from a metabCombiner object
+of type "gam" or "loess".
+}
+\seealso{
+[fit_gam], [fit_loess]
 }

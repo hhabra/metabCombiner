@@ -7,13 +7,17 @@
 crossValidationLoess(rts, spans, seed, loess.parameters)
 }
 \arguments{
-\item{rts}{}
+\item{rts}{Data frame of ordered retention time pairs.}
 
-\item{spans}{}
+\item{spans}{numeric vector. Selection of values (between 0 & 1) to control
+the degree of smoothing of loess curve.}
 
-\item{seed}{}
+\item{seed}{integer. Psuedo-random seed generator for cross validation.}
 
-\item{loess.parameters}{}
+\item{loess.parameters}{Parameters for LOESS fitting. See ?loess.control.}
+}
+\value{
+Optimal value among pre-selected values for \code{spans}.
 }
 \description{
 Cross Validation for Loess Model

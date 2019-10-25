@@ -19,3 +19,12 @@ A customized error message for specific object check.
 This function stores and returns a customized error message
 when checking the validity of certain objects.
 }
+\details{
+In certain functions, an object must be checked for correctness. A
+\code{metabData} must have a properly formatted dataset with the correct
+column names & types.A \code{metabCombiner} must have properly formatted
+\code{combinerTable}, with expected names and columns. If one of these
+conditions is not met, a non-zero numeric code is returned and this function
+is used to print a specific error message corresponding to the appropriate
+object and error code.
+}

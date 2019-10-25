@@ -15,12 +15,12 @@ calcScores(object, A, B, C, fit = c("gam", "loess"), usePPM = FALSE,
 \item{B}{Numeric weight for penalizing differences between fitted & observed
 retention times}
 
-\item{C}{Numeric weight for differences in Q (abundance quantiles).}
+\item{C}{Numeric weight for penalizing differences in Q (abundance quantiles).}
 
 \item{fit}{Character. Choice of fitted rt model, "gam" or "loess."}
 
 \item{usePPM}{logical. Option to use relative (as opposed to absolute) m/z
-differences in score computation.}
+differences in score computations.}
 
 \item{useAdduct}{logical. Option to penalize mismatches in (non-empty) adduct
 column labels.}
@@ -33,17 +33,12 @@ adduct column labels by this value.}
 }
 \value{
 metabCombiner object with updated combinerTable. rtProj column will
-contain the fitted retention times determined from previously computed model;
+contain fitted retention times determined from previously computed model;
 score will contain the computed pairwise similarity scores of features from
 datasets x & y; rankX & rankY are the integer ranks of scores for x & y
 features in descending order.
 }
 \description{
-Calculates pairwise similarity (between 0 & 1) for all
-grouped features in \code{metabCombiner} object. Uses a nonlinear model
-(computed using either \code{fit_gam} or \code{fit_loess}) to project dataset X
-retention times onto dataset Y, and computes score based on differences
-between m/z (absolute or relative), retention times (projected vs observed),
-and abundance quantiles (Q). Parameters \code{A}, \code{B}, & \code{C} are
-constants penalizing differences in m/z, rt, and Q, respectively.
+Calculates a pairwise similarity (between 0 & 1) between all
+grouped features in \code{metabCombiner} object.
 }

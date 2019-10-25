@@ -16,6 +16,3 @@ Names of samples of formatted dataset.
 \description{
 Obtain Metabolomics Sample Names
 }
-\examples{
-
-}

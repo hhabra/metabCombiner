@@ -14,5 +14,5 @@
 A list containing statistics from metabCombiner object.
 }
 \description{
-Get metabCombiner Statistics
+This function prints a set of metabCombiner object statistics.
 }

@@ -13,8 +13,10 @@
 \item{data}{Either one of 'x' or 'y'.}
 }
 \value{
-If data is "x", returns x dataset ; if "y", returns y dataset.
+If data is "x", returns dataset X ; if "y", returns dataset Y.
 }
 \description{
-
+\code{metabCombiner} objects consist of two formatted metabolomics feature
+tables. This function allows for returning one of the two processed datasets
+contained within the object.
 }

@@ -4,30 +4,40 @@
 \alias{filterAnchorsGAM}
 \title{Filter Outlier Ordered Pairs}
 \usage{
-filterAnchorsGAM(rts, k, bs, m, family, method, iterFilter, optim, ratio,
-  frac, ...)
+filterAnchorsGAM(rts, k, bs, iterFilter, family, m, method, optimizer,
+  ratio, frac, ...)
 }
 \arguments{
-\item{rts}{}
+\item{rts}{Data frame of ordered retention time pairs.}
 
-\item{k}{}
+\item{k}{Integer vector. Selection of values to control the number of basis
+functions for GAM construction.}
 
-\item{bs}{}
+\item{bs}{character. Choice of spline method from mgcv; either "bs" or "ps".}
 
-\item{m}{}
+\item{iterFilter}{integer. Number of residual filtering iterations to perform.}
 
-\item{family}{}
+\item{family}{character. Choice of mgcv family; see: ?mgcv::family.mgcv}
 
-\item{method}{}
+\item{m}{integer. Basis and penalty order for GAM; see ?mgcv::s}
 
-\item{iterFilter}{}
+\item{method}{character. Smoothing parameter estimation method; see:
+?mgcv::gam}
 
-\item{optim}{}
+\item{optimizer}{character. Method to optimize smoothing parameter; see:
+?mgcv::gam}
 
-\item{ratio}{}
+\item{ratio}{numeric. Residual multiplier for determining outliers.}
 
-\item{frac}{}
+\item{frac}{numeric. A point is excluded if deemed a residual in more than
+this fraction value times the number of fits. Must be between 0 & 1.}
+
+\item{...}{Other arguments passed to \code{mgcv::gam}.}
+}
+\value{
+Ordered retention time pairs data frame with updated weights.
 }
 \description{
-Helper function for fit_gam.
+This is a helper function for \code{fit_gam}. It filters retention time ordered
+pairs using the residuals calculated from multiple GAM fits.
 }

@@ -11,8 +11,12 @@
 \item{object}{metabCombiner object}
 }
 \value{
-anchor set constructed using selectAnchors().
+Data frame of anchor feature alignments.
 }
 \description{
-Get Ordered Retention Time Pairs
+This returns the list of feature alignments used to anchor a retention
+time projection model, constructed by \code{\link{selectAnchors}}.
+}
+\seealso{
+[selectAnchors]
 }

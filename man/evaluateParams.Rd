@@ -12,17 +12,17 @@ evaluateParams(object, A = seq(60, 150, by = 10), B = seq(6, 15),
 \arguments{
 \item{object}{metabCombiner object}
 
-\item{A}{Numeric weight for penalizing m/z differences.}
+\item{A}{Numeric weights for penalizing m/z differences.}
 
-\item{B}{Numeric weight for penalizing differences between fitted & observed
-retention times}
+\item{B}{Numeric weights for penalizing differences between fitted
+& observed retention times}
 
-\item{C}{Numeric weight for differences in Q (abundance quantiles).}
+\item{C}{Numeric weights for penalizing differences in Q (abundance quantiles)}
 
 \item{fit}{Character. Choice of fitted rt model, "gam" or "loess."}
 
-\item{usePPM}{logical. Option to use relative (as opposed to absolute) m/z
-differences in score computation.}
+\item{usePPM}{logical. Option to use relative ppm (as opposed to absolute) m/z
+differences in score computations.}
 
 \item{useAdduct}{logical. Option to penalize mismatches in (non-empty) adduct
 column labels.}
@@ -46,9 +46,9 @@ A data frame with the following columns:
 \item{score}{objective function evaluation of (A,B,C) combination}
 }
 \description{
-This function provides a method for guiding suitable parameters for A, B, & C
-weights parameters in the \code{\link{calcScores}} method. Combinations of
-parameters are evaluated based on the similarity scores of matching and
+This function provides a method for guiding selection of suitable parameters for
+A, B, & C weights parameters in the \code{\link{calcScores}} method. Combinations
+of parameters are evaluated based on the similarity scores of matching and
 mismatching identity labels. Input datasets must have at least one compound id
 in common with each other, and preferably more than 10.
 }

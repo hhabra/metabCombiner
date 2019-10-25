@@ -4,24 +4,29 @@
 \alias{crossValidationGAM}
 \title{Cross Validation for GAM model}
 \usage{
-crossValidationGAM(rts, k, bs, m, family, method, optim, seed, ...)
+crossValidationGAM(rts, k, bs, m, family, method, optimizer, seed, ...)
 }
 \arguments{
-\item{rts}{}
+\item{rts}{Data frame of ordered retention time pairs.}
 
-\item{k}{}
+\item{k}{Integer vector. Selection of values to control the number of basis
+functions for gam construction.}
 
-\item{bs}{}
+\item{bs}{character. Choice of spline method from mgcv, either "bs" or "ps"}
 
-\item{m}{}
+\item{m}{integer. Basis and penalty order for GAM; see ?mgcv::s}
 
-\item{family}{}
+\item{family}{character. Choice of mgcv family; see: ?mgcv::family.mgcv}
 
-\item{method}{}
+\item{method}{character. Smoothing parameter estimation method; see:
+?mgcv::gam}
 
-\item{optim}{}
+\item{optimizer}{character. Method to optimize smoothing parameter; see:
+?mgcv::gam}
 
 \item{seed}{integer. Psuedo-random seed generator for cross-validation.}
+
+\item{...}{Other arguments passed to \code{mgcv::gam}.}
 }
 \value{
 Optimal value for \code{k} as determined by 10-fold cross validation.

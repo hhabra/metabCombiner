@@ -2,7 +2,7 @@
 % Please edit documentation in R/combinerError.R
 \name{isCombinerTable}
 \alias{isCombinerTable}
-\title{Determine If Object is a Valid combinerTable}
+\title{Determine combinerTable Validity}
 \usage{
 isCombinerTable(object)
 }

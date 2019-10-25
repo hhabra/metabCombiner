@@ -3,19 +3,25 @@
 \docType{methods}
 \name{getSamples,metabCombiner-method}
 \alias{getSamples,metabCombiner-method}
-\title{Get Sample Names From metabCombiner Object}
+\title{Get Sample Names From metabCombiner Object
+
+\code{metabCombiner} objects consist of two formatted metabolomics feature
+tables. This method returns the sample names from one of the two datasets.}
 \usage{
 \S4method{getSamples}{metabCombiner}(object, data = c("x", "y"))
 }
 \arguments{
 \item{object}{metabCombiner object}
 
-\item{data}{Either one of 'x' or 'y'.}
+\item{data}{Character. One of either 'x' or 'y'.}
 }
 \value{
-If data is "x", returns sample names from xdata; if "y", returns
-sample names from ydata.
+If data is "x", returns sample names for dataset X; if "y", returns
+sample names from dataset Y.
 }
 \description{
 Get Sample Names From metabCombiner Object
+
+\code{metabCombiner} objects consist of two formatted metabolomics feature
+tables. This method returns the sample names from one of the two datasets.
 }

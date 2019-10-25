@@ -2,12 +2,12 @@
 % Please edit documentation in R/fit_gam.R
 \name{fit_gam}
 \alias{fit_gam}
-\title{Fit GAM model between retention times}
+\title{Fit RT Projection Model With GAMs}
 \usage{
-fit_gam(object, useID = FALSE, k = seq(10, 25, by = 5),
-  iterFilter = 2, ratio = 2, frac = 0.5, bs = c("bs", "ps", "tp"),
+fit_gam(object, useID = FALSE, k = seq(10, 20, by = 2),
+  iterFilter = 2, ratio = 2, frac = 0.5, bs = c("bs", "ps"),
   family = c("scat", "gaussian"), weights = 1, m = c(3, 2),
-  method = "REML", optim = "newton", seed = 100, ...)
+  method = "REML", optimizer = "newton", seed = 100, ...)
 }
 \arguments{
 \item{object}{a metabCombiner object.}
@@ -19,24 +19,70 @@ functions for gam construction. Best value chosen by 10-fold cross validation.}
 
 \item{iterFilter}{integer. Number of residual filtering iterations to perform.}
 
-\item{ratio}{numeric. Residual multiplier for determining outliers.}
+\item{ratio}{numeric. A point is considered an outlier if ratio of residual to
+mean residual of a fit exceeds this value. Must be greater than 1.}
 
-\item{bs}{character. Choice of spline method from mgcv; see: ?smooth.terms}
+\item{frac}{numeric. A point is excluded if deemed a residual in more than
+this fraction value times the number of fits. Must be between 0 & 1.}
 
-\item{family}{character. Choice of mgcv family; see: ?family.mgcv}
+\item{bs}{character. Choice of spline method from mgcv, either "bs" (basis
+splines) or "ps" (penalized basis splines)}
+
+\item{family}{character. Choice of mgcv family; see: ?mgcv::family.mgcv}
+
+\item{weights}{Numeric prior weights determines the contribution of each point
+to the model. see: ?mgcv::gam}
 
 \item{m}{integer. Basis and penalty order for GAM; see ?mgcv::s}
 
-\item{method}{character. Smoothing parameter estimation method; see: ?gam}
+\item{method}{character. Smoothing parameter estimation method; see:
+?mgcv::gam}
+
+\item{optimizer}{character. Method to optimize smoothing parameter; see:
+?mgcv::gam}
 
 \item{seed}{integer. Psuedo-random seed generator for cross validation.}
 
-\item{optimizer}{character. Method to optimize smoothing parameter; see: ?gam}
+\item{...}{Other arguments passed to \code{mgcv::gam}.}
 }
 \value{
-Updated metabCombiner object with a GAM model
+metabCombiner object with a fitted GAM model
 }
 \description{
-Fit a Generalized Additive Model between selected ordered retention 
-time pairs
+Fits a (penalized) basis splines curve through a set of ordered pair
+retention times. One dataset's retention times (ydata) serve as the dependent
+variable, fitted as a function of retention times of the other (xdata).
+
+Filtering iterations of high residual points are performed, controlled by
+\code{iterFilter}, and multiple acceptable values of \code{k} used, with
+one value selected using 10-fold cross validation.
+}
+\details{
+A set of ordered pair retention times must be previously computed using
+\code{selectAnchors()}. The minimum and maximum retention times from both
+input datasets are included in the set (min_rtx, min_rty) & (max_rtx, max_rty).
+
+The \code{weights} argument initially determines the contribution of each point
+to the model fits; they are equally weighed by default, but can be changed using
+an \code{n+2} length vector, where n is the number of ordered pairs and the
+first and last of the weights determines the contribution of the min and max
+ordered pairs.
+
+The model complexity is determined by argument \code{k}. Multiple values of k
+are expected, with the best value chosen by 10 fold cross validation. Before
+this happens, certain ordered pairs are removed based on the model errors.
+In each iteration, a GAM is fit using each selected value of k. A point is
+"removed" (its corresponding \code{weights} value set to 0) if its residual
+is \code{ratio} times average residual for a fraction of fitted models, as
+determined by \code{frac}. If an ordered pair is an "identity" (discovered
+in the \code{selectAnchors} by setting the \code{useID} to TRUE), then
+setting \code{useID} here will prevent its removal.
+
+Other arguments, such as \code{family}, \code{m}, \code{optimizer}, \code{bs},
+and \code{method} are GAM specific parameters. Type of splines are currently
+limited to basis splines (\eqn{bs = "bs"}) or penalized basis splines
+(\eqn{bs = "ps"}).
+}
+\seealso{
+[crossValidationGAM], [filterAnchorsGAM], [fit_loess]
 }

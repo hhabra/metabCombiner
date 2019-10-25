@@ -2,7 +2,7 @@
 % Please edit documentation in R/selectAnchors.R
 \name{selectAnchors}
 \alias{selectAnchors}
-\title{Select Ordered Pair Features for Nonlinear RT Model}
+\title{Select Anchors for Nonlinear RT Model}
 \usage{
 selectAnchors(object, useID = FALSE, tolMZ = 0.005, tolQ = 0.5,
   windX = 0.03, windY = 0.03)
@@ -17,19 +17,17 @@ selectAnchors(object, useID = FALSE, tolMZ = 0.005, tolQ = 0.5,
 \item{tolQ}{numeric. Quantile Q tolerance for prospective anchors.}
 
 \item{windX}{numeric. Retention time exclusion window around each anchor in
-X dataset.}
+X dataset. Optimal values are between 0.01 and 0.05 min (1-3s).}
 
 \item{windY}{numeric. Retention time exclusion window around each anchor in
-Y dataset.}
+dataset Y. Optimal values are between 0.01 and 0.05 min (1-3s).}
 }
 \value{
 an updated metabCombiner object containing a table of ordered feature
 pairs for fitting a nonlinear rt fitting model.
 }
 \description{
-Select Ordered Pair Features for Nonlinear RT Model
-}
-\examples{
-
-
+This function selects a subset of possible alignments for use as ordered
+pairs to anchor a retention time projection model. Alignments of abundant
+features are prominent targets for anchor selection.
 }

@@ -14,16 +14,17 @@ retention times}
 
 \item{C}{Numeric weight for differences in Q (abundance quantiles).}
 
-\item{mzdiff}{Difference between feature m/z values; can be absolute or
-relative (ppm)}
+\item{mzdiff}{Numeric differences between feature m/z values}
 
-\item{rtdiff}{Difference between model-projected retention time value ('xdata')
-& observed retention time ('ydata')}
+\item{rtdiff}{Differences between model-projected retention time value &
+observed retention time}
 
 \item{qdiff}{Difference between feature quantile Q values}
 
-\item{adduct}{Numeric (x>=1). Divides computed score when adduct labels do
-not match.}
+\item{rtrange}{Range of dataset Y retention times}
+
+\item{adductdiff}{Numeric divisors of computed score when non-empty adduct
+labels do not match}
 }
 \value{
 Pairwise score between two grouped features(between 0 & 1) evaluating
@@ -37,7 +38,7 @@ in complementary datasets.
 \details{
 Score between two grouped features x & y calculated as:
 
-\deqn{S(x,y) = -exp(-A |mzx-mzy|- B |rty-rtproj|/rtrange - C |Qx-Qy|)}
+\deqn{S(x,y,A,B,C) = -exp(-A |mzx-mzy|- B |rty-rtproj|/rtrange - C |Qx-Qy|)}
 
 where mzx & Qx correspond to the m/z and abundance quantile values of feature
 x, mzy, rty, and Qy correspond to the m/z, retention time, and abundance

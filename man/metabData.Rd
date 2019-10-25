@@ -5,7 +5,7 @@
 \title{Constructor for the metabData object.}
 \usage{
 metabData(table, mz = "mz", rt = "rt", id = "id",
-  adduct = "adduct", samples = "detect", Q = NULL, extra = NULL,
+  adduct = "adduct", samples = NULL, Q = NULL, extra = NULL,
   rtmin = "min", rtmax = "max", misspc = 50, measure = c("median",
   "mean"), zero = FALSE, impute = FALSE, imputeVal = 100,
   duplicate = c(0.0025, 0.05))
@@ -74,7 +74,4 @@ Following construction is a pre-analysis filtering of rows that are either,
 
 \code{metabData()} currently supports a limited set of options for missing value
   imputation, specified by the \code{impute} & \code{imputeVal} options.
-}
-\examples{
-
 }

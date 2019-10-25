@@ -13,11 +13,15 @@ iterativeAnchorSelection(cTable, windX, windY, swap = FALSE)
 
 \item{windY}{numeric positive retention time exclusion windown in Y dataset.}
 
-\item{useID}{logical. Operation proceeds if TRUE, terminates early otherwise.}
+\item{swap}{logical. When FALSE, searches for abundant features in dataset X,
+complemented by dataset Y features; when TRUE, searches for abundant features
+in dataset Y, complemented by dataset X features.}
 }
 \value{
-Data frame
+Data frame of anchor feature alignments.
 }
 \description{
-
+This is a helper function for \code{selectAnchors}. Anchors are iteratively
+selected from highly abundant feature pairs, subject to feature m/z, rt, & Q
+constraints set by the user.
 }

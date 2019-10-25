@@ -7,8 +7,10 @@
 detectFields(Data, table, mz, rt, id, adduct, samples, extra, Q)
 }
 \arguments{
-\item{table}{Path to file containing feature table or data.frame object
-containing features}
+\item{Data}{a metabData object.}
+
+\item{table}{data frame containing metabolomics features or path to
+metabolomics data file.}
 
 \item{mz}{Character. Name for column containing m/z values. If "mz",
 will search for {mz, m/z, m.z, mass}}
@@ -26,6 +28,9 @@ If "id", will search for {id, compound, feature}}
 "detect", finds longest stretch of consecutive numeric columns.}
 
 \item{extra}{Character. Names of (additional) user-supplied columns.}
+
+\item{Q}{Character. Name of user-supplied abundance quantiles column.
+If null, quantiles will be automatically calculated.}
 }
 \value{
 an initialized and formatted \code{metabData} object.
