@@ -31,66 +31,47 @@ readData <- function(file){
 #' @title Detect Keywords in Column Names
 #'
 #' @description Helper function for metabData() constructor, used to detect
-#'   column corresponding to different fields. If one of {"mz", "rt", "id", or
-#'   "adduct"}, looks for additional related keywords, or exact name otherwise.
+#'   column corresponding to different fields.
 #'
-#' @param field    Character. Name of column to look for.
+#' @param keywords    character regular expression to search for in \code{names}.
 #'
-#' @param names    Character vector containing the names of the data
+#' @param names   character. A vector of column names.
 #'
-#' @param coltypes    Character vector containing the types for each column
+#' @param type    character. One of either "single" to get the first matching
+#' column or "multiple" to retrieve all matching columns.
 #'
-#' @param exclude   Numeric vector of column indices to exclude
-#'
-#' @return        Integer index of column (if keyword found), or NULL.
+#' @return
+#' Integer index or indices of column(s) of keywords; NULL if none found.
 #'
 #' @noRd
-detect <- function(field, names, types, exclude){
-    if(is.null(field))
+detect <- function(keywords, names, type){
+    if(is.null(keywords))
         return(NULL)
 
-    snames = character(0)
-    field = as.character(field[1])
-    keywords = base::switch(field,  "mz" = c("mz", "m/z", "m.z","MZ", "mass"),
-                                    "rt" = c("rt","retention time", "r.t", "RT"),
-                                    "id" = c("id", "ID", "compound", "Compound",
-                                             "feature", "Feature"),
-                                  "adduct" = c("adduct", "adducts", "annotation",
-                                               "Adduct", "Adducts")
-    )
+    keywords = paste(keywords, collapse = "|")
 
-    N = length(names)
+    indices = grep(keywords, names)
 
-    #limit to numeric and non-excluded indices
-    if(!is.null(keywords)){
-        if(field %in% c("mz","rt"))
-            snames = names[types == "numeric" & !(1:N %in% exclude)]
-
-        else if(field %in% c("id","adduct")){
-            snames = names[types == "character" & !(1:N %in% exclude)]
-        }
-    }else{  #detect user-given names
-        keywords = field
-        snames = names[!(1:N %in% exclude)]
-    }
-
-    #collect first name that matches keyword(s)
-    if (any(snames %in% keywords)){
-        vname = snames[which(snames %in% keywords)[1]]
-        index = which(names == vname)
-        return(index)
-    }else
+    if(length(indices) == 0)
         return(NULL)
+
+    #searching for a single column, e.g. m/z, rt columns
+    if(type == "single")
+        return(indices[1])
+
+    #searching for multiple columns, e.g. sample & extra columns
+    else
+        return(indices)
 }
 
 #' @title Automatic Detection of Experimental Sample Columns
 #'
 #' @description Searches for the longest continuous stretch of numeric columns
-#'   to treat as experimental sample columns.
+#'   to treat as experimental sample columns if no keyword supplied.
 #'
-#' @param colnames
+#' @param colnames character names of table columns
 #'
-#' @param coltypes
+#' @param coltypes  types of columns
 #'
 #' @noRd
 detectSamples <- function(colnames, coltypes){
@@ -102,13 +83,13 @@ detectSamples <- function(colnames, coltypes){
 
     consec = base::rle(coltypes)    #looks for consecutive column types
 
-    consec.numeric = (consec$values == "numeric")
+    consec.numeric = (consec[["values"]] == "numeric")
     longest.numeric = base::max(consec$lengths[consec.numeric])
 
     index = which.max(consec.numeric & consec[["lengths"]] == longest.numeric)
 
-    firstSample = base::cumsum(consec$lengths)[index] - longest.numeric + 1
-    lastSample = base::cumsum(consec$lengths)[index]
+    firstSample = cumsum(consec[["lengths"]])[index] - longest.numeric + 1
+    lastSample = cumsum(consec[["lengths"]])[index]
 
     samples = colnames[firstSample:lastSample]
 
@@ -120,11 +101,11 @@ detectSamples <- function(colnames, coltypes){
 #' @description  Select the column of the input table corresponding to the m/z
 #'   values and checks if it matches requirements
 #'
-#' @param table     An untargeted metabolomics data frame received as input
+#' @param table   An untargeted metabolomics data frame received as input
 #'
-#' @param col       Column from input data that contains the mz values.
+#' @param col     Column from input data that contains the mz values.
 #'
-#' @return          m/z value vector
+#' @return        m/z value vector
 #'
 #' @noRd
 selectMZ <- function(table, col){
@@ -145,13 +126,14 @@ selectMZ <- function(table, col){
 
 #' @title Process Retention Time Column
 #'
+#' @description
 #' Select column of the input table corresponding to the rt values and perform
 #' condition-checks.
 #'
 #' @param table     An untargeted metabolomics data frame received as input.
 #' @param col       Column from input table that contains the rt values
 #'
-#' @return          rt value vector
+#' @return    numeric retention time value vector
 #'
 #' @noRd
 selectRT <- function(table, col){
@@ -175,6 +157,7 @@ selectRT <- function(table, col){
 
 #' @title Process Quantiles Column
 #'
+#' @description
 #' Select column of the input table corresponding to the Q values and perform
 #' condition-checks. If null, return a vector of 0.
 #'
@@ -201,20 +184,16 @@ selectQ <- function(table, col){
     return(Q)
 }
 
-
-
 ##
-#' @title
+#' @title Process ID & Adduct Columns
 #'
-#' @description Optional function to allow for a column of user-supplied IDs.
+#' @description Optional function to process character (ID/ adduct) columns.
 #'
 #' @param table  An untargeted metabolomics data frame received as input
 #'
 #' @param col   Column from input data that contains a character field
 #'
-#' @return   vector of ids
-#'
-#' @examples
+#' @return   vector of characters
 #'
 #' @noRd
 selectColumn <- function(table, col = NULL){
@@ -230,8 +209,10 @@ selectColumn <- function(table, col = NULL){
 
 #' @title Detect metabData Input Columns
 #'
-#' @param table      Path to file containing feature table or data.frame object
-#'                  containing features
+#' @param Data      a metabData object.
+#'
+#' @param table     data frame containing metabolomics features or path to
+#' metabolomics data file.
 #'
 #' @param mz         Character. Name for column containing m/z values. If "mz",
 #'                  will search for {mz, m/z, m.z, mass}
@@ -250,85 +231,103 @@ selectColumn <- function(table, col = NULL){
 #'
 #' @param extra      Character. Names of (additional) user-supplied columns.
 #'
-#' @return an initialized and formatted \code{metabData} object.
+#' @param Q       Character. Name of user-supplied abundance quantiles column.
+#'                If null, quantiles will be automatically calculated.
+#'
+#' @return  an initialized and formatted \code{metabData} object.
 #'
 detectFields <- function(Data, table, mz, rt, id, adduct, samples, extra, Q)
 {
-    #exclude: integer vector ensuring each column is used at most once
-    exclude <- integer(5)
-    coltypes <- as.character(lapply(table, class))
+    colNames = names(table)
 
-    ##detecting m/z value column
-    mzCol = detect(mz, names = names(table), types = coltypes, exclude = exclude)
+    ##detecting and processing m/z value column
+    mzCol = detect(mz, colNames, type = "single")
 
     if(is.null(mzCol))
         stop("m/z column undefined or used more than once.")
 
     new_mz <- selectMZ(table = table, col = mzCol)
-    exclude[1] = mzCol        ##updating excluded indices
 
-    ##detecting rt value column
-    rtCol = detect(rt, names = names(table), types = coltypes, exclude = exclude)
+    table = table[,-mzCol]
+    colNames = colNames[-mzCol]
+
+    ##detecting and processing rt value column
+    rtCol = detect(rt, colNames, type = "single")
+
+    if(is.null(rtCol))
+        stop("rt column undefined or used more than once.")
 
     new_rt <- selectRT(table, col = rtCol)
-    exclude[2] = rtCol        ##updating excluded indices
+
+    table = table[,-rtCol]
+    colNames = colNames[-rtCol]
 
     ##detecting (optional) identities column; empty column if missing or null
-    idCol = detect(id, names = names(table), types = coltypes, exclude = exclude)
+    idCol = detect(id, colNames, type = "single")
     new_id <- selectColumn(table, col = idCol)
 
-    if(!is.null(idCol))
-        exclude[3] = idCol
+    if(!is.null(idCol)){
+        table = table[,-idCol]
+        colNames = colNames[-idCol]
+    }
 
     ##detecting (optional) adduct column; empty column if missing or null
-    adductCol = detect(adduct, names = names(table), types = coltypes,
-                       exclude = exclude)
+    adductCol = detect(adduct, colNames, type = "single")
     new_adduct <- selectColumn(table, col = adductCol)
 
-    if(!is.null(adductCol))
-        exclude[4] = adductCol
+    if(!is.null(adductCol)){
+        table = table[,-adductCol]
+        colNames = colNames[-adductCol]
+    }
 
     ##detecting (optional) Q column
-    QCol = detect(Q, names = names(table), types = coltypes,
-                       exclude = exclude)
+    QCol = detect(Q, colNames, type = "single")
     new_Q <- selectQ(table, col = QCol)
 
-    if(!is.null(QCol))
-        exclude[5] = QCol
+    if(!is.null(QCol)){
+        table = table[,-QCol]
+        colNames = colNames[-QCol]
+    }
 
-    ##removing excluded columns
-    table = table[,-exclude]
+    ##finding (additional, non-analyzed) extra columns
+    extraCols = detect(extra, colNames, type = "multiple")
 
-    ##finding (optional) extra columns
-    if(!is.null(extra)){
-        if(!any(extra %in% names(table)))
-            stop("At least one name in 'extra' field undefined or used
-                 more than once")
+    if(!is.null(extraCols)){
+        new_extra = table[,extraCols]
+        Data@extra = colNames[extraCols]
+        table = table[,-extraCols]
+        colNames = colNames[-extraCols]
+    }
 
-        new_extra = table[,extra]
-        table = table[, !names(table) %in% extra]
-    } else
-        extra = character(0)
+    else{
+        new_extra = NULL
+        Data@extra = character(0)
+    }
 
-    Data@extra = extra
+    ##finding analyzed sample columns
+    sampleCols = detect(samples, colNames, type = "multiple")
 
-    ##finding sample value columns
-    if(base::identical(samples, "detect")){
+    if(is.null(sampleCols)){
+        warning("No column contains keywords in argument 'samples'. Automated
+                detection of sample columns may be less accurate.")
+
         coltypes <- base::as.character(lapply(table, class))
 
-        samples = detectSamples(names(table), coltypes)
-    }else{
-        if(!any(samples %in% names(table)) | any(duplicated(samples)))
-            stop("At least one name in 'samples' undefined or non-unique")
+        samples = detectSamples(colNames, coltypes)
+    }
+
+    else{
+        coltypes <- as.character(lapply(table[,sampleCols], class))
+
+        sampleCols = sampleCols[which(coltypes %in% c("numeric", "integer"))]
+
+        if(length(sampleCols) == 0)
+            stop("no numeric columns found using 'samples' argument")
+
+        samples = colNames[sampleCols]
     }
 
     new_values = table[,samples]
-
-    apply(new_values, 2, function(x){
-        if(!(class(x) %in% c("integer", "numeric")))
-           stop("at least one selected sample column is non-numeric")
-
-    })
 
     Data@samples = samples
 
@@ -338,10 +337,9 @@ detectFields <- function(Data, table, mz, rt, id, adduct, samples, extra, Q)
                            check.names = FALSE, stringsAsFactors = FALSE)
 
     if(length(extra) > 0)
-        Data@data[,extra] = new_extra
+        Data@data[,Data@extra] = new_extra
 
     return(Data)
-
 }
 
 

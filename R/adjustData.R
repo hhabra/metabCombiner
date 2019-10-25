@@ -25,26 +25,28 @@
 #' \code{rtmin} \eqn{\le} rt \eqn{\le} \code{rtmax})
 #'
 ##
-filterRT <- function(data, rtmin, rtmax){
+filterRT <- function(data, rtmin, rtmax)
+{
+    rts = data[["rt"]]
 
     if(rtmin == "min")
-        rtmin = min(data[["rt"]])
+        rtmin = min(rts)
 
     if(rtmax == "max")
-        rtmax = max(data[["rt"]])
+        rtmax = max(rts)
 
     if(class(rtmin)!= "numeric" | rtmin > rtmax | rtmin < 0 |
-       rtmin > max(rt) |rtmin < min(rt))
+        rtmin > max(rts) | rtmin < min(rts))
     {
         warning("The supplied 'rtmin value' is invalid. Setting 'rtmin' to
                 minimum observed retention time.")
-        rtmin = min(rt)
+        rtmin = min(rts)
     }
 
-    if(class(rtmax)!= "numeric" | rtmin > rtmax | rtmax < 0 | rtmax > max(rt)){
-        warning("The supplied 'rtmax' value is invalid. Setting to maximum observed
-              retention time.")
-        rtmax = max(rt)
+    if(class(rtmax)!= "numeric" | rtmin > rtmax | rtmax < 0 | rtmax > max(rts)){
+        warning("The supplied 'rtmax' value is invalid. Setting to maximum
+                 observed retention time.")
+        rtmax = max(rts)
     }
 
     data = dplyr::filter(data, rt >= rtmin & rt <= rtmax)
@@ -246,7 +248,7 @@ adjustData <- function(Data, misspc, measure, rtmin, rtmax, zero,
     missingpc = missingpc[keepIndices]
 
     if(measure == "median")
-        counts <- apply(data[,samples], 1, median, na.rm = TRUE) %>%
+        counts <- apply(data[,samples], 1, stats::median, na.rm = TRUE) %>%
                   as.numeric()
     else if(measure == "mean")
         counts <- apply(data[,samples], 1, mean, na.rm = TRUE) %>%

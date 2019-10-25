@@ -63,13 +63,9 @@
 #' specified by \code{mz,rt, samples, id, adduct, Q, and extra} arguments, and adjusted
 #' by pre-processing steps.
 #'
-#' @example
-#'
-#'
-#'
 #' @export
 metabData <- function(table, mz = "mz", rt = "rt", id = "id",
-                      adduct = "adduct", samples = "detect", Q = NULL,
+                      adduct = "adduct", samples = NULL, Q = NULL,
                       extra = NULL, rtmin = "min", rtmax = "max",
                       misspc = 50, measure = c("median", "mean"),
                       zero = FALSE, impute = FALSE, imputeVal = 100,
