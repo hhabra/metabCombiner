@@ -17,41 +17,49 @@
 *
 * binByMZ performs continuous binning of features by m/z (pre-sorted). 
 * Features with m/z values within 'gap' Daltons are considered for a potential 
-* mzGroup; increment bin count if group contains features from both datasets.
+* mzGroup. Increment group count if mzGroup contains features from both datasets.
+*
+* PARAMETERS:
 * 
+* mz: A pooled and sorted list of m/z values from two separate feature tables
+*
+* datasets: 
+*
+* gap:  
 */
-SEXP binByMZ(SEXP mz, SEXP length, SEXP datasets, SEXP gap)
+SEXP binByMZ(SEXP mz, SEXP datasets, SEXP gap)
 {
 	//obtaining C types
-	double *rmz = REAL(mz);
-	int rlength = INTEGER(length)[0];	
-	double rgap = REAL(gap)[0];
+	double *mz_r = REAL(mz);
+	double gap_r = REAL(gap)[0];
+	
+	int length = LENGTH(mz);
 		
 	//groups will contain the final returned vector; initialize to 0 vector
-	SEXP groups = PROTECT(allocVector(INTSXP, rlength));
-	int *rgroups = INTEGER(groups);
-	memset(rgroups, 0, rlength * sizeof(int));    
+	SEXP groups = PROTECT(allocVector(INTSXP, length));
+	int *groups_r = INTEGER(groups);
+	memset(groups_r, 0, length * sizeof(int));    
 
 	//initiating loop variables
 	double diff;
 	int cond1 = 0, cond2 = 0, bin = 1, start, count;
 	const char *set1, *set2;
 	
-	//bin by MZ and assign new groups if:
-	//condition 1: consecutive mz gap less than gap
-	//condition 2: at least one feature from both datasets
-	for(int i = 0; i < rlength-1; i++){
-		diff = rmz[i+1] - rmz[i];
+	//bin by m/z and assign new groups if:
+	//condition 1: difference between consecutive m/z is less than gap
+	//condition 2: at least one feature found from both datasets
+	for(int i = 0; i < length-1; i++){
+		diff = mz_r[i+1] - mz_r[i];
 		
 		//initiate a potential group
-		if (!(cond1) && diff < rgap){
+		if (!(cond1) && diff < gap_r){
 			cond1 = 1;
 			start = i;
 			count = 0;
 		}
 		
 		//elongate group and check if cond2 met
-		if(cond1 && diff < rgap){
+		if(cond1 && diff < gap_r){
 			count++;
 			
 			if(!cond2){
@@ -64,12 +72,12 @@ SEXP binByMZ(SEXP mz, SEXP length, SEXP datasets, SEXP gap)
 		}
 	
 		//reset and update group count, if condition 2 met
-		if(diff > rgap || i == (rlength - 2)){
+		if(i == (length - 2) || diff > gap_r){
 			cond1 = 0;
 			
 			if(cond2){
 				for(int j = start; j <= start+count; j++){
-					rgroups[j] = bin;
+					groups_r[j] = bin;
 				}
 				
 				bin++;

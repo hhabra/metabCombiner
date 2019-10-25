@@ -25,15 +25,15 @@
  * 
  *
 */
-void updateLabels(SEXP labels, int f, double windrX, double windrY, 
+void updateLabels(SEXP labels, int f, double windX, double windY, 
 				   double* rtx, double* rty, double* rts)
 {
 	const char *label = CHAR(STRING_ELT(labels, f)); 
 			
 	if(strcmp(label,"P") == 0)
 	{
-		if(	fabs(rtx[f] - rts[0]) < windrX || 
-			fabs(rty[f] - rts[1]) < windrY)
+		if(	fabs(rtx[f] - rts[0]) < windX || 
+			fabs(rty[f] - rts[1]) < windY)
 		{
 			SET_STRING_ELT(labels, f, mkChar("N"));
 		}
