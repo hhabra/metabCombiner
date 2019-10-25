@@ -82,7 +82,9 @@ identityAnchorSelection <- function(cTable, windX, windY, useID){
 #' @title Iteratively Select Ordered Feature Pairs
 #'
 #' @description
-#'
+#' This is a helper function for \code{selectAnchors}. Anchors are iteratively
+#' selected from highly abundant feature pairs, subject to feature m/z, rt, & Q
+#' constraints set by the user.
 #'
 #' @param cTable  data frame, contains only feature ids, mzs, rts, Qs, & labels
 #'
@@ -90,10 +92,12 @@ identityAnchorSelection <- function(cTable, windX, windY, useID){
 #'
 #' @param windY   numeric positive retention time exclusion windown in Y dataset.
 #'
-#' @param useID   logical. Operation proceeds if TRUE, terminates early otherwise.
+#' @param swap  logical. When FALSE, searches for abundant features in dataset X,
+#' complemented by dataset Y features; when TRUE, searches for abundant features
+#' in dataset Y, complemented by dataset X features.
 #'
 #' @return
-#' Data frame
+#' Data frame of anchor feature alignments.
 #'
 ##
 iterativeAnchorSelection <- function(cTable, windX, windY, swap = FALSE){
@@ -125,7 +129,12 @@ iterativeAnchorSelection <- function(cTable, windX, windY, swap = FALSE){
 }
 
 
-#' @title Select Ordered Pair Features for Nonlinear RT Model
+#' @title Select Anchors for Nonlinear RT Model
+#'
+#' @description
+#' This function selects a subset of possible alignments for use as ordered
+#' pairs to anchor a retention time projection model. Alignments of abundant
+#' features are prominent targets for anchor selection.
 #'
 #' @param object metabCombiner object.
 #'
@@ -136,16 +145,13 @@ iterativeAnchorSelection <- function(cTable, windX, windY, swap = FALSE){
 #' @param tolQ numeric. Quantile Q tolerance for prospective anchors.
 #'
 #' @param windX numeric. Retention time exclusion window around each anchor in
-#' X dataset.
+#' X dataset. Optimal values are between 0.01 and 0.05 min (1-3s).
 #'
 #' @param windY numeric. Retention time exclusion window around each anchor in
-#' Y dataset.
+#' dataset Y. Optimal values are between 0.01 and 0.05 min (1-3s).
 #'
 #' @return an updated metabCombiner object containing a table of ordered feature
 #' pairs for fitting a nonlinear rt fitting model.
-#'
-#' @examples
-#'
 #'
 #' @export
 selectAnchors <- function(object, useID = FALSE, tolMZ = 0.005, tolQ = 0.5,

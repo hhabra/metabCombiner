@@ -1,11 +1,28 @@
-## Contains a loess fitting method
+## Contains a LOESS fitting method
 
-##
-#' @title Select Out High Residual Ordered Pairs
+#' @title Filter Outlier Ordered Pairs
 #'
 #' @description
-#' This is a helper function for the \code{fit_loess} function. Filters anchor retention
-#' time ordered pairs using the residuals calculated from
+#' This is a helper function for \code{fit_loess}. It filters retention time
+#' ordered pairs using the residuals calculated from multiple LOESS fits.
+#'
+#' @param rts Data frame of ordered retention time pairs.
+#'
+#' @param spans numeric vector. Selection of values (between 0 & 1) to control
+#' the degree of smoothing of loess curve.
+#'
+#' @param iterFilter integer. Number of residual filtering iterations to perform.
+#'
+#' @param ratio   numeric. A point is considered an outlier if ratio of residual to
+#' mean residual of a fit exceeds this value. Must be greater than 1.
+#'
+#' @param frac   numeric. A point is excluded if deemed a residual in more than
+#' this fraction value times the number of fits. Must be between 0 & 1.
+#'
+#' @param loess.parameters  Parameters for LOESS fitting. See ?loess.control.
+#'
+#' @return
+#' Ordered retention time pairs data frame with updated weights.
 #'
 #' @seealso
 #' [filterAnchorsGAM],[fit_loess], [crossValidationLoess]
@@ -16,20 +33,20 @@ filterAnchorsLoess <- function(rts, spans, iterFilter, ratio, frac,loess.paramet
 
     while(iteration < iterFilter){
         cat("Performing filtering iteration: ", iteration + 1, "\n", sep = "")
-        residuals <- sapply(spans, function(s){
-              model <- loess(rty ~ rtx, data = rts, span = s, degree = 1,
-                     family = "symmetric", control = loess.parameters,
-                     weights = rts[["weights"]],...)
 
-              res = abs(model$residuals)
-              return(res)
+        residuals <- sapply(spans, function(s){
+            model <- stats::loess(rty ~ rtx, data = rts, span = s, degree = 1,
+                     family = "symmetric", control = loess.parameters,
+                     weights = rts[["weights"]])
+
+            res = abs(model[["residuals"]])
+            return(res)
         })
 
-        include = which(rts$weights == 1)
+        include = which(rts[["weights"]] == 1)
 
         ##flagging excessively high residuals
         thresholds <- ratio * colMeans(residuals[include,] %>% as.matrix())
-
 
         flags <- sapply(1:length(spans), function(i){
             fl <- (residuals[,i] > thresholds[i])
@@ -39,7 +56,7 @@ filterAnchorsLoess <- function(rts, spans, iterFilter, ratio, frac,loess.paramet
         ##remove features with high proportion of excessive residuals
         fracs = rowSums(flags)/ncol(flags)
         remove = fracs > frac
-        remove[rts$labels == "I"] = FALSE
+        remove[rts[["labels"]] == "I"] = FALSE
 
         ##assigning 0 weight to outlier anchors;
         ##must retain 20 anchors plus both endpoints
@@ -51,22 +68,24 @@ filterAnchorsLoess <- function(rts, spans, iterFilter, ratio, frac,loess.paramet
         iteration = iteration+1
     }
 
-  return(rts)
+    return(rts)
 }
 
 #' @title  Cross Validation for Loess Model
 #'
-#' @param rts
+#' @param rts Data frame of ordered retention time pairs.
 #'
-#' @param spans
+#' @param spans numeric vector. Selection of values (between 0 & 1) to control
+#' the degree of smoothing of loess curve.
 #'
-#' @param seed
+#' @param seed integer. Psuedo-random seed generator for cross validation.
 #'
-#' @param loess.parameters
+#' @param loess.parameters Parameters for LOESS fitting. See ?loess.control.
+#'
+#' @return
+#' Optimal value among pre-selected values for \code{spans}.
 #'
 #'
-#'
-##
 crossValidationLoess <- function(rts, spans, seed,loess.parameters){
     cat("Performing 10-fold cross validation.")
 
@@ -89,13 +108,14 @@ crossValidationLoess <- function(rts, spans, seed,loess.parameters){
 
         #error for each span for fold f
         errors <- sapply(spans, function(s){
-            model <- loess(rty ~ rtx, data = rts_train, span = s, degree = 1,
-                           family = "symmetric",control = loess.parameters,
+            model <- stats::loess(rty ~ rtx, data = rts_train, span = s,
+                           degree = 1, family = "symmetric",
+                           control = loess.parameters,
                            weights = rts_train[["weights"]])
 
-            preds <- predict(model, newdata = rts_test)
+            preds <- stats::predict(model, newdata = rts_test)
 
-            MSE = sum((preds - rts_test$rty)^2)/ length(preds)
+            MSE = sum((preds - rts_test[["rty"]])^2)/ length(preds)
 
             return(MSE)
         })
@@ -106,9 +126,16 @@ crossValidationLoess <- function(rts, spans, seed,loess.parameters){
     return(cv_errors)
 }
 
-#' @title Fit a LOESS Through Retention Time Ordered Pairs
+#' @title Fit RT Projection Model With LOESS
 #'
 #' @description
+#' Fits a local regression smoothing spline curve through a set of ordered pair
+#' retention times. One dataset's retention times (ydata) serve as the dependent
+#' variable, fitted as a function of retention times of the other (xdata).
+#'
+#' Filtering iterations of high residual points are performed, controlled by
+#' \code{iterFilter}, and multiple acceptable values of \code{span} used, with
+#' one value chosen using 10-fold cross validation.
 #'
 #' @param object  metabCombiner object.
 #'
@@ -116,10 +143,11 @@ crossValidationLoess <- function(rts, spans, seed,loess.parameters){
 #'
 #' @param spans   numeric vector. Span values (between 0 & 1) used for loess fits
 #'
-#' @param ratio   numeric residual multiplier for determining outliers.
+#' @param ratio   numeric. A point is considered an outlier if ratio of residual to
+#' mean residual of a fit exceeds this value. Must be greater than 1.
 #'
-#' @param frac    numeric. Threshold proportion of fits needed to determine if
-#'                ordered pair is an outlier.
+#' @param frac   numeric. A point is excluded if deemed a residual in more than
+#' this fraction value times the number of fits. Must be between 0 & 1.
 #'
 #' @param iterFilter  integer. Number of residual filtering iterations to perform.
 #'
@@ -129,12 +157,10 @@ crossValidationLoess <- function(rts, spans, seed,loess.parameters){
 #' @param weights  numeric. Optional user supplied weights. Note: vector length
 #'                  must be #num_anchors + 2 (first and last are endpoints).
 #'
-#' @param seed    integer. Psuedo-random seed generator for cross validation.
+#' @param seed  integer. Psuedo-random seed generator for cross validation.
 #'
 #'
 #' @export
-#'
-##
 fit_loess <- function(object, useID = FALSE, spans = seq(0.2, 0.4, by = 0.05),
                       iterFilter = 2, ratio = 2, frac = 0.5, iterLoess = 10,
                       weights = 1, seed = 100)

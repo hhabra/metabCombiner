@@ -10,6 +10,8 @@
 #'
 #' @param sep   Character field separator. Values within each row are separated
 #'              by this string.
+#'
+#' @export
 ##
 write2file <- function(object, file = "", sep = ","){
 
@@ -29,7 +31,7 @@ write2file <- function(object, file = "", sep = ","){
     if(base::nchar(sep) > 1)
         stop("parameter 'sep' must be a length <= 1 character")
 
-    if(!S4vectors::isSorted(cTable[["group"]])){
+    if(!S4Vectors::isSorted(cTable[["group"]])){
         cTable = cTable[with(cTable, order(group, desc(score))), ]
     }
 

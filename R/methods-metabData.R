@@ -1,4 +1,6 @@
 ##Methods For metabData Objects
+#' @include generics.R classes.R
+
 
 #' @title Obtain processed metabolomics data frame
 #'
@@ -9,9 +11,7 @@
 #'
 #' @return Processed metabolomics feature data frame.
 #'
-#' @examples
-#'
-#' @exportMethod
+#' @export
 ##
 setMethod("getData", signature = "metabData", function(object){
     data = object@data
@@ -25,9 +25,7 @@ setMethod("getData", signature = "metabData", function(object){
 #'
 #' @return Names of samples of formatted dataset.
 #'
-#' @examples
-#'
-#' @exportMethod
+#' @export
 ##
 setMethod("getSamples", signature = "metabData", function(object){
     samples = object@samples
@@ -42,7 +40,7 @@ setMethod("getSamples", signature = "metabData", function(object){
 #'
 #' @return Names of 'extra' columns in \code{data} field of metabData
 #'
-#' @exportMethod
+#' @export
 ##
 setMethod("getExtra", signature = "metabData", function(object){
     extra = object@extra
@@ -58,9 +56,7 @@ setMethod("getExtra", signature = "metabData", function(object){
 #'
 #' @return Feature statistics from metabData object
 #'
-#' @examples
-#'
-#'  @exportMethod
+#' @export
 ##
 setMethod("getStats", signature = "metabData", function(object){
     extra = object@stats

@@ -1,4 +1,5 @@
-##Methods for metabCombiner object
+##Methods for metabCombiner objects
+#' @include generics.R classes.R
 
 #' @title Obtain Combiner Feature Alignment Report
 #'
@@ -27,7 +28,7 @@
 #' \item{adductY}{adduct label of features from dataset Y}
 #' \item{...}{Sample and extra columns from both datasets X & Y}
 #'
-#' @exportMethod
+#' @export
 ##
 setMethod("combinerTable", signature = "metabCombiner", function(object){
     return(object@combinerTable)
@@ -35,11 +36,18 @@ setMethod("combinerTable", signature = "metabCombiner", function(object){
 
 #' @title Get Ordered Retention Time Pairs
 #'
+#' @description
+#' This returns the list of feature alignments used to anchor a retention
+#' time projection model, constructed by \code{\link{selectAnchors}}.
+#'
 #' @param object metabCombiner object
 #'
-#' @return anchor set constructed using selectAnchors().
+#' @return Data frame of anchor feature alignments.
 #'
-#' @exportMethod
+#' @seealso
+#' [selectAnchors]
+#'
+#' @export
 ##
 setMethod("getAnchors", signature = "metabCombiner", function(object){
     return(object@anchors)
@@ -58,7 +66,7 @@ setMethod("getAnchors", signature = "metabCombiner", function(object){
 #' \item{B}{Specific weight penalizing relative error of retention time projection}
 #' \item{C}{Specific weight penalizing differences in abundance quantiles}
 #'
-#' @exportMethod
+#' @export
 ##
 setMethod("getCoefficients", signature = "metabCombiner", function(object){
     return(object@coefficients)
@@ -68,14 +76,17 @@ setMethod("getCoefficients", signature = "metabCombiner", function(object){
 #' @title Get Datasets From metabCombiner Object.
 #'
 #' @description
+#' \code{metabCombiner} objects consist of two formatted metabolomics feature
+#' tables. This function allows for returning one of the two processed datasets
+#' contained within the object.
 #'
 #' @param object  metabCombiner object
 #'
 #' @param data    Either one of 'x' or 'y'.
 #'
-#' @return If data is "x", returns x dataset ; if "y", returns y dataset.
+#' @return If data is "x", returns dataset X ; if "y", returns dataset Y.
 #'
-#' @exportMethod
+#' @export
 ##
 setMethod("getData", signature = "metabCombiner", function(object, data = c("x", "y")){
     data = match.arg(data)
@@ -90,6 +101,8 @@ setMethod("getData", signature = "metabCombiner", function(object, data = c("x",
 #' @title Get Fitted RT Model
 #'
 #' @description
+#' This returns the last fitted RT projected model from a metabCombiner object
+#' of type "gam" or "loess".
 #'
 #' @param object  metabCombiner object
 #'
@@ -97,7 +110,10 @@ setMethod("getData", signature = "metabCombiner", function(object, data = c("x",
 #'
 #' @return Nonlinear retention time fitting model.
 #'
-#' @exportMethod
+#' @seealso
+#' [fit_gam], [fit_loess]
+#'
+#' @export
 ##
 setMethod("getModel", signature = "metabCombiner", function(object, fit = c("gam", "loess")){
     fit = match.arg(fit)
@@ -112,14 +128,18 @@ setMethod("getModel", signature = "metabCombiner", function(object, fit = c("gam
 
 #' @title Get Sample Names From metabCombiner Object
 #'
+#' \code{metabCombiner} objects consist of two formatted metabolomics feature
+#' tables. This method returns the sample names from one of the two datasets.
+#'
 #' @param object  metabCombiner object
 #'
-#' @param data    Either one of 'x' or 'y'.
+#' @param data   Character. One of either 'x' or 'y'.
 #'
-#' @return If data is "x", returns sample names from xdata; if "y", returns
-#' sample names from ydata.
+#' @return If data is "x", returns sample names for dataset X; if "y", returns
+#' sample names from dataset Y.
 #'
-#' @exportMethod
+#'
+#' @export
 ##
 setMethod("getSamples", signature = "metabCombiner", function(object, data = c("x", "y")){
 
@@ -135,63 +155,23 @@ setMethod("getSamples", signature = "metabCombiner", function(object, data = c("
 
 #' @title Get metabCombiner Statistics
 #'
+#' @description
+#' This function prints a set of metabCombiner object statistics.
+#'
 #' @param object  metabCombiner object
 #'
 #' @return A list containing statistics from metabCombiner object.
 #'
-#' @exportMethod
+#' @export
 ##
 setMethod("getStats", signature = "metabCombiner", function(object){
     return(object@stats)
 })
 
-
-#' @title Plot nonlinear fit between retention times
-#'
-#' @param object metabCombiner object
-#'
-#' @param fit Choice of model. Either "gam" or "loess".
-#'
-#' @param pcol color of the points (ordered pairs) in the plot.
-#'
-#' @param lcol color of the fitted line in the plot
-#'
-#' @param ... Other variables passed into graphics::plot
-#'
-##
-setMethod("plot", signature = "metabCombiner",
-          function(object, fit = c("gam","loess"), pcol, lcol, lwd,...){
-
-    fit = match.arg(fit)
-    model = getModel(object, fit = fit)
-
-    if(is.null(model))
-        stop(paste("object missing model of type", fit))
-
-    if(fit == "loess")
-        data = data.frame(rtx = model[["x"]],
-                          rty = model[["y"]],
-                          pred = model[["fitted"]],
-                          weights = model[["weights"]])
-
-    else if (fit == "gam")
-        data = data.frame(rtx = model$model$rtx,
-                          rty = model$model$rty,
-                          pred = model$fitted.values,
-                          weights = model$prior.weights)
-
-    data = dplyr::arrange(data, rtx)
-
-    if(missing(pcol))
-        pcol = "black"
-    if(missing(lcol))
-        lcol = "red"
-    if(missing(lwd))
-        lwd = 4
-
-    graphics::plot(data[["rtx"]], data[["rty"]], type = "p", col = pcol,...)
-    graphics::lines(x = data[["rtx"]], y = data[["pred"]],
-                    col = lcol, lwd = lwd,...)
+##plot method
+#'@export
+setMethod("plot", signature = "metabCombiner", function(x,...){
+    plot_Combiner(object = x,...)
 })
 
 
@@ -257,5 +237,3 @@ setMethod("show", signature = "metabCombiner", function(object){
 
     return(invisible())
 })
-
-

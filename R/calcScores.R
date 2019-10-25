@@ -65,21 +65,22 @@ comp_adduct_strings <- function(s1,s2, adduct){
 #'
 #' @param C Numeric weight for differences in Q (abundance quantiles).
 #'
-#' @param mzdiff Difference between feature m/z values; can be absolute or
-#'               relative (ppm)
+#' @param mzdiff Numeric differences between feature m/z values
 #'
-#' @param rtdiff Difference between model-projected retention time value ('xdata')
-#'               & observed retention time ('ydata')
+#' @param rtdiff Differences between model-projected retention time value &
+#'               observed retention time
 #'
 #' @param qdiff Difference between feature quantile Q values
 #'
-#' @param adduct Numeric (x>=1). Divides computed score when adduct labels do
-#'               not match.
+#' @param rtrange   Range of dataset Y retention times
+#'
+#' @param adductdiff Numeric divisors of computed score when non-empty adduct
+#'                   labels do not match
 #'
 #' @details
 #' Score between two grouped features x & y calculated as:
 #'
-#' \deqn{S(x,y) = -exp(-A |mzx-mzy|- B |rty-rtproj|/rtrange - C |Qx-Qy|)}
+#' \deqn{S(x,y,A,B,C) = -exp(-A |mzx-mzy|- B |rty-rtproj|/rtrange - C |Qx-Qy|)}
 #'
 #' where mzx & Qx correspond to the m/z and abundance quantile values of feature
 #' x, mzy, rty, and Qy correspond to the m/z, retention time, and abundance
@@ -107,13 +108,8 @@ scorePairs <- function(A, B, C, mzdiff, rtdiff, qdiff, rtrange, adductdiff){
 ##
 #' @title Compute Feature Similarity Scores
 #'
-#' @description Calculates pairwise similarity (between 0 & 1) for all
-#' grouped features in \code{metabCombiner} object. Uses a nonlinear model
-#' (computed using either \code{fit_gam} or \code{fit_loess}) to project dataset X
-#' retention times onto dataset Y, and computes score based on differences
-#' between m/z (absolute or relative), retention times (projected vs observed),
-#' and abundance quantiles (Q). Parameters \code{A}, \code{B}, & \code{C} are
-#' constants penalizing differences in m/z, rt, and Q, respectively.
+#' @description Calculates a pairwise similarity (between 0 & 1) between all
+#' grouped features in \code{metabCombiner} object.
 #'
 #' @param object  metabCombiner object.
 #'
@@ -122,12 +118,12 @@ scorePairs <- function(A, B, C, mzdiff, rtdiff, qdiff, rtrange, adductdiff){
 #' @param B Numeric weight for penalizing differences between fitted & observed
 #' retention times
 #'
-#' @param C Numeric weight for differences in Q (abundance quantiles).
+#' @param C Numeric weight for penalizing differences in Q (abundance quantiles).
 #'
 #' @param fit Character. Choice of fitted rt model, "gam" or "loess."
 #'
 #' @param usePPM logical. Option to use relative (as opposed to absolute) m/z
-#'               differences in score computation.
+#'               differences in score computations.
 #'
 #' @param useAdduct logical. Option to penalize mismatches in (non-empty) adduct
 #'                  column labels.
@@ -139,11 +135,10 @@ scorePairs <- function(A, B, C, mzdiff, rtdiff, qdiff, rtrange, adductdiff){
 #'              (default), will compute scores for all feature groups.
 #'
 #' @return metabCombiner object with updated combinerTable. rtProj column will
-#' contain the fitted retention times determined from previously computed model;
+#' contain fitted retention times determined from previously computed model;
 #' score will contain the computed pairwise similarity scores of features from
 #' datasets x & y; rankX & rankY are the integer ranks of scores for x & y
 #' features in descending order.
-#'
 #'
 #' @export
 ##

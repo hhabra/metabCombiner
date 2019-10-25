@@ -11,6 +11,14 @@
 #' @param type  character object type (either "combinerTable", "metabCombiner"
 #' or "metabData")
 #'
+#' @details In certain functions, an object must be checked for correctness. A
+#' \code{metabData} must have a properly formatted dataset with the correct
+#' column names & types.A \code{metabCombiner} must have properly formatted
+#' \code{combinerTable}, with expected names and columns. If one of these
+#' conditions is not met, a non-zero numeric code is returned and this function
+#' is used to print a specific error message corresponding to the appropriate
+#' object and error code.
+#'
 #' @return A customized error message for specific object check.
 ##
 combinerError <- function(errNo, type){
@@ -41,7 +49,7 @@ combinerError <- function(errNo, type){
 
 
 ##
-#' @title Determine If Object is a Valid combinerTable
+#' @title Determine combinerTable Validity
 #'
 #' @description Checks whether input object is a valid metabData.Returns an
 #' integer code if invalid. Function is used alongside \code{combinerError}.
@@ -79,6 +87,8 @@ isCombinerTable <- function(object){
 
     return(0)
 }
+
+
 
 ##
 #' @title Determine if object is a valid metabCombiner object

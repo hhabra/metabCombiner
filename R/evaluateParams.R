@@ -1,13 +1,23 @@
 ###Function for Evaluating A, B, C score Parameters
 
-
-##
+## piecewise function
 hinge <- function(value, thresh){
     ifelse(value > thresh, value, 0)
 }
 
 
-## finding mismatch rows
+#' @title Find Mismatch Identity Rows
+#'
+#' @description
+#' Finds all rows containing misalignments for a given feature
+#'
+#' @param cTable  data frame. Abridged Combiner report table.
+#'
+#' @param id  character. Compound identity to be searched for misalignments
+#'
+#' @return vector of integer rows
+#'
+#' @noRd
 mismatchfind <- function(cTable, id)
 {
     mm = which(cTable[["idx"]] == id & cTable[["idy"]] != id |
@@ -16,7 +26,14 @@ mismatchfind <- function(cTable, id)
     return(mm)
 }
 
-## Specific score for mismatched ids
+#' @title Calculate Mismatch Score
+#'
+#'
+#' @param cTable data frame. Abridged Combiner report table.
+#'
+#' @param mismatches  integer rows containing misalignments
+#'
+#' @noRd
 mismatchScore <- function(cTable, mismatches)
 {
     ifelse(length(mismatches) > 0, max(cTable$score[mismatches]), 0)
@@ -26,38 +43,61 @@ mismatchScore <- function(cTable, mismatches)
 #' @title Weight Parameter Objective Function
 #'
 #' @description
+#' This function evaluates the A, B, C weight parameters in terms of score
+#' separability of matching versus mismatching compound alignments. Higher
+#' objective function value imply a superior weight parameter selection.
 #'
-#' @param cTable
+#' @param cTable  data frame. Abridged Combiner report table.
 #'
-#' @param identities
+#' @param identities  data frame containing all evaluated identities
 #'
-#' @param A
+#' @param A   Numeric weight for penalizing m/z differences.
 #'
-#' @param B
+#' @param B   Numeric weight for penalizing differences between fitted &
+#' observed retention times
 #'
-#' @param C
+#' @param C Numeric weight for penalizing differences in Q (abundance quantiles)
 #'
-#' @param minScore
+#' @param minScore numeric. Minimum score to count towards objective function value.
 #'
-#' @param mzdiff
+#' @param mzdiff numeric differences between feature m/z values
 #'
-#' @param rtdiff
+#' @param rtdiff Differences between model-projected retention time value &
+#'               observed retention time
 #'
-#' @param qdiff
+#' @param qdiff  Difference between feature quantile Q values.
 #'
-#' @param rtrange
+#' @param rtrange  range of dataset Y retention times
 #'
-#' @param adductdiff
+#' @param adductdiff Numeric divisors of computed score when non-empty adduct
+#'                   labels do not match
 #'
-#' @param penalty
+#' @param penalty  numeric. Subtractive mismatch penalty.
 #'
-#' @param matches
+#' @param matches  integer row indices of identity matches
 #'
-#' @param mismatches
+#' @param mismatches  list of integer mismatching identity rows for each identity
+#'
+#' @details
+#' First, the similarity scores between all grouped features are calculated as
+#' described in \code{scorePairs}
+#'
+#' Then, the objective value for a similarity S is evaluated as:
+#'
+#' \deqn{OBJ(S) = \sum h(S(i,i)) - h(S(i, j)) - p(S(i,i) > S(i,j))}
+#'
+#' -S(i,i) represents the similarity between correct identity alignments;
+#' -S(i,j), represents the maximum similarity of i to grouped feature j,
+#'         i \eqn{\deq} j (the highest-scoring misalignment);
+#' -h(x) = x if x > \code{minScore}, 0 otherwise
+#' -p(COND) = 0 if the condition is true, and a penalty value otherwise.
+#'
+#' This is summed over all labeled compound identities, i, found to be common
+#' in both input datasets.
 #'
 #' @return
-#'
-#'
+#' A numeric value quantifying the separability of similarity scores of
+#' features with matching ids vs mismatching ids.
 objective <- function(cTable, identities, A, B, C, minScore, mzdiff, rtdiff,
                       qdiff, rtrange, adductdiff, penalty, matches, mismatches)
 {
@@ -90,25 +130,25 @@ objective <- function(cTable, identities, A, B, C, minScore, mzdiff, rtdiff,
 #' @title Evaluate Similarity Score Parameters
 #'
 #' @description
-#' This function provides a method for guiding suitable parameters for A, B, & C
-#' weights parameters in the \code{\link{calcScores}} method. Combinations of
-#' parameters are evaluated based on the similarity scores of matching and
+#' This function provides a method for guiding selection of suitable parameters for
+#' A, B, & C weights parameters in the \code{\link{calcScores}} method. Combinations
+#' of parameters are evaluated based on the similarity scores of matching and
 #' mismatching identity labels. Input datasets must have at least one compound id
 #' in common with each other, and preferably more than 10.
 #'
 #' @param object metabCombiner object
 #'
-#' @param A  Numeric weight for penalizing m/z differences.
+#' @param A  Numeric weights for penalizing m/z differences.
 #'
-#' @param B  Numeric weight for penalizing differences between fitted & observed
-#' retention times
+#' @param B  Numeric weights for penalizing differences between fitted
+#' & observed retention times
 #'
-#' @param C Numeric weight for differences in Q (abundance quantiles).
+#' @param C Numeric weights for penalizing differences in Q (abundance quantiles)
 #'
 #' @param fit Character. Choice of fitted rt model, "gam" or "loess."
 #'
-#' @param usePPM logical. Option to use relative (as opposed to absolute) m/z
-#'               differences in score computation.
+#' @param usePPM logical. Option to use relative ppm (as opposed to absolute) m/z
+#'               differences in score computations.
 #'
 #' @param useAdduct logical. Option to penalize mismatches in (non-empty) adduct
 #'                  column labels.
@@ -142,7 +182,6 @@ evaluateParams <- function(object, A = seq(60,150,by = 10), B = seq(6,15),
                        usePPM = FALSE, useAdduct = FALSE, adduct = 1,
                        minScore = 0.5, penalty = 1, groups = NULL)
 {
-
     code = isMetabCombiner(object)
 
     if(code)

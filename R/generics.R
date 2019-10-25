@@ -16,7 +16,7 @@ setGeneric("getSamples", function(object, data = c("x", "y")) standardGeneric("g
 
 setGeneric("getStats", function(object) standardGeneric("getStats"))
 
-setGeneric("plot", function(object, ...) standardGeneric("plot"))
+#setGeneric("plot", function(object, ...) standardGeneric("plot"))
 
 
 
