@@ -13,9 +13,29 @@ Description: Takes two untargeted metabolomics feature lists (consisting of m/z,
 	compound matches, ranked by a similarity score for groups of features. Inputs 
 	tables are assumed to be derived from biologically similar samples analyzed 
 	with a similar analytical method.
-Depends: R (>= 3.2.0)
-Imports: methods, dplyr, mgcv, caret, S4Vectors, mlr
+Depends: R (>= 3.2.0), dplyr
+Imports: methods, mgcv, caret, S4Vectors, mlr, stats
 BugReports: https://www.github.com/hhabra/Combiner/issues
 NeedsCompilation: yes
 RoxygenNote: 6.1.1
 Encoding: UTF-8
+Collate: 
+    'adjustData.R'
+    'calcScores.R'
+    'classes.R'
+    'combinerError.R'
+    'detectFields.R'
+    'evaluateParams.R'
+    'fit_gam.R'
+    'fit_loess.R'
+    'formCombinerTable.R'
+    'generics.R'
+    'metabCombiner.R'
+    'metabData.R'
+    'methods-metabCombiner.R'
+    'methods-metabData.R'
+    'mzGroup.R'
+    'plot_Combiner.R'
+    'reduceTable.R'
+    'selectAnchors.R'
+    'write2file.R'
