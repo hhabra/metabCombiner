@@ -1,4 +1,26 @@
 
+
+## Determine Matching Identity Strings
+#'
+#' @param s1  One of two character vectors to be compared
+#'
+#' @param s2  One of two character vectors to be compared
+#'
+#' @param value The value to give for matching s1 and s2 strings
+#'
+#' @return  character vector. Indices of matching strings are equal to value,
+#'          with remaining indices left as empty characters.
+#'
+#' @noRd
+##
+comp_id_strings <- function(s1,s2, value){
+    s1 = ifelse(is.na(s1), "", s1)
+    s2 = ifelse(is.na(s2), "", s2)
+
+    ifelse(!(s1 == "" | s2 == "") & tolower(s1) == tolower(s2), value, "")
+}
+
+
 ##
 #' @title Label and Remove Combiner Report Rows
 #'
@@ -36,8 +58,8 @@
 #' Combiner initially reports all possible feature alignments in the rows of
 #' \code{combinerTable} report. Most of these alignments are inaccurate and
 #' require inspection and removal. This function is used to automate most of the
-#' reduction process by labeling certain rows as removable or conflicting, based
-#' on certain conditions, and is performed after
+#' reduction process by labeling rows as removable or conflicting, based on
+#' certain conditions, and is performed after computing similarity scores.
 #'
 #' The labeling rules are as follows:
 #' 1) Rows with matching idx & idy strings are labeled "IDENTITY". These rows are
@@ -47,11 +69,7 @@
 #' 4) If row has score > \code{minScore} and 1 < rankX \eqn{\leq} \code{maxRankX}:
 #'    or 1 < rankY \eqn{\leq}\code{maxRankY}:
 #'
-#'
-#'
-#'
-#'
-#' @return  combinerTable with labeled column for removable rows
+#' @return  combinerTable with label column for removable rows
 #'
 #' @export
 ##
@@ -126,12 +144,14 @@ reduceTable <- function(object, maxRankX = 3, maxRankY = 3, minScore = 0.3,
                                PACKAGE = "Combiner")
 
     #option to eliminate rows labeled as removables
-    if(remove == TRUE)
-        fields = dplyr::filter(fields, labels != "REMOVE")
+    if(remove == TRUE){
+        keepRows = which(fields[["labels"]] != "REMOVE")
+        fields = fields[keepRows,]
+        values = values[keepRows,]
+    }
 
     cTable = data.frame(fields, values, stringsAsFactors = FALSE,
                         check.names = FALSE)
-
 
     if(class(object) == "metabCombiner")
         object@combinerTable = cTable
