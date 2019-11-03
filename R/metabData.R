@@ -1,51 +1,42 @@
 #' @title Constructor for the metabData object.
 #'
 #' @description
-#' This is a constructor for objects of type \code{metabData}. A processed
-#'   metabolomics feature data frame must contain columns for m/z, rt, and numeric
-#'   sample intensities. The user may also supply some optional fields such as
-#'   \code{id} and \code{adduct} label columns. Non-analyzed columns can be
-#'   included into the final output by specifying the names of these columns in the
-#'   "extra" argument. All required arguments are checked for correctness and
-#'   validity (e.g. no negative m/z or rt values, no overlapping columns, etc...).
-#'
-#' Following construction is a pre-analysis filtering of rows that are either,
-#'   1) Outside of the specified retention time range (\code{rtmin},\code{rtmax}),
-#'   2) Missing in excess of \code{misspc} percent of analyzed samples, or 3)
-#'   deemed duplicates by small pairwise differences (mzTol,rtTol) as specified
-#'   by the \code{duplicate} argument. Remaining features are ranked by abundance
-#'   quantiles, Q, using a central \code{measure}, either "median" or "mean."
-#'   Alternatively, the abundance quantiles column can be specified in the
-#'   argument \code{Q}.
-#'
-#' \code{metabData()} currently supports a limited set of options for missing value
-#'   imputation, specified by the \code{impute} & \code{imputeVal} options.
+#' This is a constructor for objects of type \code{metabData}.
 #'
 #' @param table  Path to file containing feature table or data.frame object
 #'               containing features
 #'
-#' @param mz    Character. Name for column containing m/z values. If "mz",
-#'              will search for {mz, m/z, m.z, mass}
+#' @param mz    Character name(s) or regular expression associated with data
+#' column containing m/z values. The first column whose name contains this
+#' expression will be selected for analysis.
 #'
-#' @param rt    Character. Name for column containing retention time values.
-#'              If "rt", will search for {rt, retention time, r.t, RT}.
+#' @param rt    Character name(s) or regular expression associated with data
+#' column containing retention time values. The first column whose name contains
+#' this expression will be selected for analysis.
 #'
-#' @param id         Character. Name for column containing compound identifiers.
-#'                  If "id", will search for {id, compound, feature}
+#' @param id     Character name(s) or regular expression associated with data
+#' column containing metabolomics feature identifiers. The first column whose
+#' name contains this expression will be selected for analysis.
 #'
-#' @param adduct     Character. Name for column containing adduct labels. If
-#'                  "adduct", will search for {adduct, adducts, annotation}.
+#' @param adduct   Character name(s) or regular expression associated with data
+#' column containing adduct, formula, or additional annotations. The first
+#' column whose name contains this expression will be selected for analysis.
 #'
-#' @param samples  Character. Names of columns containing sample values. If
-#'                "detect", finds longest stretch of consecutive numeric columns.
+#' @param samples   Character names of columns containing sample values. All
+#' numeric columns containing these keywords are selected for analysis. If no
+#' keywords given, will search for longest stretch of numeric columns remaining.
 #'
-#' @param Q     Character. Name of user supplied quantile column.
+#' @param extra  Character names of columns containing additional feature
+#' information, e.g.  non-analyzed sample values. All columns containing these
+#' keywords are selected for analysis.
 #'
-#' @param extra      Character. Names of (additional) user-supplied columns.
+#' @param Q   Character name(s) or regular expression associated with numeric
+#' feature abundance quantiles. If NULL, abundance quantiles will be calculated
+#' from sample intensities.
 #'
-#' @param rtmin      Numeric. Minimum retention time for analysis.
+#' @param rtmin     Numeric. Minimum retention time for analysis.
 #'
-#' @param rtmax      Numeric. Maximum retention time for analysis.
+#' @param rtmax    Numeric. Maximum retention time for analysis.
 #'
 #' @param misspc     Numeric. Threshold missingness percentage for analysis.
 #'
@@ -53,23 +44,36 @@
 #'
 #' @param measure Character. Central abundance measure, either "median" or "mean".
 #'
-#' @param impute     Logical. Whether to impute value for missing sample measures.
-#'
-#' @param imputeVal  Imputed value. One of "median", "mean", or numeric value.
-#'
 #' @param duplicate  Numeric ordered pair (m/z, rt) duplicate feature tolerances.
 #'
+#' @details
+#' A processed metabolomics feature data frame must contain columns for m/z, rt,
+#' and numeric sample intensities. The user may also supply some optional fields
+#' such as identity (id) and adduct label columns. Non-analyzed columns can be
+#' included into the final output by specifying the names of these columns in the
+#' \code{extra} argument. All required arguments are checked for correctness,
+#' validity (e.g. no negative m/z or rt values, each column is used at most once,
+#' column types are valid, etc...),
+#'
+#' Following construction is a pre-analysis filtering of rows that are either,
+#' 1) Outside of the specified retention time range (\code{rtmin},\code{rtmax}),
+#' 2) Missing in excess of \code{misspc} percent of analyzed samples, or
+#' 3) deemed duplicates by small pairwise differences (mzTol,rtTol) as specified
+#' by the \code{duplicate} argument. Remaining features are ranked by abundance
+#' quantiles, Q, using a central \code{measure}, either "median" or "mean."
+#' Alternatively, the abundance quantiles column can be specified in the
+#' argument \code{Q}.
+#'
 #' @return An object of class metabData containing the specific information
-#' specified by \code{mz,rt, samples, id, adduct, Q, and extra} arguments, and adjusted
-#' by pre-processing steps.
+#' specified by \code{mz,rt, samples, id, adduct, Q, and extra} arguments, and
+#' adjusted by pre-processing steps.
 #'
 #' @export
 metabData <- function(table, mz = "mz", rt = "rt", id = "id",
                       adduct = "adduct", samples = NULL, Q = NULL,
                       extra = NULL, rtmin = "min", rtmax = "max",
                       misspc = 50, measure = c("median", "mean"),
-                      zero = FALSE, impute = FALSE, imputeVal = 100,
-                      duplicate = c(0.0025, 0.05))
+                      zero = FALSE, duplicate = c(0.0025, 0.05))
 {
     if(missing(table))
         stop("required argument 'table' is missing with no default")

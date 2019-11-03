@@ -4,8 +4,7 @@
 \alias{adjustData}
 \title{Process and Filter Metabolomics Feature Lists}
 \usage{
-adjustData(Data, misspc, measure, rtmin, rtmax, zero, impute, imputeVal,
-  duplicate)
+adjustData(Data, misspc, measure, rtmin, rtmax, zero, duplicate)
 }
 \arguments{
 \item{Data}{a metabData object.}
@@ -19,11 +18,6 @@ adjustData(Data, misspc, measure, rtmin, rtmax, zero, impute, imputeVal,
 \item{rtmax}{Numeric. Maximum retention time for analysis.}
 
 \item{zero}{Logical. Whether to consider zero values as missing.}
-
-\item{impute}{Logical. Option to impute value for missing sample measures.}
-
-\item{imputeVal}{One of "median", "mean", or non-negative numeric value.
-\code{impute} must be TRUE for the analysis to proceed.}
 
 \item{duplicate}{Ordered numeric pair (m/z, rt) tolerance parameters for
 duplicate feature search.}
@@ -39,10 +33,8 @@ metabolomics feature tables.
 \details{
 The pre-analysis adjustment steps include: 1) Restriction to a feature
 retention time range \code{rtmin} \eqn{\le} rt \eqn{\le} \code{rtmax}
-2) Removal of features with a missing value percentage exceeding \code{misspc},
-3) (optional)Imputation of missing values. \code{impute} must be set to TRUE,
-and imputeVal must be one of "median", "mean", or some positive numeric value.
-4) Removal of duplicate metabolomics features.
+2) Removal of features with a missing value percentage exceeding \code{misspc}
+3) Removal of duplicate metabolomics features.
 
 After reducing the table, abundance quantile values are calculated for the
 remaining features (unless initially supplied by the user). The \code{measure}
@@ -53,5 +45,4 @@ used to rank features.
 \code{\link{metabData}}: the constructor for metabData objects,
 \code{\link{filterRT}}: function for filtering by retention times,
 \code{\link{findDuplicates}}: function for finding duplicates
-\code{\link{imputeVals}}: function for imputing missing values
 }

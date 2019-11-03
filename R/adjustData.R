@@ -55,56 +55,6 @@ filterRT <- function(data, rtmin, rtmax)
 }
 
 ##
-#' @title Impute Missing Values for Metabolomics Features
-#'
-#' @description
-#' This is an optional method for imputing missing metabolomics feature
-#' abundance values. This function is limited to imputation of feature
-#' means, medians, or a constant value.
-#'
-#' @param data    constructed data frame of metabolomics features
-#'
-#' @param samples  names of experimental samples
-#'
-#' @param imputeVal  One of "median", "mean", or non-negative numeric value.
-#'
-#' @return
-#' Metabolomics data frame with imputed signal intensity values. If imputeVal is
-#' equal to "median", feature missing values will be replaced with median.
-#' If impute Val is equal to "mean", will impute the individual feature's
-#'
-##
-imputeVals <- function(data, samples, imputeVal)
-{
-    cols <- which(names(data) %in% samples)
-    values = data[,cols]
-
-    if (imputeVal == "median"){
-        imputedData <- mlr::impute(values, classes = list(
-                            numeric = mlr::imputeMedian(),
-                            integer = mlr::imputeMedian()))[["data"]]
-
-    }else if(imputeVal == "mean"){
-        imputedData <- mlr::impute(values, classes = list(
-                            numeric = mlr::imputeMean(),
-                            integer = mlr::imputeMean()))[["data"]]
-
-    }else if(is.numeric(imputeVal) & imputeVal >= 0){
-        imputedData <- mlr::impute(values, classes = list(
-                            numeric = mlr::imputeConstant(imputeVal),
-                            integer = mlr::imputeConstant(imputeVal)))[["data"]]
-
-    }else{
-        warning("Invalid parameter 'imputeVal'. No imputation performed.")
-        return(data)
-    }
-
-   data[,cols] = imputedData
-
-   return(data)
-}
-
-##
 #' @title Find and Remove Duplicate Features
 #'
 #' @description
@@ -186,21 +136,14 @@ findDuplicates <- function(data, missing, counts, duplicate)
 #'
 #' @param zero  Logical. Whether to consider zero values as missing.
 #'
-#' @param impute  Logical. Option to impute value for missing sample measures.
-#'
-#' @param imputeVal  One of "median", "mean", or non-negative numeric value.
-#' \code{impute} must be TRUE for the analysis to proceed.
-#'
 #' @param duplicate Ordered numeric pair (m/z, rt) tolerance parameters for
 #' duplicate feature search.
 #'
 #' @details
 #' The pre-analysis adjustment steps include: 1) Restriction to a feature
 #' retention time range \code{rtmin} \eqn{\le} rt \eqn{\le} \code{rtmax}
-#' 2) Removal of features with a missing value percentage exceeding \code{misspc},
-#' 3) (optional)Imputation of missing values. \code{impute} must be set to TRUE,
-#' and imputeVal must be one of "median", "mean", or some positive numeric value.
-#' 4) Removal of duplicate metabolomics features.
+#' 2) Removal of features with a missing value percentage exceeding \code{misspc}
+#' 3) Removal of duplicate metabolomics features.
 #'
 #' After reducing the table, abundance quantile values are calculated for the
 #' remaining features (unless initially supplied by the user). The \code{measure}
@@ -215,12 +158,10 @@ findDuplicates <- function(data, missing, counts, duplicate)
 #' \code{\link{metabData}}: the constructor for metabData objects,
 #' \code{\link{filterRT}}: function for filtering by retention times,
 #' \code{\link{findDuplicates}}: function for finding duplicates
-#' \code{\link{imputeVals}}: function for imputing missing values
 #'
 ##
-adjustData <- function(Data, misspc, measure, rtmin, rtmax, zero,
-                       impute, imputeVal, duplicate){
-
+adjustData <- function(Data, misspc, measure, rtmin, rtmax, zero,duplicate)
+{
     data = getData(Data)
     samples = getSamples(Data)
 
