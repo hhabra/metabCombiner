@@ -14,7 +14,7 @@ Description: Takes two untargeted metabolomics feature lists (consisting of m/z,
 	tables are assumed to be derived from biologically similar samples analyzed 
 	with a similar analytical method.
 Depends: R (>= 3.2.0), dplyr
-Imports: methods, mgcv, caret, S4Vectors, mlr, stats
+Imports: methods, mgcv, caret, S4Vectors, stats, utils
 BugReports: https://www.github.com/hhabra/Combiner/issues
 NeedsCompilation: yes
 RoxygenNote: 6.1.1
@@ -39,3 +39,7 @@ Collate:
     'reduceTable.R'
     'selectAnchors.R'
     'write2file.R'
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
