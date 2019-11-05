@@ -290,8 +290,6 @@ fit_gam <- function(object, useID = FALSE, k = seq(10,20, by = 2), iterFilter = 
     bs = match.arg(bs)
 
     family = match.arg(family)
-    if(family == "scat") family = scat()
-    else if (family == "gaussian") family = "gaussian"
 
     ##appending minimum and maximum RT values to retention time lists
     cTable = combinerTable(object)
