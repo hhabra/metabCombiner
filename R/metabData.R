@@ -44,7 +44,9 @@
 #'
 #' @param measure Character. Central abundance measure, either "median" or "mean".
 #'
-#' @param duplicate  Numeric ordered pair (m/z, rt) duplicate feature tolerances.
+#' @param duplicate  Numeric ordered pair (m/z, rt) feature tolerances. Pairs of
+#' features within these tolerances are deemed duplicates and one of the pair is
+#' removed (see: \code{\link{findDuplicates}})
 #'
 #' @details
 #' A processed metabolomics feature data frame must contain columns for m/z, rt,
@@ -111,11 +113,6 @@ metabData <- function(table, mz = "mz", rt = "rt", id = "id",
         zero = FALSE
     }
 
-    if(!is.logical(impute)){
-        warning("Parameter 'impute' is non-logical. Setting to default (FALSE)")
-        impute = FALSE
-    }
-
     measure = match.arg(measure)
 
     newData <- new("metabData")
@@ -126,7 +123,6 @@ metabData <- function(table, mz = "mz", rt = "rt", id = "id",
 
     newData = adjustData(Data = newData, misspc = misspc, measure = measure,
                          rtmin = rtmin, rtmax = rtmax, zero = zero,
-                         impute = impute, imputeVal = imputeVal,
                          duplicate = duplicate)
 
     return(newData)
