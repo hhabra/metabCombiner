@@ -206,13 +206,6 @@ adjustData <- function(Data, misspc, measure, rtmin, rtmax, zero,duplicate)
         counts = counts[-duplicates]
     }
 
-    ##optional imputation of missing values
-    if(impute == TRUE & any(missingpc > 0)){
-        data = imputeVals(data = data,
-                          samples = samples,
-                          imputeVal = imputeVal)
-    }
-
     stats[["filtered_as_duplicates"]] = length(duplicates)
     stats[["final_count"]] = nrow(data)
 
