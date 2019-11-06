@@ -51,7 +51,9 @@ keywords are selected for analysis.}
 
 \item{zero}{Logical. Whether to consider zero values as missing.}
 
-\item{duplicate}{Numeric ordered pair (m/z, rt) duplicate feature tolerances.}
+\item{duplicate}{Numeric ordered pair (m/z, rt) feature tolerances. Pairs of
+features within these tolerances are deemed duplicates and one of the pair is
+removed (see: \code{\link{findDuplicates}})}
 }
 \value{
 An object of class metabData containing the specific information

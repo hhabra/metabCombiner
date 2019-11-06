@@ -28,5 +28,5 @@ of other features. If a name appears more than once, only one pair will be
 selected, and the others excluded.
 }
 \seealso{
-[selectAnchors], [selectIterativeAnchors]
+\code{\link{selectAnchors}}
 }

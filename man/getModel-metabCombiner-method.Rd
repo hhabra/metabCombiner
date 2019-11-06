@@ -20,5 +20,5 @@ This returns the last fitted RT projected model from a metabCombiner object
 of type "gam" or "loess".
 }
 \seealso{
-[fit_gam], [fit_loess]
+\code{\link{fit_gam}}, \code{\link{fit_loess}}
 }
