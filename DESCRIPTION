@@ -8,8 +8,8 @@ Author: Authors@R: c(
 Maintainer: Hani Habra <hhabra1@gmail.com>
 License: GPL-3
 Description: Takes two untargeted metabolomics feature lists (consisting of m/z,
-  rt, and sample intensity measurements, plus optional identifiers, adduct 
-	labels, and extras) and outputs a merged feature list consisting of potential 
+  rt, and sample intensity measurements, plus optional identifiers & adduct 
+	labels) and outputs a merged feature list consisting of potential 
 	compound matches, ranked by a similarity score for groups of features. Inputs 
 	tables are assumed to be derived from biologically similar samples analyzed 
 	with a similar analytical method.
@@ -20,6 +20,7 @@ NeedsCompilation: yes
 RoxygenNote: 6.1.1
 Encoding: UTF-8
 Collate: 
+    'Combiner_package_doc.R'
     'adjustData.R'
     'calcScores.R'
     'classes.R'
