@@ -1,2 +1,2 @@
-# Combiner
-Combiner R Package: Untargeted Metabolomics paired feature matching 
+#metabCombiner
+metabCombiner R Package: Untargeted Metabolomics paired feature matching 
