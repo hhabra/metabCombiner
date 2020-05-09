@@ -5,29 +5,31 @@
 \alias{metabCombiner-class}
 \title{'metabCombiner' Combined Metabolomics Dataset Class}
 \description{
-This is the main object for the \code{Combiner} package workflow. This
-object holds a pair of analyzed metabolomics datasets and a combined
-feature table, along with a retention time projection model.
+This is the main object for the \code{metabCombiner} package workflow. This
+object holds a combined feature table, along with a retention time
+projection model, the ordered pair anchors used to generate this model, and
+key object statistics.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{xdata}}{One of two formatted metabData objects to be combined.}
-
-\item{\code{ydata}}{One of two formatted metabData objects to be combined.}
-
-\item{\code{combinerTable}}{A data.frame combining tables measurements and displaying
+\item{\code{combinedTable}}{A data.frame combining tables measurements and displaying
 all feature alignments}
 
-\item{\code{binGap}}{The numeric m/z gap used to compute feature groups}
+\item{\code{nongrouped}}{A list of data frames containing features from input tables
+that could not be paired in \code{combinedTable}}
 
 \item{\code{anchors}}{A data.frame consisting of feature alignments to be used for
 fitting a nonlinear retention time projection model}
 
 \item{\code{model}}{A list containing the last fitted nonlinear model(s).}
 
-\item{\code{coefficients}}{A list of last used A,B,C similarity score weight arguments}
+\item{\code{coefficients}}{A list of last used A,B,C similarity weight values}
 
-\item{\code{stats}}{A list of useful metabCombiner object statistics}
+\item{\code{samples}}{A list of sample name character vectors from input datasets}
+
+\item{\code{extra}}{A list of extra column chacter name vectors from input datasets}
+
+\item{\code{stats}}{A set of useful metabCombiner statistics}
 }}
 

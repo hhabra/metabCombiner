@@ -2,14 +2,14 @@
 % Please edit documentation in R/combinerError.R
 \name{combinerError}
 \alias{combinerError}
-\title{Obtain Errors for Combiner Object Checks}
+\title{Obtain Errors for metabCombiner Object Checks}
 \usage{
 combinerError(errNo, type)
 }
 \arguments{
 \item{errNo}{integer error code.}
 
-\item{type}{character object type (either "combinerTable", "metabCombiner"
+\item{type}{character object type (either "combinedTable", "metabCombiner"
 or "metabData")}
 }
 \value{
@@ -23,7 +23,7 @@ when checking the validity of certain objects.
 In certain functions, an object must be checked for correctness. A
 \code{metabData} must have a properly formatted dataset with the correct
 column names & types.A \code{metabCombiner} must have properly formatted
-\code{combinerTable}, with expected names and columns. If one of these
+\code{combinedTable}, with expected names and columns. If one of these
 conditions is not met, a non-zero numeric code is returned and this function
 is used to print a specific error message corresponding to the appropriate
 object and error code.

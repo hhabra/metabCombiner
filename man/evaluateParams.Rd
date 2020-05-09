@@ -7,7 +7,7 @@
 evaluateParams(object, A = seq(60, 150, by = 10), B = seq(6, 15),
   C = seq(0.1, 0.5, by = 0.1), fit = c("gam", "loess"),
   usePPM = FALSE, useAdduct = FALSE, adduct = 1, minScore = 0.5,
-  penalty = 1, groups = NULL)
+  penalty = 5, groups = NULL, brackets_ignore = c("(", "[", "{"))
 }
 \arguments{
 \item{object}{metabCombiner object}
@@ -36,24 +36,64 @@ adduct column labels by this value.}
 
 \item{groups}{integer. Vector of feature groups to score. If set to NULL
 (default), will compute scores for all feature groups.}
+
+\item{brackets_ignore}{bracketed identity character strings of these types
+will be ignored according to this argument}
 }
 \value{
 A data frame with the following columns:
-
 \item{A}{m/z weight values}
 \item{B}{rt weight values}
 \item{C}{Q weight values}
-\item{score}{objective function evaluation of (A,B,C) combination}
+\item{score}{objective function evaluation of (A,B,C) weights}
 }
 \description{
 This function provides a method for guiding selection of suitable parameters for
-A, B, & C weights parameters in the \code{\link{calcScores}} method. Combinations
+A, B, & C weight arguments in the \code{\link{calcScores}} method. Combinations
 of parameters are evaluated based on the similarity scores of matching and
-mismatching identity labels. Input datasets must have at least one compound id
-in common with each other, and preferably more than 10.
+mismatching identity labels. Input datasets must have at least one compound
+identity in common (i.e. idx = idy), and preferably more than 10.
+}
+\details{
+An objective function, based on the accurate and inaccurate alignments of shared
+pre-identified compounds. For more details, see: \code{\link{objective}}.
 }
 \note{
 In contrast to \code{\link{calcScores}} function, A, B, & C take numeric
 vectors as input, as opposed to constants. The total number of rows in the
 output will be equal to the products of the lengths of these input vectors
+}
+\examples{
+\dontrun{
+library(metabCombiner)
+data(plasma30)
+data(plasma20)
+
+p30 <- metabData(plasma30, samples = "CHEAR")
+p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
+p.combined = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+
+p.combined = selectAnchors(p.combined, tolMZ = 0.003, tolQ = 0.3, windY = 0.02)
+p.combined = fit_gam(p.combined, k = seq(12,20,2), iterFilter = 1)
+
+##example 1
+scores = evaluateParams(p.combined, minScore = 0.7, penalty = 5)
+
+##example 2: changing A, B, C parameters
+scores = evaluateParams(p.combined, A = seq(70,150,5), B = seq(7, 20, 0.5),
+                        C = c(0.2,0.3,0.5))
+
+##example 3: using PPM mass deviation (note change to A argument)
+scores = evaluateParams(p.combined, usePPM = TRUE, A = seq(0.01,0.1,0.01))
+
+##example 4: limiting to groups 1-2000
+scores = evaluateParams(p.combined, minScore = 0.5, groups = 1:2000)
+
+##After evaluation
+p.combined = calcScores(p.combined, A = 90, B = 14, C = 0.5)
+}
+
+}
+\seealso{
+\code{\link{calcScores}}, \code{\link{objective}}
 }

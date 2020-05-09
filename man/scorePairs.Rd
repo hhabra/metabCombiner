@@ -2,7 +2,7 @@
 % Please edit documentation in R/calcScores.R
 \name{scorePairs}
 \alias{scorePairs}
-\title{Calculate the pairwise score between grouped features}
+\title{Calculate Pairwise Alignment Scores}
 \usage{
 scorePairs(A, B, C, mzdiff, rtdiff, qdiff, rtrange, adductdiff)
 }
@@ -31,20 +31,20 @@ Pairwise score between two grouped features(between 0 & 1) evaluating
          the likelihood of a compound match.
 }
 \description{
-Helper function for \code{calcScores()} & \code{evalParams()}.
-Calculates the pairwise similarity score between grouped features acquired
-in complementary datasets.
+Helper function for \code{\link{calcScores}} &
+\code{\link{evaluateParams}}. Calculates the pairwise similarity score between
+grouped features using differences in m/z, rt, and Q.
 }
 \details{
-Score between two grouped features x & y calculated as:
+The score between two grouped features x & y is calculated as:
 
-\deqn{S(x,y,A,B,C) = -exp(-A |mzx-mzy|- B |rty-rtproj|/rtrange - C |Qx-Qy|)}
+\deqn{S = -exp(-A |mzx - mzy| - B |rty - rtproj|/rtrange - C |Qx - Qy|)}
 
 where mzx & Qx correspond to the m/z and abundance quantile values of feature
-x, mzy, rty, and Qy correspond to the m/z, retention time, and abundance
-quantile values of feature y,  rtproj is the model-projected retention of
+x; mzy, rty, and Qy correspond to the m/z, retention time, and abundance
+quantile values of feature y; rtproj is the model-projected retention time of
 feature x onto the retention times of the dataset containing y, and rtrange is
 the range of retention times of y dataset features. A, B, C are non-negative
 constant weight parameters for penalizing m/z, rt, and Q  differences. Values
-vary between 0 (no confidence combination) and 1 (high confidence combination).
+vary between 0 (no confidence combination) and 1 (high confidence alignment).
 }

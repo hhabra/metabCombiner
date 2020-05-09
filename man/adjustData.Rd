@@ -31,8 +31,9 @@ steps and
 metabolomics feature tables.
 }
 \details{
-The pre-analysis adjustment steps include: 1) Restriction to a feature
-retention time range \code{rtmin} \eqn{\le} rt \eqn{\le} \code{rtmax}
+The pre-analysis adjustment steps include:
+1) Restriction to a feature retention time range \code{rtmin} \eqn{\le}
+   rt \eqn{\le} \code{rtmax}
 2) Removal of features with a missing value percentage exceeding \code{misspc}
 3) Removal of duplicate metabolomics features.
 

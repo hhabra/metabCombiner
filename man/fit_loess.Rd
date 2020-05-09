@@ -4,7 +4,7 @@
 \alias{fit_loess}
 \title{Fit RT Projection Model With LOESS}
 \usage{
-fit_loess(object, useID = FALSE, spans = seq(0.2, 0.4, by = 0.05),
+fit_loess(object, useID = FALSE, spans = seq(0.2, 0.3, by = 0.02),
   iterFilter = 2, ratio = 2, frac = 0.5, iterLoess = 10,
   weights = 1, seed = 100)
 }
@@ -26,8 +26,9 @@ this fraction value times the number of fits. Must be between 0 & 1.}
 \item{iterLoess}{integer. Number of robustness iterations to perform in
 \code{loess()}.See ?loess.control for more details.}
 
-\item{weights}{numeric. Optional user supplied weights. Note: vector length
-must be #num_anchors + 2 (first and last are endpoints).}
+\item{weights}{numeric. Optional user supplied weights for each anchor point.
+Must be of length equal to # of anchor points or a divisor of (# of anchor
+points + 2)}
 
 \item{seed}{integer. Psuedo-random seed generator for cross validation.}
 }
@@ -39,4 +40,39 @@ variable, fitted as a function of retention times of the other (xdata).
 Filtering iterations of high residual points are performed, controlled by
 \code{iterFilter}, and multiple acceptable values of \code{span} used, with
 one value chosen using 10-fold cross validation.
+}
+\examples{
+\dontrun{
+library(metabCombiner)
+data(plasma30)
+data(plasma20)
+
+p30 <- metabData(plasma30, samples = "CHEAR")
+p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
+p.combined = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+p.combined = selectAnchors(p.combined, tolMZ = 0.003, tolQ = 0.3, windY = 0.02)
+anchors = getAnchors(p.combined)
+
+#version 1
+p.combined = fit_loess(p.combined, spans = c(0.18,0.2,0.22,0.25,0.27,0.3),
+                       iterFilter = 1)
+
+#version 2 (using weights)
+weights = c(2, rep(1, nrow(anchors)), 2) #weight = 2 to boundary points
+p.combined = fit_loess(p.combined, spans = seq(0.2,0.3,0.02),
+                       weights = weights)
+
+#version 3 (using identities)
+p.combined = selectAnchors(p.combined, useID = TRUE, tolMZ = 0.003)
+p.combined = fit_loess(p.combined, spans = seq(0.2,0.3,0.02),
+                      useID = TRUE)
+
+#to preview result of fit_loess
+plot(p.combined, fit = "loess", xlab = "CHEAR Plasma (30 min)",
+     ylab = "Red-Cross Plasma (20 min)", pch = 19,
+     main = "Example fit_loess Result Fit")
+}
+}
+\seealso{
+\code{\link{selectAnchors}},\code{\link{fit_gam}}
 }

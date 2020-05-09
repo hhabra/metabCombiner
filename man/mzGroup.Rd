@@ -4,15 +4,17 @@
 \alias{mzGroup}
 \title{Binning of mass spectral features in m/z dimension}
 \usage{
-mzGroup(object, binGap = 0.005)
+mzGroup(xset, yset, binGap)
 }
 \arguments{
-\item{object}{metabCombiner object}
+\item{xset}{data frame containing metabolomics features}
+
+\item{yset}{data frame containing metabolomics features}
 
 \item{binGap}{numeric. Gap between concecutive sorted pooled feature m/z values.}
 }
 \value{
-metabCombiner object with group information in data objects
+list object containing updated xset & yset with group information
 }
 \description{
 Features in two input feature lists are grouped by their m/z values.
@@ -21,5 +23,6 @@ Features in two input feature lists are grouped by their m/z values.
 The m/z values from both datasets are pooled, sorted, and binned by the
 \code{binGap} argument. Feature groups form when there is at least one pair
 of features from both datasets whose consecutive difference is less than
-\code{binGap}.
+\code{binGap}. Grouped features are joined together in \code{combinedTable}
+data report.
 }

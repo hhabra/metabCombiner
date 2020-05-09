@@ -8,7 +8,7 @@ objective(cTable, identities, A, B, C, minScore, mzdiff, rtdiff, qdiff,
   rtrange, adductdiff, penalty, matches, mismatches)
 }
 \arguments{
-\item{cTable}{data frame. Abridged Combiner report table.}
+\item{cTable}{data frame. Abridged metabCombiner report table.}
 
 \item{identities}{data frame containing all evaluated identities}
 
@@ -56,12 +56,12 @@ Then, the objective value for a similarity S is evaluated as:
 
 \deqn{OBJ(S) = \sum h(S(i,i)) - h(S(i, j)) - p(S(i,i) > S(i,j))}
 
--S(i,i) represents the similarity between correct identity alignments;
+-S(i,i) represents the similarity between correct identity alignments \cr
 -S(i,j), represents the maximum similarity of i to grouped feature j,
-        i \eqn{\deq} j (the highest-scoring misalignment);
--h(x) = x if x > \code{minScore}, 0 otherwise
--p(COND) = 0 if the condition is true, and a penalty value otherwise.
+        i \eqn{\leq} j (the highest-scoring misalignment) \cr
+-h(x) = x if x > \code{minScore}, 0 otherwise \cr
+-p(COND) = 0 if the condition is true, and a \code{penalty} value otherwise.
 
-This is summed over all labeled compound identities, i, found to be common
+This is summed over all labeled compound identitiesfound to be common
 in both input datasets.
 }

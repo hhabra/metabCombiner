@@ -30,8 +30,8 @@ splines) or "ps" (penalized basis splines)}
 
 \item{family}{character. Choice of mgcv family; see: ?mgcv::family.mgcv}
 
-\item{weights}{Numeric prior weights determines the contribution of each point
-to the model. see: ?mgcv::gam}
+\item{weights}{Optional user supplied weights for each ordered pair. Must be
+of length equal to number of anchors (n) or a divisor of (n + 2).}
 
 \item{m}{integer. Basis and penalty order for GAM; see ?mgcv::s}
 
@@ -46,7 +46,7 @@ to the model. see: ?mgcv::gam}
 \item{...}{Other arguments passed to \code{mgcv::gam}.}
 }
 \value{
-metabCombiner object with a fitted GAM model
+metabCombiner with a fitted GAM model object
 }
 \description{
 Fits a (penalized) basis splines curve through a set of ordered pair
@@ -60,7 +60,8 @@ one value selected using 10-fold cross validation.
 \details{
 A set of ordered pair retention times must be previously computed using
 \code{selectAnchors()}. The minimum and maximum retention times from both
-input datasets are included in the set (min_rtx, min_rty) & (max_rtx, max_rty).
+input datasets are included in the set as ordered pairs (min_rtx, min_rty)
+& (max_rtx, max_rty).
 
 The \code{weights} argument initially determines the contribution of each point
 to the model fits; they are equally weighed by default, but can be changed using
@@ -83,6 +84,47 @@ and \code{method} are GAM specific parameters. Type of splines are currently
 limited to basis splines (\eqn{bs = "bs"}) or penalized basis splines
 (\eqn{bs = "ps"}).
 }
+\examples{
+\dontrun{
+library(metabCombiner)
+data(plasma30)
+data(plasma20)
+
+p30 <- metabData(plasma30, samples = "CHEAR")
+p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
+p.combined = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+
+p.combined = selectAnchors(p.combined, tolMZ = 0.003, tolQ = 0.3, windY = 0.02)
+anchors = getAnchors(p.combined)
+
+#version 1
+p.combined = fit_gam(p.combined, k = c(10,12,15,17,20), method = "GCV.Cp",
+                     frac = 0.8, family = "scat")
+#version 2
+p.combined = fit_gam(p.combined, k = seq(12,20,2), family = "gaussian",
+                     iterFilter = 1, ratio = 3)
+
+#version 3 (with identities)
+p.combined = selectAnchors(p.combined, useID = TRUE)
+anchors = getAnchors(p.combined)
+p.combined = fit_gam(p.combined, useID = TRUE, k = seq(12,20,2),
+                     iterFilter = 1)
+
+#version 4 (using identities and weights)
+weights = ifelse(anchors$labels == "I", 2, 1)
+p.combined = fit_gam(p.combined, useID = TRUE, k = seq(12,20,2),
+                     iterFilter = 1, weights = weights)
+
+#version 5 (assigning weights to the boundary points
+weights = c(2, rep(1, nrow(anchors)), 2)
+p.combined = fit_gam(p.combined, k = seq(12,20,2), weights = weights)
+
+#to preview result of fit_gam
+plot(p.combined, xlab = "CHEAR Plasma (30 min)",
+     ylab = "Red-Cross Plasma (20 min)", pch = 19,
+     main = "Example fit_gam Result Fit")
+}
+}
 \seealso{
-[crossValidationGAM], [filterAnchorsGAM], [fit_loess]
+\code{\link{selectAnchors}},\code{\link{fit_loess}},
 }

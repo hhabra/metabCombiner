@@ -12,25 +12,32 @@ detectFields(Data, table, mz, rt, id, adduct, samples, extra, Q)
 \item{table}{data frame containing metabolomics features or path to
 metabolomics data file.}
 
-\item{mz}{Character. Name for column containing m/z values. If "mz",
-will search for {mz, m/z, m.z, mass}}
+\item{mz}{Character name(s) or regular expression associated with data
+column containing m/z values. The first column whose name contains this
+expression will be selected for analysis.}
 
-\item{rt}{Character. Name for column containing retention time values.
-If "rt", will search for {rt, retention time, r.t, RT}.}
+\item{rt}{Character name(s) or regular expression associated with data
+column containing retention time values. The first column whose name contains
+this expression will be selected for analysis.}
 
-\item{id}{Character. Name for column containing compound identifiers.
-If "id", will search for {id, compound, feature}}
+\item{id}{Character name(s) or regular expression associated with data
+column containing metabolomics feature identifiers. The first column whose
+name contains this expression will be selected for analysis.}
 
-\item{adduct}{Character. Name for column containing adduct labels. If
-"adduct", will search for {adduct, adducts, annotation}.}
+\item{adduct}{Character name(s) or regular expression associated with data
+column containing adduct, formula, or additional annotations. The first
+column whose name contains this expression will be selected for analysis.}
 
-\item{samples}{Character. Names of columns containing sample values. If
-"detect", finds longest stretch of consecutive numeric columns.}
+\item{samples}{Character names of columns containing sample values. All
+numeric columns containing these keywords are selected for analysis. If no
+keywords given, will search for longest stretch of numeric columns remaining.}
 
-\item{extra}{Character. Names of (additional) user-supplied columns.}
+\item{extra}{Character names of columns containing additional feature
+information, e.g.  non-analyzed sample values. All columns containing these
+keywords are selected for analysis.}
 
-\item{Q}{Character. Name of user-supplied abundance quantiles column.
-If null, quantiles will be automatically calculated.}
+\item{Q}{Character name(s) or regular expression associated with numeric
+feature abundance quantiles.}
 }
 \value{
 an initialized and formatted \code{metabData} object.

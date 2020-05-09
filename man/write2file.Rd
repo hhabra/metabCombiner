@@ -2,20 +2,42 @@
 % Please edit documentation in R/write2file.R
 \name{write2file}
 \alias{write2file}
-\title{Print a Combiner Report to file.}
+\title{Print metabCombiner Report to File.}
 \usage{
 write2file(object, file = "", sep = ",")
 }
 \arguments{
-\item{object}{metabCombiner object or combinerTable.}
+\item{object}{\code{metabCombiner} object or \code{combinedTable}.}
 
-\item{file}{character string naming an output file path.}
+\item{file}{character string naming the output file path}
 
 \item{sep}{Character field separator. Values within each row are separated
-by this string.}
+by this character.}
 }
 \description{
-Prints a \code{combinerTable} report to a file, specified by
-             \code{file} argument. The output will contain an empty line
-             separating each m/z group.
+Prints a \code{combinedTable} report to a file, specified by
+             \code{file} argument. The output will have an empty line between
+             each separate m/z group for ease of viewing.
+}
+\examples{
+\dontrun{
+library(metabCombiner)
+data(plasma30)
+data(plasma20)
+
+p30 <- metabData(plasma30, samples = "CHEAR")
+p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
+p.combined = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+
+p.combined = selectAnchors(p.combined, tolMZ = 0.003, tolQ = 0.3, windY = 0.02)
+p.combined = fit_gam(p.combined, k = seq(12,20,2), iterFilter = 1)
+p.combined = calcScores(p.combined, A = 90, B = 14, C = 0.5)
+
+###using metabCombiner object as input
+write2file(p.combined, file = "plasma-combined.csv", sep = ",")
+
+###using combinedTable report as input
+cTable = combinedTable(p.combined)
+write2file(cTable, file = "plasma-combined.txt", sep = "\\t")
+}
 }

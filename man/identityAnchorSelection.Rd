@@ -4,7 +4,7 @@
 \alias{identityAnchorSelection}
 \title{Select Matching Ids as Anchors}
 \usage{
-identityAnchorSelection(cTable, windX, windY, useID)
+identityAnchorSelection(cTable, windX, windY, useID, brackets)
 }
 \arguments{
 \item{cTable}{data frame, contains only feature ids, mzs, rts, Qs, & labels}
@@ -14,6 +14,9 @@ identityAnchorSelection(cTable, windX, windY, useID)
 \item{windY}{numeric positive retention time exclusion windown in Y dataset.}
 
 \item{useID}{logical. Operation proceeds if TRUE, terminates otherwise.}
+
+\item{brackets}{If useID = TRUE, bracketed identity strings of the types
+included in this argument will be ignored}
 }
 \description{
 This is an optional helper function for \code{selectAnchors}. Uses identities
@@ -22,9 +25,9 @@ true, it will select pairs of features with matching ID character strings before
 proceeding with iterative selection.
 }
 \note{
-Identity anchors may violate constraints of m/z and Q difference
-tolerances, and will not be removed if they fall within the exclusion window
-of other features. If a name appears more than once, only one pair will be
+Identity anchors are allowed to violate constraints of m/z and Q
+difference tolerances, and will not be removed if they fall within the exclusion
+window of other features. If a name appears more than once, only one pair will be
 selected, and the others excluded.
 }
 \seealso{

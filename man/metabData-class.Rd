@@ -5,7 +5,7 @@
 \alias{metabData-class}
 \title{'metabData' Single Metabolomics Dataset Class}
 \description{
-This class is designed to pre-process, format, and acilitating the subsequent
+This class is designed to pre-process, format, and facilitate the subsequent
 combining of input metabolomics feature tables. It stores the information of
 a single metabolomics dataset, including the formatted feature table, sample
 names, and feature statistics.

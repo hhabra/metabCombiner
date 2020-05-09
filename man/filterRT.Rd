@@ -27,7 +27,7 @@ range of retention times defined by \code{rtmin} & \code{rtmax}.
 \details{
 Retention time restriction is often a recommended step to aid the analysis of
 comparable metabolomics datasets. For example, the beginning and end of a
-chromatogram often contain features that do not correspond with a true
+chromatogram contain features that do not correspond with a true
 a biological compound derived from the sample. It is recommended to set rtmin
 slightly before the first observed common metabolite, and rtmax slightly after
 the last observed metabolite.

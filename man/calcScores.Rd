@@ -5,7 +5,8 @@
 \title{Compute Feature Similarity Scores}
 \usage{
 calcScores(object, A, B, C, fit = c("gam", "loess"), usePPM = FALSE,
-  useAdduct = FALSE, adduct = 2, groups = NULL)
+  useAdduct = FALSE, adduct = 1.25, groups = NULL,
+  brackets_ignore = c("(", "[", "{"))
 }
 \arguments{
 \item{object}{metabCombiner object.}
@@ -30,15 +31,59 @@ adduct column labels by this value.}
 
 \item{groups}{integer. Vector of feature groups to score. If set to NULL
 (default), will compute scores for all feature groups.}
+
+\item{brackets_ignore}{If useAdduct = TRUE, bracketed adduct character
+strings of these types will be ignored according to this argument}
 }
 \value{
-metabCombiner object with updated combinerTable. rtProj column will
-contain fitted retention times determined from previously computed model;
-score will contain the computed pairwise similarity scores of features from
-datasets x & y; rankX & rankY are the integer ranks of scores for x & y
-features in descending order.
+\code{metabCombiner} object with updated \code{combinedTable}.
+rtProj column will contain fitted retention times determined from previously
+computed model; score will contain the computed pairwise similarity scores of
+features from datasets x & y; rankX & rankY are the integer ranks of scores
+for x & y features in descending order.
 }
 \description{
 Calculates a pairwise similarity (between 0 & 1) between all
 grouped features in \code{metabCombiner} object.
+}
+\examples{
+\dontrun{
+library(metabCombiner)
+data(plasma30)
+data(plasma20)
+
+p30 <- metabData(plasma30, samples = "CHEAR")
+p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
+p.combined = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+
+p.combined = selectAnchors(p.combined, tolMZ = 0.003, tolQ = 0.3, windY = 0.02)
+p.combined = fit_gam(p.combined, k = seq(12,20,2), iterFilter = 1)
+
+#example 1: moderate m/z deviation, excellent rt fit, moderate sample similarity
+p.combined = calcScores(p.combined, A = 90, B = 14, C = 0.5)
+
+#example 2: high m/z deviation, moderate rt fit, low sample similarity
+p.combined = calcScores(p.combined, A = 50, B = 8, C = 0.2)
+
+#example 3: low m/z deviation, poor rt fit, high sample similarity
+p.combined = calcScores(p.combined, A = 120, B = 5, C = 0.8)
+
+#example 4: using LOESS fit
+p.combined = fit_loess(p.combined, spans = seq(0.2,0.3,0.02), iterFilter = 1)
+p.combined = calcScores(p.combined, fit = "loess", A = 90, B = 12, C = 0.5)
+
+#example 5: using ppm for mass deviation; note A value
+p.combined = calcScores(p.combined, A = 0.05, B = 14, C = 0.5, usePPM = TRUE)
+
+#example 6: limiting to specific m/z groups 1-1000
+p.combined = calcScores(p.combined, A = 90, B = 14, C = 0.5, groups = 1:1000)
+
+#example 7: using adduct information
+p.combined = calcScores(p.combined, A = 90, B = 14, C = 0.5, useAdduct = TRUE,
+                        adduct = 1.5)
+
+#extracting output
+cTable = combinedTable(p.combined)
+}
+
 }
