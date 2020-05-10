@@ -30,15 +30,15 @@
 SEXP binByMZ(SEXP mz, SEXP datasets, SEXP gap)
 {
 	//obtaining C types
-	double *mz_r = REAL(mz);
-	double gap_r = REAL(gap)[0];
+	double *mz_c = REAL(mz);
+	double gap_c = REAL(gap)[0];
 	
 	int length = LENGTH(mz);
 		
 	//groups will contain the final returned vector; initialize to 0 vector
 	SEXP groups = PROTECT(allocVector(INTSXP, length));
-	int *groups_r = INTEGER(groups);
-	memset(groups_r, 0, length * sizeof(int));    
+	int *groups_c = INTEGER(groups);
+	memset(groups_c, 0, length * sizeof(int));    
 
 	//initiating loop variables
 	double diff;
@@ -49,17 +49,17 @@ SEXP binByMZ(SEXP mz, SEXP datasets, SEXP gap)
 	//condition 1: difference between consecutive m/z is less than gap
 	//condition 2: at least one feature found from both datasets
 	for(int i = 0; i < length-1; i++){
-		diff = mz_r[i+1] - mz_r[i];
+		diff = mz_c[i+1] - mz_c[i];
 		
 		//initiate a potential group
-		if (!(cond1) && diff < gap_r){
+		if (!(cond1) && diff < gap_c){
 			cond1 = 1;
 			start = i;
 			count = 0;
 		}
 		
 		//elongate group and check if cond2 met
-		if(cond1 && diff < gap_r){
+		if(cond1 && diff < gap_c){
 			count++;
 			
 			if(!cond2){
@@ -72,12 +72,12 @@ SEXP binByMZ(SEXP mz, SEXP datasets, SEXP gap)
 		}
 	
 		//reset and update group count, if condition 2 met
-		if(i == (length - 2) || diff > gap_r){
+		if(i == (length - 2) || diff > gap_c){
 			cond1 = 0;
 			
 			if(cond2){
 				for(int j = start; j <= start+count; j++){
-					groups_r[j] = bin;
+					groups_c[j] = bin;
 				}
 				
 				bin++;

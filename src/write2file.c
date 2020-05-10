@@ -5,8 +5,8 @@
 /*
  * File Description:
  * ------------------
- *
- *
+ * Contains a function for writing metabCombiner table output to a line-separated
+ * file. Function is called from the write2file() function in R.
  *
 */
 
@@ -27,7 +27,7 @@
 */
 void write2file(SEXP lines, SEXP file, SEXP groups)
 {
-	int *rgroups = INTEGER(groups);
+	int *groups_c = INTEGER(groups);
 	int n = LENGTH(groups);
 
 	const char *filename = CHAR(STRING_ELT(file, 0));
@@ -35,7 +35,7 @@ void write2file(SEXP lines, SEXP file, SEXP groups)
 	FILE *output = fopen(filename, "a");
 	
 	for(int i = 1; i < n; i++){
-		if(rgroups[i] != rgroups[i-1])
+		if(groups_c[i] != groups_c[i-1])
 			fputs("\n", output);
 			
 		const char *line = CHAR(STRING_ELT(lines, i));

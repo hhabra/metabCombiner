@@ -22,8 +22,6 @@
  * smaller counts (median/ mean abundance). If there is a tie in both, the second feature
  * is named a duplicate.
  *
- *
- *
 */
 void comparePair(int i, int j, double *rt, double tolRT, double *missing, 
 				 double *counts, int *duplicates)
@@ -62,34 +60,49 @@ void comparePair(int i, int j, double *rt, double tolRT, double *missing,
  * are deemed "duplicates" as defined by very small differences in m/z & rt (tolerances 
  * determined by tolMZ & tolRT. 
  *
- * Returns a vector of characters labeled 'o' (okay) or 'd' (duplicate)
+ * Returns: a vector of 0 (non-duplicate) & 1 (duplicate)
+ *
+ * PARAMETERS:
+ *
+ * mz: numeric m/z value of metabolomics features
+ *
+ * rt: numeric retention time value of metabolomics features
+ *
+ * tolMZ: numeric m/z tolerance for duplicate features
+ *
+ * tolRT: numeric retention time tolerance for duplicate features
+ *
+ * missing: proportion of feature's values which are missing across samples
+ *
+ * counts: feature's median or mean abundance value
+ *  
 */
 SEXP findDuplicates(SEXP mz, SEXP rt, SEXP tolMZ, SEXP tolRT, 
 					SEXP missing, SEXP counts)
 {
 	//obtaining C types
-    double *mz_r = REAL(mz);
-    double *rt_r = REAL(rt);
+    double *mz_c = REAL(mz);
+    double *rt_c = REAL(rt);
     
-    double tol_MZ = REAL(tolMZ)[0];
-    double tol_RT = REAL(tolRT)[0];
-    double *missing_r = REAL(missing);
-    double *counts_r = REAL(counts);
+    double tolMZ_c = REAL(tolMZ)[0];
+    double tolRT_c = REAL(tolRT)[0];
+    double *missing_c = REAL(missing);
+    double *counts_c = REAL(counts);
     	
 	int length = LENGTH(mz);
 	
     SEXP duplicates = PROTECT(allocVector(INTSXP, length));
-    int *duplicates_r = INTEGER(duplicates);
-    memset(duplicates_r, 0, length * sizeof(int));
+    int *duplicates_c = INTEGER(duplicates);
+    memset(duplicates_c, 0, length * sizeof(int));
     
     for(int i = 0; i < length-1; i++){
-        if(duplicates_r[i] == 1)
+        if(duplicates_c[i] == 1)
             continue;
 		
         int k = 1;
         
-        while(mz_r[i + k] - mz_r[i] < (tol_MZ + EPS)){
-            comparePair(i, i+k, rt_r, tol_RT, missing_r, counts_r, duplicates_r);
+        while(mz_c[i + k] - mz_c[i] < (tolMZ_c + EPS)){
+            comparePair(i, i+k, rt_c, tolRT_c, missing_c, counts_c, duplicates_c);
 			k++;
 			if((i + k) >= length)      //handling boundary condition
                 break; 
