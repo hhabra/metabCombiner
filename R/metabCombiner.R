@@ -20,6 +20,17 @@
 #'
 #' @return a metabCombiner object
 #'
+#' @examples
+#' \dontrun{
+#' library(metabCombiner)
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 <- metabData(plasma30, samples = "CHEAR")
+#' p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
+#'
+#' p.combined = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+#' }
 #' @export
 ##
 metabCombiner <- function(xdata, ydata, binGap = 0.005){
@@ -32,22 +43,50 @@ metabCombiner <- function(xdata, ydata, binGap = 0.005){
     if(codeY)
         stop(paste("invalid ydata parameter:",combinerError(codeY, "metabData")))
 
+    if(is.null(binGap) | length(binGap) == 0)
+        stop("parameter 'binGap' must be defined")
+
+    if(binGap <= 0 | !is.numeric(binGap))
+        stop("parameter 'binGap' must be a positive numeric constant")
+
+    if(binGap >= 0.25)
+        stop("parameter 'binGap' is too large")
+
+    if(binGap > 0.05)
+        warning("parameter 'binGap' is very high. binGap < 0.05 is recommended.")
+
     object <- new("metabCombiner")
-    object@xdata = xdata
-    object@ydata = ydata
+    object@stats[["binGap"]] = binGap
 
-    object = mzGroup(object = object, binGap = binGap)
+    xset = getData(xdata)
+    yset = getData(ydata)
 
-    xdata = getData(object, "x") %>% dplyr::filter(group > 0) %>%
-            dplyr::arrange(group)
+    xygroups = mzGroup(xset = xset,
+                       yset = yset,
+                       binGap = binGap)
 
-    ydata = getData(object, "y") %>% dplyr::filter(group > 0) %>%
-            dplyr::arrange(group)
+    object@stats[["input_size_X"]] = nrow(xset)
+    object@nongrouped[["x"]] = dplyr::filter(xygroups[["x"]], .data$group == 0)
+    xset = dplyr::filter(xygroups[["x"]], .data$group > 0) %>%
+           dplyr::arrange(.data$group)
+    object@stats[["grouped_size_X"]] = nrow(xset)
 
-    nGroups = max(xdata[["group"]])
+    object@stats[["input_size_Y"]] = nrow(yset)
+    object@nongrouped[["y"]] = dplyr::filter(xygroups[["y"]], .data$group == 0)
+    yset = dplyr::filter(xygroups[["y"]], .data$group > 0) %>%
+           dplyr::arrange(.data$group)
+    object@stats[["grouped_size_Y"]] = nrow(yset)
 
+    nGroups = max(xset[["group"]])
     object@stats[["nGroups"]] = nGroups
-    object = formCombinerTable(object, xdata, ydata, nGroups)
+
+    object@samples[["x"]] = xdata@samples
+    object@samples[["y"]] = ydata@samples
+
+    object@extra[["x"]] = xdata@extra
+    object@extra[["y"]] = ydata@extra
+
+    object = formCombinedTable(object, xset, yset, nGroups)
 
     return(object)
 }

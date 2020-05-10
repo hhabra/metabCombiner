@@ -28,8 +28,11 @@ mismatchfind <- function(cTable, id)
 
 #' @title Calculate Mismatch Score
 #'
+#' @description Assign a mismatch value for a given metabolite, equal to the
+#' highest mismatching combination for a given identified compound. If no
+#' incorrect combinations exist, this is equal to 0.
 #'
-#' @param cTable data frame. Abridged Combiner report table.
+#' @param cTable data frame. Abridged metabCombiner report table.
 #'
 #' @param mismatches  integer rows containing misalignments
 #'
@@ -47,7 +50,7 @@ mismatchScore <- function(cTable, mismatches)
 #' separability of matching versus mismatching compound alignments. Higher
 #' objective function value imply a superior weight parameter selection.
 #'
-#' @param cTable  data frame. Abridged Combiner report table.
+#' @param cTable  data frame. Abridged metabCombiner report table.
 #'
 #' @param identities  data frame containing all evaluated identities
 #'
@@ -86,13 +89,13 @@ mismatchScore <- function(cTable, mismatches)
 #'
 #' \deqn{OBJ(S) = \sum h(S(i,i)) - h(S(i, j)) - p(S(i,i) > S(i,j))}
 #'
-#' -S(i,i) represents the similarity between correct identity alignments;
+#' -S(i,i) represents the similarity between correct identity alignments \cr
 #' -S(i,j), represents the maximum similarity of i to grouped feature j,
-#'         i \eqn{\deq} j (the highest-scoring misalignment);
-#' -h(x) = x if x > \code{minScore}, 0 otherwise
-#' -p(COND) = 0 if the condition is true, and a penalty value otherwise.
+#'         i \eqn{\leq} j (the highest-scoring misalignment) \cr
+#' -h(x) = x if x > \code{minScore}, 0 otherwise \cr
+#' -p(COND) = 0 if the condition is true, and a \code{penalty} value otherwise.
 #'
-#' This is summed over all labeled compound identities, i, found to be common
+#' This is summed over all labeled compound identitiesfound to be common
 #' in both input datasets.
 #'
 #' @return
@@ -131,10 +134,10 @@ objective <- function(cTable, identities, A, B, C, minScore, mzdiff, rtdiff,
 #'
 #' @description
 #' This function provides a method for guiding selection of suitable parameters for
-#' A, B, & C weights parameters in the \code{\link{calcScores}} method. Combinations
+#' A, B, & C weight arguments in the \code{\link{calcScores}} method. Combinations
 #' of parameters are evaluated based on the similarity scores of matching and
-#' mismatching identity labels. Input datasets must have at least one compound id
-#' in common with each other, and preferably more than 10.
+#' mismatching identity labels. Input datasets must have at least one compound
+#' identity in common (i.e. idx = idy), and preferably more than 10.
 #'
 #' @param object metabCombiner object
 #'
@@ -163,31 +166,69 @@ objective <- function(cTable, identities, A, B, C, minScore, mzdiff, rtdiff,
 #' @param groups integer. Vector of feature groups to score. If set to NULL
 #'               (default), will compute scores for all feature groups.
 #'
-#' @return A data frame with the following columns:
+#' @param brackets_ignore bracketed identity character strings of these types
+#' will be ignored according to this argument
 #'
+#' @return A data frame with the following columns:
 #' \item{A}{m/z weight values}
 #' \item{B}{rt weight values}
 #' \item{C}{Q weight values}
-#' \item{score}{objective function evaluation of (A,B,C) combination}
+#' \item{score}{objective function evaluation of (A,B,C) weights}
+#'
+#' @details
+#' An objective function, based on the accurate and inaccurate alignments of shared
+#' pre-identified compounds. For more details, see: \code{\link{objective}}.
 #'
 #' @note
 #' In contrast to \code{\link{calcScores}} function, A, B, & C take numeric
 #' vectors as input, as opposed to constants. The total number of rows in the
 #' output will be equal to the products of the lengths of these input vectors
 #'
+#' @examples
+#' \dontrun{
+#' library(metabCombiner)
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 <- metabData(plasma30, samples = "CHEAR")
+#' p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
+#' p.combined = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+#'
+#' p.combined = selectAnchors(p.combined, tolMZ = 0.003, tolQ = 0.3, windY = 0.02)
+#' p.combined = fit_gam(p.combined, k = seq(12,20,2), iterFilter = 1)
+#'
+#' ##example 1
+#' scores = evaluateParams(p.combined, minScore = 0.7, penalty = 5)
+#'
+#' ##example 2: changing A, B, C parameters
+#' scores = evaluateParams(p.combined, A = seq(70,150,5), B = seq(7, 20, 0.5),
+#'                         C = c(0.2,0.3,0.5))
+#'
+#' ##example 3: using PPM mass deviation (note change to A argument)
+#' scores = evaluateParams(p.combined, usePPM = TRUE, A = seq(0.01,0.1,0.01))
+#'
+#' ##example 4: limiting to groups 1-2000
+#' scores = evaluateParams(p.combined, minScore = 0.5, groups = 1:2000)
+#'
+#' ##After evaluation
+#' p.combined = calcScores(p.combined, A = 90, B = 14, C = 0.5)
+#' }
+#'
+#' @seealso \code{\link{calcScores}}, \code{\link{objective}}
+#'
 #' @export
-##
 evaluateParams <- function(object, A = seq(60,150,by = 10), B = seq(6,15),
                        C = seq(0.1,0.5,by = 0.1) , fit = c("gam", "loess"),
                        usePPM = FALSE, useAdduct = FALSE, adduct = 1,
-                       minScore = 0.5, penalty = 1, groups = NULL)
+                       minScore = 0.5, penalty = 5, groups = NULL,
+                       brackets_ignore = c("(", "[", "{"))
 {
     code = isMetabCombiner(object)
 
     if(code)
         stop(combinerError(code, "metabCombiner"))
 
-    cTable = combinerTable(object)[,1:15]
+    cTable = combinedTable(object)[,1:15]
 
     if(any(is.na(A)) | any(is.na(B)) | any(is.na(C)))
         stop("At least one missing value in at least one of arguments A, B, C")
@@ -219,31 +260,32 @@ evaluateParams <- function(object, A = seq(60,150,by = 10), B = seq(6,15),
     rows = which(cTable[["group"]] %in% groups)
     cTable = cTable[rows,]
 
-    cTable[["label"]] = comp_id_strings(cTable[["idx"]], cTable[["idy"]],
-                                        "IDENTITY")
+    cTable[["label"]] = compare_strings(cTable[["idx"]], cTable[["idy"]],
+                                        "IDENTITY", "", brackets_ignore)
 
     if(!any(cTable[["label"]] == "IDENTITY"))
-        stop("Must have at least one pre-labeled identities found in table")
+        stop("Must have at least one shared pre-labeled identity")
 
-    cTable[["idx"]] = paste(tolower(cTable[[c("idx")]]),
+    cTable[["idx"]] = paste(tolower(cTable[["idx"]]),
                             cTable[["group"]],
                             sep = "_")
 
-    cTable[["idy"]] = paste(tolower(cTable[[c("idy")]]),
+    cTable[["idy"]] = paste(tolower(cTable[["idy"]]),
                             cTable[["group"]],
                             sep = "_")
 
-    identities = dplyr::filter(cTable, label == "IDENTITY") %>%
-                 dplyr::select(idx) %>%
-                 dplyr::mutate(match = 0,
-                               mismatch = 0,
-                               penalty = 0,
-                               score = 0)
+    identities = dplyr::filter(cTable, .data$label == "IDENTITY") %>%
+                 dplyr::select(.data$idx) %>%
+                 dplyr::mutate(`match` = 0,
+                               `mismatch` = 0,
+                               `penalty` = 0,
+                               `score` = 0)
 
     names(identities)[1] = "id"
 
     counts = table(identities[["id"]])
 
+    #look for duplicate identity names within a group
     if(any(counts > 1)){
         duplicates = which(counts > 1)
         dupliNames = names(counts)[duplicates]
@@ -258,8 +300,8 @@ evaluateParams <- function(object, A = seq(60,150,by = 10), B = seq(6,15),
 
     ##reducing table to rows with identities of interest
     cTable = dplyr::filter(cTable,
-                           idx %in% identities[["id"]] |
-                           idy %in% identities[["id"]])
+                           .data$idx %in% identities[["id"]] |
+                           .data$idy %in% identities[["id"]])
 
     fit = match.arg(fit)
     model = getModel(object, fit = fit)
@@ -273,12 +315,22 @@ evaluateParams <- function(object, A = seq(60,150,by = 10), B = seq(6,15),
                       mzy = cTable[["mzy"]],
                       usePPM = usePPM)
 
-    rtdiff = abs(cTable$rty - cTable$rtProj)
-    qdiff = abs(cTable$Qx - cTable$Qy)
+    rtdiff = abs(cTable[["rty"]] - cTable[["rtProj"]])
+    qdiff = abs(cTable[["Qx"]] - cTable[["Qy"]])
 
-    adductdiff = comp_adduct_strings(cTable[["adductx"]],
-                                     cTable[["adducty"]],
-                                     adduct = adduct)
+    if(useAdduct == TRUE){
+        if(!is.numeric(adduct) | adduct < 1){
+            warning("value of argument 'adduct' must be a numeric value greater
+                    than or equal to 1")
+            adduct = 1
+        }
+
+        adductdiff = compare_adduct_strings(cTable[["adductx"]],
+                                            cTable[["adducty"]],
+                                            1, adduct, brackets_ignore)
+    }
+    else
+        adductdiff = 1
 
     scores = data.frame(A = rep(A, each = length(B)*length(C)),
                         B = rep(B, each = length(C)),
@@ -303,9 +355,11 @@ evaluateParams <- function(object, A = seq(60,150,by = 10), B = seq(6,15),
                                          matches = matches,
                                          mismatches = mismatches,
                                          penalty = penalty),
-                          scores[["A"]], scores[["B"]], scores[["C"]])
+                                scores[["A"]],
+                                scores[["B"]],
+                                scores[["C"]])
 
-    scores = dplyr::arrange(scores, desc(score))
+    scores = dplyr::arrange(scores, desc(.data$score))
 
     return(scores)
 }

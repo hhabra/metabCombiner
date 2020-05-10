@@ -1,6 +1,7 @@
 ##Methods for metabCombiner objects
 #' @include generics.R classes.R
 
+
 #' @title Obtain Combiner Feature Alignment Report
 #'
 #' @description Obtain constructed table reporting every possible metabolomics
@@ -8,7 +9,7 @@
 #'
 #' @param object metabCombiner object.
 #'
-#' @return Data frame combinerTable merged feature alignment report. The columns
+#' @return Data frame combinedTable merged feature alignment report. The columns
 #' of the report are as follows:
 #'
 #' \item{idx}{Identities of features from dataset X}
@@ -29,35 +30,33 @@
 #' \item{...}{Sample and extra columns from both datasets X & Y}
 #'
 #' @export
-##
-setMethod("combinerTable", signature = "metabCombiner", function(object){
-    return(object@combinerTable)
+setMethod("combinedTable", signature = "metabCombiner", function(object){
+    return(object@combinedTable)
 })
 
 #' @title Get Ordered Retention Time Pairs
 #'
 #' @description
-#' This returns the list of feature alignments used to anchor a retention
+#' This returns the data frame of feature alignments used to anchor a retention
 #' time projection model, constructed by \code{\link{selectAnchors}}.
 #'
 #' @param object metabCombiner object
 #'
-#' @return Data frame of anchor feature alignments.
+#' @return Data frame of anchor features
 #'
 #' @seealso
-#' [selectAnchors]
+#' \code{\link{selectAnchors}}
 #'
 #' @export
-##
 setMethod("getAnchors", signature = "metabCombiner", function(object){
     return(object@anchors)
 })
 
-#' @title Obtain last-used set of score coefficients
+#' @title Obtain Last-Used Score Coefficients
 #'
 #' @description
 #' Provides the last used weight arguments from \code{calcScores()} function.
-#' Returns NULL if \code{calcScores()} has not yet been called.
+#' Returns empty list if \code{calcScores()} has not yet been called.
 #'
 #' @param object  metabCombiner object
 #'
@@ -67,54 +66,12 @@ setMethod("getAnchors", signature = "metabCombiner", function(object){
 #' \item{C}{Specific weight penalizing differences in abundance quantiles}
 #'
 #' @export
-##
 setMethod("getCoefficients", signature = "metabCombiner", function(object){
     return(object@coefficients)
 })
 
-
-#' @title Get Datasets From metabCombiner Object.
-#'
-#' @description
-#' \code{metabCombiner} objects consist of two formatted metabolomics feature
-#' tables. This function allows for returning one of the two processed datasets
-#' contained within the object.
-#'
-#' @param object  metabCombiner object
-#'
-#' @param data    Either one of 'x' or 'y'.
-#'
-#' @return If data is "x", returns dataset X ; if "y", returns dataset Y.
-#'
+#' @describeIn getModel Method for 'metabCombiner' object
 #' @export
-##
-setMethod("getData", signature = "metabCombiner", function(object, data = c("x", "y")){
-    data = match.arg(data)
-
-    if(data == "x")
-        return(object@xdata@data)
-
-    if(data == "y")
-        return(object@ydata@data)
-})
-
-#' @title Get Fitted RT Model
-#'
-#' @description
-#' This returns the last fitted RT projected model from a metabCombiner object
-#' of type "gam" or "loess".
-#'
-#' @param object  metabCombiner object
-#'
-#' @param fit   Choice of model. Either "loess" or "gam".
-#'
-#' @return Nonlinear retention time fitting model.
-#'
-#' @seealso
-#' [fit_gam], [fit_loess]
-#'
-#' @export
-##
 setMethod("getModel", signature = "metabCombiner", function(object, fit = c("gam", "loess")){
     fit = match.arg(fit)
 
@@ -138,49 +95,53 @@ setMethod("getModel", signature = "metabCombiner", function(object, fit = c("gam
 #' @return If data is "x", returns sample names for dataset X; if "y", returns
 #' sample names from dataset Y.
 #'
-#'
 #' @export
-##
 setMethod("getSamples", signature = "metabCombiner", function(object, data = c("x", "y")){
-
     data = match.arg(data)
 
     if(data == "x")
-        return(object@xdata@samples)
+        return(object@samples[["x"]])
 
     else if(data == "y")
-        return(object@ydata@samples)
+        return(object@samples[["y"]])
 })
 
 
-#' @title Get metabCombiner Statistics
-#'
-#' @description
-#' This function prints a set of metabCombiner object statistics.
-#'
-#' @param object  metabCombiner object
-#'
-#' @return A list containing statistics from metabCombiner object.
+#' @describeIn getStats Method for 'metabCombiner' object
 #'
 #' @export
-##
 setMethod("getStats", signature = "metabCombiner", function(object){
     return(object@stats)
 })
 
-##plot method
+#' @describeIn nongrouped Method for 'metabCombiner' objects
+#'
+#' @export
+setMethod("nongrouped", signature = "metabCombiner", function(object, data = c("x", "y")){
+  data = match.arg(data)
+
+  if(data == "x")
+    return(object@nongrouped[["x"]])
+
+  if(data == "y")
+    return(object@nongrouped[["y"]])
+})
+
+#' @rdname plot_Combiner
+#'
+#' @param x  \code{metabCombiner} object
+#'
+#' @param y ...
+#'
 #'@export
-setMethod("plot", signature = "metabCombiner", function(x,...){
+setMethod("plot", signature = "metabCombiner", function(x,y,...){
     plot_Combiner(object = x,...)
 })
 
 
 ## Show Method
 setMethod("show", signature = "metabCombiner", function(object){
-    xdata = getData(object)
-    ydata = getData(object, data = "y")
-    cTable = combinerTable(object)
-
+    cTable = combinedTable(object)
     stats = getStats(object)
 
     anchors = getAnchors(object)
@@ -193,33 +154,24 @@ setMethod("show", signature = "metabCombiner", function(object){
     model_gam = getModel(object)
     model_loess = getModel(object, fit = "loess")
 
-    groupedX = 0
-    groupedY = 0
-
-    if(nrow(xdata) > 0)
-        groupedX = sum(xdata[["group"]] != 0)
-
-    if(nrow(ydata) > 0)
-        groupedY = sum(ydata[["group"]] != 0)
-
     if(is.null(stats[["nGroups"]]))
         stats[["nGroups"]] = 0
 
     cat("A metabCombiner object\n")
     cat("-------------------------\n")
-    cat("Gap Parameter:", object@binGap, "\n")
 
-    cat("Total Groups:", stats[["nGroups"]], "\n")
     if(!is.null(stats[["binGap"]]))
         cat("m/z gap size:",stats[["binGap"]], "\n")
 
-    cat("Dataset X contains", nrow(xdata), "features of which", groupedX,
-        "are grouped\n")
+    cat("Total Groups:", stats[["nGroups"]], "\n")
 
-    cat("Dataset Y contains", nrow(ydata), "features of which", groupedY,
-        "are grouped\n")
+    cat("Dataset X contains", stats[["input_size_X"]], "features of which",
+        stats[["grouped_size_X"]], "are grouped\n")
 
-    cat("combinerTable currently contains", nrow(cTable), "rows\n")
+    cat("Dataset Y contains", stats[["input_size_Y"]], "features of which",
+        stats[["grouped_size_Y"]], "are grouped\n")
+
+    cat("combinedTable currently contains", nrow(cTable), "rows\n")
 
     if(nrow(anchors) > 0)
         cat(nrow(anchors), "ordered pairs selected to fit RT model\n")

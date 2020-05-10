@@ -85,11 +85,10 @@ filterAnchorsLoess <- function(rts, spans, iterFilter, ratio, frac,loess.paramet
 #' @return
 #' Optimal value among pre-selected values for \code{spans}.
 #'
-#'
 crossValidationLoess <- function(rts, spans, seed,loess.parameters){
     cat("Performing 10-fold cross validation.")
 
-    rts = dplyr::filter(rts, weights != 0)
+    rts = dplyr::filter(rts, .data$weights != 0)
 
     ##skipping last entry
     N = nrow(rts) - 1
@@ -123,7 +122,10 @@ crossValidationLoess <- function(rts, spans, seed,loess.parameters){
         return(errors)
     })
 
-    return(cv_errors)
+    mean_cv_errors = rowMeans(matrix(cv_errors, nrow = length(spans)))
+    best_span = spans[which.min(mean_cv_errors)]
+
+    return(best_span)
 }
 
 #' @title Fit RT Projection Model With LOESS
@@ -154,14 +156,48 @@ crossValidationLoess <- function(rts, spans, seed,loess.parameters){
 #' @param iterLoess  integer. Number of robustness iterations to perform in
 #'                   \code{loess()}.See ?loess.control for more details.
 #'
-#' @param weights  numeric. Optional user supplied weights. Note: vector length
-#'                  must be #num_anchors + 2 (first and last are endpoints).
+#' @param weights  numeric. Optional user supplied weights for each anchor point.
+#' Must be of length equal to # of anchor points or a divisor of (# of anchor
+#' points + 2)
 #'
 #' @param seed  integer. Psuedo-random seed generator for cross validation.
 #'
+#' @seealso
+#' \code{\link{selectAnchors}},\code{\link{fit_gam}}
 #'
+#' @examples
+#' \dontrun{
+#' library(metabCombiner)
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 <- metabData(plasma30, samples = "CHEAR")
+#' p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
+#' p.combined = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+#' p.combined = selectAnchors(p.combined, tolMZ = 0.003, tolQ = 0.3, windY = 0.02)
+#' anchors = getAnchors(p.combined)
+#'
+#' #version 1
+#' p.combined = fit_loess(p.combined, spans = c(0.18,0.2,0.22,0.25,0.27,0.3),
+#'                        iterFilter = 1)
+#'
+#' #version 2 (using weights)
+#' weights = c(2, rep(1, nrow(anchors)), 2) #weight = 2 to boundary points
+#' p.combined = fit_loess(p.combined, spans = seq(0.2,0.3,0.02),
+#'                        weights = weights)
+#'
+#' #version 3 (using identities)
+#' p.combined = selectAnchors(p.combined, useID = TRUE, tolMZ = 0.003)
+#' p.combined = fit_loess(p.combined, spans = seq(0.2,0.3,0.02),
+#'                       useID = TRUE)
+#'
+#' #to preview result of fit_loess
+#' plot(p.combined, fit = "loess", xlab = "CHEAR Plasma (30 min)",
+#'      ylab = "Red-Cross Plasma (20 min)", pch = 19,
+#'      main = "Example fit_loess Result Fit")
+#' }
 #' @export
-fit_loess <- function(object, useID = FALSE, spans = seq(0.2, 0.4, by = 0.05),
+fit_loess <- function(object, useID = FALSE, spans = seq(0.2, 0.3, by = 0.02),
                       iterFilter = 2, ratio = 2, frac = 0.5, iterLoess = 10,
                       weights = 1, seed = 100)
 {
@@ -217,13 +253,14 @@ fit_loess <- function(object, useID = FALSE, spans = seq(0.2, 0.4, by = 0.05),
     loess.parameters = loess.control(iterations = iterLoess, surface = "direct")
 
     ##appending minimum and maximum RT values to retention time lists
-    cTable = combinerTable(object)
-
-    RTx = c(base::min(cTable[["rtx"]]), base::max(cTable[["rtx"]]))
-    RTy = c(base::min(cTable[["rty"]]), base::max(cTable[["rty"]]))
-    rtx <- c(RTx[1], anchors[["rtx"]], RTx[2])
-    rty <- c(RTy[1], anchors[["rty"]], RTy[2])
+    cTable = combinedTable(object)
+    rtx <- c(min(cTable[["rtx"]]), anchors[["rtx"]], max(cTable[["rtx"]]))
+    rty <- c(min(cTable[["rty"]]), anchors[["rty"]], max(cTable[["rty"]]))
     labels <- c("I", anchors[["labels"]], "I")
+
+    if(length(weights) == nrow(anchors))
+        weights = c(1, weights, 1)
+
     rts <- data.frame(rtx, rty, labels, weights = weights, stringsAsFactors = FALSE)
 
     #Anchor filtering procedure
@@ -231,15 +268,19 @@ fit_loess <- function(object, useID = FALSE, spans = seq(0.2, 0.4, by = 0.05),
                                          ratio, frac, loess.parameters))
 
     ##10 fold cross validation: find the best span, s
-    cv_errors <- suppressWarnings(crossValidationLoess(rts, spans, seed,
+    if(length(spans) > 1)
+        best_span <- suppressWarnings(crossValidationLoess(rts, spans, seed,
                                                        loess.parameters))
+    else
+        best_span = spans
 
-    mean_cv_errors = rowMeans(matrix(cv_errors, nrow = length(spans)))
-    best_span = spans[which.min(mean_cv_errors)]
+    cat("Fitting Model with span =", best_span,"\n")
 
     best_model <- loess(rty ~ rtx, data = rts, span = best_span, degree = 1,
                         family = "symmetric",control = loess.parameters,
                         weights = rts[["weights"]])
+
+
 
     object@model[["loess"]] = best_model
     object@stats[["best_span"]] = best_span

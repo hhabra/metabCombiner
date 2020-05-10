@@ -1,39 +1,35 @@
-##Contains Error-checking Functions
-
-##
-#' @title Obtain Errors for Combiner Object Checks
+#' @title Obtain Errors for metabCombiner Object Checks
 #'
 #' @description This function stores and returns a customized error message
 #' when checking the validity of certain objects.
 #'
 #' @param errNo   integer error code.
 #'
-#' @param type  character object type (either "combinerTable", "metabCombiner"
+#' @param type  character object type (either "combinedTable", "metabCombiner"
 #' or "metabData")
 #'
 #' @details In certain functions, an object must be checked for correctness. A
 #' \code{metabData} must have a properly formatted dataset with the correct
 #' column names & types.A \code{metabCombiner} must have properly formatted
-#' \code{combinerTable}, with expected names and columns. If one of these
+#' \code{combinedTable}, with expected names and columns. If one of these
 #' conditions is not met, a non-zero numeric code is returned and this function
 #' is used to print a specific error message corresponding to the appropriate
 #' object and error code.
 #'
 #' @return A customized error message for specific object check.
-##
 combinerError <- function(errNo, type){
     errors = switch(type,
-        "combinerTable" =
-           c("combinerTable is not a data frame",
-              "combinerTable has fewer than expected columns",
-              "combinerTable is empty",
-              "combinerTable column names different from expected column names",
-              "combinerTable column classes different from expected classes",
-              "At least one invalid group number in combinerTable"),
+        "combinedTable" =
+           c("combinedTable is not a data frame",
+              "combinedTable has fewer than expected columns",
+              "combinedTable is empty",
+              "combinedTable column names different from expected column names",
+              "combinedTable column classes different from expected classes",
+              "At least one invalid group number in combinedTable"),
 
         "metabCombiner" =
             c("Input object is not of class 'metabCombiner'",
-              "combinerTable in input object is invalid"),
+              "combinedTable in input object is invalid"),
 
         "metabData" =
             c("Input object is not of class 'metabData'",
@@ -48,8 +44,7 @@ combinerError <- function(errNo, type){
 }
 
 
-##
-#' @title Determine combinerTable Validity
+#' @title Determine combinedTable Validity
 #'
 #' @description Checks whether input object is a valid metabData.Returns an
 #' integer code if invalid. Function is used alongside \code{combinerError}.
@@ -57,8 +52,7 @@ combinerError <- function(errNo, type){
 #' @param object  Any R object.
 #'
 #' @return 0 if object is a valid Combiner Table; an integer code otherwise
-##
-isCombinerTable <- function(object){
+iscombinedTable <- function(object){
     if(class(object) != "data.frame")
         return(1)
 
@@ -99,22 +93,19 @@ isCombinerTable <- function(object){
 #' @param object Any R object.
 #'
 #' @return 0 if object is a valid metabData object; an integer code otherwise
-##
 isMetabCombiner <- function(object){
     if(class(object) != "metabCombiner")
         return(1)
 
-    combiner_table_code = isCombinerTable(combinerTable(object))
+    combiner_table_code = iscombinedTable(combinedTable(object))
 
     if(combiner_table_code){
-        warning(combinerError(combiner_table_code, "combinerTable"))
+        warning(combinerError(combiner_table_code, "combinedTable"))
         return(2)
     }
 
     return(0)
 }
-
-
 
 #'
 #' @title Determine validity of input metabData object
@@ -132,7 +123,7 @@ isMetabData <- function(object){
 
     data = getData(object)
 
-    expected = c("id", "mz", "rt", "adduct", "Q", "group")
+    expected = c("id", "mz", "rt", "adduct", "Q")
 
     if(ncol(data) <= length(expected))
         return(2)
@@ -145,7 +136,7 @@ isMetabData <- function(object){
 
     coltypes <- as.character(lapply(data, class))
     expected_classes = c("character","numeric","numeric",
-                         "character","numeric", "integer")
+                         "character","numeric")
 
     if(!identical(coltypes[1:length(expected)], expected_classes))
         return(5)

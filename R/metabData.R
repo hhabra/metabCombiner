@@ -51,11 +51,11 @@
 #' @details
 #' A processed metabolomics feature data frame must contain columns for m/z, rt,
 #' and numeric sample intensities. The user may also supply some optional fields
-#' such as identity (id) and adduct label columns. Non-analyzed columns can be
-#' included into the final output by specifying the names of these columns in the
-#' \code{extra} argument. All required arguments are checked for correctness,
-#' validity (e.g. no negative m/z or rt values, each column is used at most once,
-#' column types are valid, etc...),
+#' such as identity \code{id} and \code{adduct} label columns. Non-analyzed columns
+#' can be included into the final output by specifying the names of these columns
+#' in the \code{extra} argument. All required arguments are checked for validity
+#' (e.g. no negative m/z or rt values, each column is used at most once,
+#' column types are valid, etc...).
 #'
 #' Following construction is a pre-analysis filtering of rows that are either,
 #' 1) Outside of the specified retention time range (\code{rtmin},\code{rtmax}),
@@ -70,6 +70,33 @@
 #' specified by \code{mz,rt, samples, id, adduct, Q, and extra} arguments, and
 #' adjusted by pre-processing steps.
 #'
+#' @examples
+#' \dontrun{
+#' library(metabCombiner)
+#'
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' #analyzing CHEAR plasma samples; RedCross samples non-analyzed "extra" columns
+#' p30 <- metabData(plasma30, mz = "mz", rt = "rt", id = "identity", adduct = "adduct",
+#'                  samples = "CHEAR", extra = "RedCross")
+#'
+#' #equivalent
+#' p30 <- metabData(plasma30, id = "id", samples = "CHEAR", extra = "Red")
+#'
+#'
+#' getSamples(p30)  #should print names of 5 CHEAR Sample column names
+#' getExtra(p30)    #should print names of 5 Red Cross Sample column names
+#'
+#' #analyzing Red Cross samples with retention time limitations (0.5-17.5min)
+#' p20 <- metabData(plasma20, samples = "Red", rtmin = 0.5, rtmax = 17.5)
+#' data = getData(p20)
+#' range(data$rt)
+#'
+#' #using regular expressions for field searches
+#' p30.2 <- metabData(plasma30, id = "identity|id|ID", samples = ".[3-5]$")
+#' getSamples(p30.2)    #should print all column names ending in .3, .4, .5
+#' }
 #' @export
 metabData <- function(table, mz = "mz", rt = "rt", id = "id",
                       adduct = "adduct", samples = NULL, Q = NULL,

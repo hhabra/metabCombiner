@@ -16,7 +16,7 @@
 #' @details
 #' Retention time restriction is often a recommended step to aid the analysis of
 #' comparable metabolomics datasets. For example, the beginning and end of a
-#' chromatogram often contain features that do not correspond with a true
+#' chromatogram contain features that do not correspond with a true
 #' a biological compound derived from the sample. It is recommended to set rtmin
 #' slightly before the first observed common metabolite, and rtmax slightly after
 #' the last observed metabolite.
@@ -49,7 +49,7 @@ filterRT <- function(data, rtmin, rtmax)
         rtmax = max(rts)
     }
 
-    data = dplyr::filter(data, rt >= rtmin & rt <= rtmax)
+    data = dplyr::filter(data, .data$rt >= rtmin & .data$rt <= rtmax)
 
     return(data)
 }
@@ -97,11 +97,11 @@ findDuplicates <- function(data, missing, counts, duplicate)
     if(tolMZ == 0 | tolRT == 0)
         return(numeric(0))
 
-    dataMat = dplyr::select(data, mz,rt) %>%
+    dataMat = dplyr::select(data, .data$mz,.data$rt) %>%
               dplyr::mutate(counts = counts,
                             missing = missing,
                             index = 1:nrow(data)) %>%
-              dplyr::arrange(mz)
+              dplyr::arrange(.data$mz)
 
     dataMat[["labels"]] = .Call("findDuplicates",
                                 mz = dataMat[["mz"]],
@@ -110,7 +110,7 @@ findDuplicates <- function(data, missing, counts, duplicate)
                                 tolRT = tolRT,
                                 missing = dataMat[["missing"]],
                                 counts = dataMat[["counts"]],
-                                PACKAGE = "Combiner")
+                                PACKAGE = "metabCombiner")
 
     duplicates = dataMat[["index"]][dataMat[["labels"]] == 1]
 
@@ -124,24 +124,25 @@ findDuplicates <- function(data, missing, counts, duplicate)
 #' \code{adjustData()} contains a set of pre-analysis steps for processing LC-MS
 #' metabolomics feature tables.
 #'
-#' @param Data   a metabData object.
+#' @param Data a metabData object.
 #'
-#' @param misspc  Numeric. Threshold missingness percentage for analysis.
+#' @param misspc Numeric. Threshold missingness percentage for analysis.
 #'
-#' @param measure  Character. Central abundance measure, either "median" or "mean".
+#' @param measure Character. Central abundance measure, either "median" or "mean".
 #'
-#' @param rtmin   Numeric. Minimum retention time for analysis.
+#' @param rtmin Numeric. Minimum retention time for analysis.
 #'
-#' @param rtmax   Numeric. Maximum retention time for analysis.
+#' @param rtmax Numeric. Maximum retention time for analysis.
 #'
-#' @param zero  Logical. Whether to consider zero values as missing.
+#' @param zero Logical. Whether to consider zero values as missing.
 #'
 #' @param duplicate Ordered numeric pair (m/z, rt) tolerance parameters for
 #' duplicate feature search.
 #'
 #' @details
-#' The pre-analysis adjustment steps include: 1) Restriction to a feature
-#' retention time range \code{rtmin} \eqn{\le} rt \eqn{\le} \code{rtmax}
+#' The pre-analysis adjustment steps include:
+#' 1) Restriction to a feature retention time range \code{rtmin} \eqn{\le}
+#'    rt \eqn{\le} \code{rtmax}
 #' 2) Removal of features with a missing value percentage exceeding \code{misspc}
 #' 3) Removal of duplicate metabolomics features.
 #'

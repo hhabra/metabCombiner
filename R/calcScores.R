@@ -24,39 +24,12 @@ mzdiff <- function(mzx, mzy, usePPM){
     return(diffs)
 }
 
-##
-#' @title Determine if two adduct strings match.
-#'
-#' @description
-#' Helper function for \code{calcScores} & \code {evaluateParams}.Determine if two
-#' strings (feature adduct labels) match. If both strings are non-empty and not
-#' equivalent, return adduct penalty; if matching strings or at least one of the
-#' two is empty,return 1. Penalty values will divide the feature similarity score.
-#'
-#' @param s1  One of two character vectors to be compared
-#'
-#' @param s2  One of two character vectors to be compared
-#'
-#' @param adduct Numeric (value >= 1) multiplicative adduct mismatch penalty.
-#'
-#' @return Numeric vector equal to 1 or user-supplied mismatch penalty.
-#'
-#' @noRd
-##
-comp_adduct_strings <- function(s1,s2, adduct){
-    s1 = ifelse(is.na(s1), "", s1)
-    s2 = ifelse(is.na(s2), "", s2)
 
-    ifelse(!(s1 == "" | s2 == "") & tolower(s1) != tolower(s2),
-         adduct, 1)
-}
-
-##
-#' @title Calculate the pairwise score between grouped features
+#' @title Calculate Pairwise Alignment Scores
 #'
-#' @description Helper function for \code{calcScores()} & \code{evalParams()}.
-#' Calculates the pairwise similarity score between grouped features acquired
-#' in complementary datasets.
+#' @description Helper function for \code{\link{calcScores}} &
+#' \code{\link{evaluateParams}}. Calculates the pairwise similarity score between
+#' grouped features using differences in m/z, rt, and Q.
 #'
 #' @param A Numeric weight for penalizing m/z differences.
 #'
@@ -78,23 +51,20 @@ comp_adduct_strings <- function(s1,s2, adduct){
 #'                   labels do not match
 #'
 #' @details
-#' Score between two grouped features x & y calculated as:
+#' The score between two grouped features x & y is calculated as:
 #'
-#' \deqn{S(x,y,A,B,C) = -exp(-A |mzx-mzy|- B |rty-rtproj|/rtrange - C |Qx-Qy|)}
+#' \deqn{S = -exp(-A |mzx - mzy| - B |rty - rtproj|/rtrange - C |Qx - Qy|)}
 #'
 #' where mzx & Qx correspond to the m/z and abundance quantile values of feature
-#' x, mzy, rty, and Qy correspond to the m/z, retention time, and abundance
-#' quantile values of feature y,  rtproj is the model-projected retention of
+#' x; mzy, rty, and Qy correspond to the m/z, retention time, and abundance
+#' quantile values of feature y; rtproj is the model-projected retention time of
 #' feature x onto the retention times of the dataset containing y, and rtrange is
 #' the range of retention times of y dataset features. A, B, C are non-negative
 #' constant weight parameters for penalizing m/z, rt, and Q  differences. Values
-#' vary between 0 (no confidence combination) and 1 (high confidence combination).
-#'
+#' vary between 0 (no confidence combination) and 1 (high confidence alignment).
 #'
 #' @return  Pairwise score between two grouped features(between 0 & 1) evaluating
 #'          the likelihood of a compound match.
-#'
-#'
 scorePairs <- function(A, B, C, mzdiff, rtdiff, qdiff, rtrange, adductdiff){
 
     nlogScore = A * abs(mzdiff) + B * abs(rtdiff) / rtrange + C * abs(qdiff)
@@ -134,23 +104,69 @@ scorePairs <- function(A, B, C, mzdiff, rtdiff, qdiff, rtrange, adductdiff){
 #' @param groups integer. Vector of feature groups to score. If set to NULL
 #'              (default), will compute scores for all feature groups.
 #'
-#' @return metabCombiner object with updated combinerTable. rtProj column will
-#' contain fitted retention times determined from previously computed model;
-#' score will contain the computed pairwise similarity scores of features from
-#' datasets x & y; rankX & rankY are the integer ranks of scores for x & y
-#' features in descending order.
+#' @param brackets_ignore If useAdduct = TRUE, bracketed adduct character
+#' strings of these types will be ignored according to this argument
+#'
+#' @return \code{metabCombiner} object with updated \code{combinedTable}.
+#' rtProj column will contain fitted retention times determined from previously
+#' computed model; score will contain the computed pairwise similarity scores of
+#' features from datasets x & y; rankX & rankY are the integer ranks of scores
+#' for x & y features in descending order.
+#'
+#' @examples
+#' \dontrun{
+#' library(metabCombiner)
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 <- metabData(plasma30, samples = "CHEAR")
+#' p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
+#' p.combined = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+#'
+#' p.combined = selectAnchors(p.combined, tolMZ = 0.003, tolQ = 0.3, windY = 0.02)
+#' p.combined = fit_gam(p.combined, k = seq(12,20,2), iterFilter = 1)
+#'
+#' #example 1: moderate m/z deviation, excellent rt fit, moderate sample similarity
+#' p.combined = calcScores(p.combined, A = 90, B = 14, C = 0.5)
+#'
+#' #example 2: high m/z deviation, moderate rt fit, low sample similarity
+#' p.combined = calcScores(p.combined, A = 50, B = 8, C = 0.2)
+#'
+#' #example 3: low m/z deviation, poor rt fit, high sample similarity
+#' p.combined = calcScores(p.combined, A = 120, B = 5, C = 0.8)
+#'
+#' #example 4: using LOESS fit
+#' p.combined = fit_loess(p.combined, spans = seq(0.2,0.3,0.02), iterFilter = 1)
+#' p.combined = calcScores(p.combined, fit = "loess", A = 90, B = 12, C = 0.5)
+#'
+#' #example 5: using ppm for mass deviation; note A value
+#' p.combined = calcScores(p.combined, A = 0.05, B = 14, C = 0.5, usePPM = TRUE)
+#'
+#' #example 6: limiting to specific m/z groups 1-1000
+#' p.combined = calcScores(p.combined, A = 90, B = 14, C = 0.5, groups = 1:1000)
+#'
+#' #example 7: using adduct information
+#' p.combined = calcScores(p.combined, A = 90, B = 14, C = 0.5, useAdduct = TRUE,
+#'                         adduct = 1.5)
+#'
+#' #extracting output
+#' cTable = combinedTable(p.combined)
+#' }
 #'
 #' @export
 ##
 calcScores <- function(object, A, B, C, fit = c("gam", "loess"), usePPM = FALSE,
-                       useAdduct = FALSE, adduct = 2, groups = NULL)
+                       useAdduct = FALSE, adduct = 1.25, groups = NULL,
+                       brackets_ignore = c("(", "[", "{"))
 {
     code = isMetabCombiner(object)
 
     if(code)
         stop(combinerError(code, "metabCombiner"))
 
-    if(class(A) != "numeric" | class(B) != "numeric" | class(C) != "numeric")
+    if((class(A) != "numeric" & class(A) != "integer")|
+       (class(A) != "numeric" & class(A) != "integer")|
+       (class(A) != "numeric" & class(A) != "integer"))
         stop("arguments 'A', 'B', 'C' must be numeric constants")
 
     if(length(A) > 1 | length(B) > 1 | length(C) > 1){
@@ -163,7 +179,7 @@ calcScores <- function(object, A, B, C, fit = c("gam", "loess"), usePPM = FALSE,
     if(A < 0 | B < 0 | C < 0)
         stop("arguments 'A', 'B', 'C' must be non-negative")
 
-    cTable = combinerTable(object)
+    cTable = combinedTable(object)
 
     fit = match.arg(fit)
     model = getModel(object, fit = fit)
@@ -172,9 +188,6 @@ calcScores <- function(object, A, B, C, fit = c("gam", "loess"), usePPM = FALSE,
         stop(paste("object missing model of type ", fit, sep =""))
 
     rtrange = max(cTable[["rty"]]) - min(cTable[["rty"]])
-
-    if(useAdduct == FALSE)
-        adduct = 1
 
     #handling groups argument
     if(is.null(groups))
@@ -186,7 +199,21 @@ calcScores <- function(object, A, B, C, fit = c("gam", "loess"), usePPM = FALSE,
     #rows whose scores are computed according to groups
     rows = which(cTable[["group"]] %in% groups)
 
-    cTable$rtProj[rows] = predict(model, newdata = cTable[rows,])
+    cTable$rtProj[rows] = stats::predict(model, newdata = cTable[rows,])
+
+    if(useAdduct == TRUE){
+        if(!is.numeric(adduct) | adduct < 1){
+            warning("value of argument 'adduct' must be a numeric value greater
+                    than or equal to 1")
+            adduct = 1
+        }
+
+        adductdiff = compare_strings(cTable$adductx[rows],
+                                     cTable$adducty[rows],
+                                     1, adduct, brackets_ignore)
+    }
+    else
+        adductdiff = 1
 
     massdiff = mzdiff(mzx = cTable$mzx[rows],
                       mzy = cTable$mzy[rows],
@@ -195,10 +222,6 @@ calcScores <- function(object, A, B, C, fit = c("gam", "loess"), usePPM = FALSE,
     rtdiff = abs(cTable$rty[rows] - cTable$rtProj[rows])
     qdiff = abs(cTable$Qx[rows] - cTable$Qy[rows])
 
-    adductdiff = comp_adduct_strings(cTable$adductx[rows],
-                                     cTable$adducty[rows],
-                                     adduct = adduct)
-
     cTable$score[rows] = scorePairs(A = A,
                                     B = B,
                                     C = C,
@@ -206,8 +229,7 @@ calcScores <- function(object, A, B, C, fit = c("gam", "loess"), usePPM = FALSE,
                                     rtdiff = rtdiff,
                                     qdiff = qdiff,
                                     rtrange = rtrange,
-                                    adductdiff = adductdiff
-                                    )
+                                    adductdiff = adductdiff)
 
     cTable[c("rtProj", "score")] = round(cTable[c("rtProj", "score")], 4)
 
@@ -216,17 +238,17 @@ calcScores <- function(object, A, B, C, fit = c("gam", "loess"), usePPM = FALSE,
 
     ##calculate score ranking of features
     cT[rows,] =   cT[rows,] %>%
-                  group_by(mzx, rtx) %>%
-                  mutate(rankX = dense_rank(desc(score))) %>%
-                  ungroup() %>%
-                  group_by(mzy, rty) %>%
-                  mutate(rankY= dense_rank(desc(score))) %>%
-                  ungroup()
+                  dplyr::group_by(.data$mzx, .data$rtx) %>%
+                  dplyr::mutate(rankX = dplyr::dense_rank(desc(.data$score))) %>%
+                  dplyr::ungroup() %>%
+                  dplyr::group_by(.data$mzy, .data$rty) %>%
+                  dplyr::mutate(rankY = dplyr::dense_rank(desc(.data$score))) %>%
+                  dplyr::ungroup()
 
     cTable[c("rankX", "rankY")] = cT[c("rankX", "rankY")]
 
-    object@combinerTable = cTable[with(cTable, order(group, desc(score))), ]
-    object@coefficients = list(A = A, B = B, C = C)
+    object@combinedTable = cTable[with(cTable, order(`group`, desc(`score`))), ]
+    object@coefficients = list(`A` = A, `B` = B, `C` = C)
 
     return(object)
 }

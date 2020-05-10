@@ -113,10 +113,10 @@ filterAnchorsGAM <- function(rts, k, bs, iterFilter, family, m, method, optimize
 ##
 crossValidationGAM <- function(rts, k, bs, m, family, method, optimizer, seed,...)
 {
-    cat("Performing 10-fold cross validation.")
+    cat("Performing 10-fold cross validation\n")
 
     #excluding filtered points
-    rts = dplyr::filter(rts, weights != 0)
+    rts = dplyr::filter(rts, .data$weights != 0)
 
     ##skipping last entry
     N = nrow(rts) - 1
@@ -190,8 +190,8 @@ crossValidationGAM <- function(rts, k, bs, m, family, method, optimizer, seed,..
 #'
 #' @param family character. Choice of mgcv family; see: ?mgcv::family.mgcv
 #'
-#' @param weights Numeric prior weights determines the contribution of each point
-#' to the model. see: ?mgcv::gam
+#' @param weights Optional user supplied weights for each ordered pair. Must be
+#' of length equal to number of anchors (n) or a divisor of (n + 2).
 #'
 #' @param m  integer. Basis and penalty order for GAM; see ?mgcv::s
 #'
@@ -208,7 +208,8 @@ crossValidationGAM <- function(rts, k, bs, m, family, method, optimizer, seed,..
 #' @details
 #' A set of ordered pair retention times must be previously computed using
 #' \code{selectAnchors()}. The minimum and maximum retention times from both
-#' input datasets are included in the set (min_rtx, min_rty) & (max_rtx, max_rty).
+#' input datasets are included in the set as ordered pairs (min_rtx, min_rty)
+#' & (max_rtx, max_rty).
 #'
 #' The \code{weights} argument initially determines the contribution of each point
 #' to the model fits; they are equally weighed by default, but can be changed using
@@ -231,13 +232,52 @@ crossValidationGAM <- function(rts, k, bs, m, family, method, optimizer, seed,..
 #' limited to basis splines (\eqn{bs = "bs"}) or penalized basis splines
 #' (\eqn{bs = "ps"}).
 #'
-#' @return metabCombiner object with a fitted GAM model
+#' @return metabCombiner with a fitted GAM model object
 #'
 #' @seealso
-#' [crossValidationGAM], [filterAnchorsGAM], [fit_loess]
+#' \code{\link{selectAnchors}},\code{\link{fit_loess}},
 #'
+#' @examples
+#' \dontrun{
+#' library(metabCombiner)
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 <- metabData(plasma30, samples = "CHEAR")
+#' p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
+#' p.combined = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+#'
+#' p.combined = selectAnchors(p.combined, tolMZ = 0.003, tolQ = 0.3, windY = 0.02)
+#' anchors = getAnchors(p.combined)
+#'
+#' #version 1
+#' p.combined = fit_gam(p.combined, k = c(10,12,15,17,20), method = "GCV.Cp",
+#'                      frac = 0.8, family = "scat")
+#' #version 2
+#' p.combined = fit_gam(p.combined, k = seq(12,20,2), family = "gaussian",
+#'                      iterFilter = 1, ratio = 3)
+#'
+#' #version 3 (with identities)
+#' p.combined = selectAnchors(p.combined, useID = TRUE)
+#' anchors = getAnchors(p.combined)
+#' p.combined = fit_gam(p.combined, useID = TRUE, k = seq(12,20,2),
+#'                      iterFilter = 1)
+#'
+#' #version 4 (using identities and weights)
+#' weights = ifelse(anchors$labels == "I", 2, 1)
+#' p.combined = fit_gam(p.combined, useID = TRUE, k = seq(12,20,2),
+#'                      iterFilter = 1, weights = weights)
+#'
+#' #version 5 (assigning weights to the boundary points
+#' weights = c(2, rep(1, nrow(anchors)), 2)
+#' p.combined = fit_gam(p.combined, k = seq(12,20,2), weights = weights)
+#'
+#' #to preview result of fit_gam
+#' plot(p.combined, xlab = "CHEAR Plasma (30 min)",
+#'      ylab = "Red-Cross Plasma (20 min)", pch = 19,
+#'      main = "Example fit_gam Result Fit")
+#' }
 #' @export
-##
 fit_gam <- function(object, useID = FALSE, k = seq(10,20, by = 2), iterFilter = 2,
                     ratio = 2, frac = 0.5, bs = c("bs", "ps"),
                     family = c("scat", "gaussian"), weights = 1, m = c(3,2),
@@ -292,12 +332,13 @@ fit_gam <- function(object, useID = FALSE, k = seq(10,20, by = 2), iterFilter = 
     family = match.arg(family)
 
     ##appending minimum and maximum RT values to retention time lists
-    cTable = combinerTable(object)
-    RTx = c(base::min(cTable[["rtx"]]), base::max(cTable[["rtx"]]))
-    RTy = c(base::min(cTable[["rty"]]), base::max(cTable[["rty"]]))
-    rtx <- c(RTx[1], anchors[["rtx"]], RTx[2])
-    rty <- c(RTy[1], anchors[["rty"]], RTy[2])
+    cTable = combinedTable(object)
+    rtx <- c(min(cTable[["rtx"]]), anchors[["rtx"]], max(cTable[["rtx"]]))
+    rty <- c(min(cTable[["rty"]]), anchors[["rty"]], max(cTable[["rty"]]))
     labels <- c("I", anchors[["labels"]], "I")
+
+    if(length(weights) == nrow(anchors))
+        weights = c(1, weights, 1)
 
     rts <- data.frame(rtx, rty, labels, weights = weights,
                       stringsAsFactors = FALSE)
@@ -315,16 +356,19 @@ fit_gam <- function(object, useID = FALSE, k = seq(10,20, by = 2), iterFilter = 
                                             frac = frac,...))
 
     ##10 fold cross validation: find the best value for k
-    best_k <- suppressWarnings(crossValidationGAM(rts = rts,
-                                                  k = k,
-                                                  bs = bs,
-                                                  m = m,
-                                                  family = family,
-                                                  method = method,
-                                                  optimizer = optimizer,
-                                                  seed = seed,...))
+    if(length(k) > 1)
+        best_k <- suppressWarnings(crossValidationGAM(rts = rts,
+                                                      k = k,
+                                                      bs = bs,
+                                                      m = m,
+                                                      family = family,
+                                                      method = method,
+                                                      optimizer = optimizer,
+                                                      seed = seed,...))
+    else
+        best_k = k
 
-
+    cat("Fitting Model with k =", best_k, "\n")
 
     best_model <- mgcv::gam(rty ~ s(rtx, k = best_k, bs = bs, m = m, ...),
                                   data = rts, family = family, method = method,

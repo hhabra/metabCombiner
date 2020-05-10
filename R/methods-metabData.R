@@ -2,14 +2,7 @@
 #' @include generics.R classes.R
 
 
-#' @title Obtain processed metabolomics data frame
-#'
-#' @description
-#' Extracts the formatted feature table contained within metabData object.
-#'
-#' @param object A metabData object
-#'
-#' @return Processed metabolomics feature data frame.
+#' @describeIn getData Method for "metabData" objects
 #'
 #' @export
 ##
@@ -26,7 +19,6 @@ setMethod("getData", signature = "metabData", function(object){
 #' @return Names of samples of formatted dataset.
 #'
 #' @export
-##
 setMethod("getSamples", signature = "metabData", function(object){
     samples = object@samples
 
@@ -34,11 +26,7 @@ setMethod("getSamples", signature = "metabData", function(object){
 })
 
 
-#' @title Get Names of Additional Data Fields
-#'
-#' @param object A metabData object
-#'
-#' @return Names of 'extra' columns in \code{data} field of metabData
+#' @describeIn getExtra Method for "metabData" Objects
 #'
 #' @export
 ##
@@ -50,11 +38,7 @@ setMethod("getExtra", signature = "metabData", function(object){
 
 
 ##
-#' @title Obtain metabData Statistics
-#'
-#' @param object A metabData object
-#'
-#' @return Feature statistics from metabData object
+#' @describeIn getStats Method for 'metabData' object
 #'
 #' @export
 ##

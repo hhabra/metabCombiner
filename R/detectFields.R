@@ -105,7 +105,7 @@ detectSamples <- function(colnames, coltypes){
 #'
 #' @param col     Column from input data that contains the mz values.
 #'
-#' @return        m/z value vector
+#' @return    m/z value vector
 #'
 #' @noRd
 selectMZ <- function(table, col){
@@ -214,25 +214,32 @@ selectColumn <- function(table, col = NULL){
 #' @param table     data frame containing metabolomics features or path to
 #' metabolomics data file.
 #'
-#' @param mz         Character. Name for column containing m/z values. If "mz",
-#'                  will search for {mz, m/z, m.z, mass}
+#' @param mz    Character name(s) or regular expression associated with data
+#' column containing m/z values. The first column whose name contains this
+#' expression will be selected for analysis.
 #'
-#' @param rt         Character. Name for column containing retention time values.
-#'                  If "rt", will search for {rt, retention time, r.t, RT}.
+#' @param rt    Character name(s) or regular expression associated with data
+#' column containing retention time values. The first column whose name contains
+#' this expression will be selected for analysis.
 #'
-#' @param id        Character. Name for column containing compound identifiers.
-#'                  If "id", will search for {id, compound, feature}
+#' @param id     Character name(s) or regular expression associated with data
+#' column containing metabolomics feature identifiers. The first column whose
+#' name contains this expression will be selected for analysis.
 #'
-#' @param adduct     Character. Name for column containing adduct labels. If
-#'                  "adduct", will search for {adduct, adducts, annotation}.
+#' @param adduct   Character name(s) or regular expression associated with data
+#' column containing adduct, formula, or additional annotations. The first
+#' column whose name contains this expression will be selected for analysis.
 #'
-#' @param samples    Character. Names of columns containing sample values. If
-#'                  "detect", finds longest stretch of consecutive numeric columns.
+#' @param samples   Character names of columns containing sample values. All
+#' numeric columns containing these keywords are selected for analysis. If no
+#' keywords given, will search for longest stretch of numeric columns remaining.
 #'
-#' @param extra      Character. Names of (additional) user-supplied columns.
+#' @param extra  Character names of columns containing additional feature
+#' information, e.g.  non-analyzed sample values. All columns containing these
+#' keywords are selected for analysis.
 #'
-#' @param Q       Character. Name of user-supplied abundance quantiles column.
-#'                If null, quantiles will be automatically calculated.
+#' @param Q   Character name(s) or regular expression associated with numeric
+#' feature abundance quantiles.
 #'
 #' @return  an initialized and formatted \code{metabData} object.
 #'
@@ -333,8 +340,8 @@ detectFields <- function(Data, table, mz, rt, id, adduct, samples, extra, Q)
 
     Data@data = data.frame(id = new_id, mz = new_mz, rt = new_rt,
                            adduct = new_adduct, Q = new_Q,
-                           group = integer(nrow(table)),new_values,
-                           check.names = FALSE, stringsAsFactors = FALSE)
+                           new_values, check.names = FALSE,
+                           stringsAsFactors = FALSE)
 
     if(length(extra) > 0)
         Data@data[,Data@extra] = new_extra
