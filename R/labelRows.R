@@ -1,12 +1,10 @@
-
-#' @title Label and Remove metabCombiner Report Rows
+#' @title Annotate and Remove Report Rows
 #'
 #' @description
 #' Automated method for determining identity-matching, removable, and conflicting
-#' alignments in \code{combinedTable}. Optionally, removable rows may be
-#' eliminated, resulting in a reduced \code{combinedTable}. Remaining alignments
-#' that require further consideration are labeled "CONFLICT" and organized into
-#' subgroups if they fall within some small measure (in score or mz/rt).
+#' feature pair alignments (FPAs) in \code{combinedTable}. FPAs that may require
+#' further inspection are labeled "CONFLICT" and organized into subgroups if they
+#' fall within some small measure (in score or mz/rt) of the top-ranked FPA.
 #'
 #' @param object  Either a \code{metabCombiner} object or \code{combinedTable}.
 #'
@@ -15,23 +13,23 @@
 #' @param maxRankY  Integer. Maximum allowable rank for Y dataset features.
 #'
 #' @param minScore  Numeric. Minimum allowable score (between 0 & 1) for
-#'                  metabolomics feature alignments.
+#'                  metabolomics FPAs.
 #'
 #' @param method  Conflict detection method. If equal to "score" (default method),
-#'                assigns a conflict subgroup if score of lower-ranking alignment
-#'                is within some tolerance of higher-ranking alignment. If set to
-#'                "mzrt", assigns a conflicting subgroup if within a small m/z &
-#'                rt distance of the top-ranked alignment.
+#'                assigns a conflict subgroup if score of lower-ranking FPA is
+#'                within some tolerance of higher-ranking FPA. If set to "mzrt",
+#'                assigns a conflicting subgroup if within a small m/z & rt
+#'                distance of the top-ranked FPA.
 #'
 #' @param conflict Numeric. If method = "score", a constant (between 0 & 1)
-#'                 score difference between a pair of alignments.
+#'                 score difference between a pair of conflicting FPAs.
 #'                 If method = "mzrt", a length 4 numeric: (m/z, rt, m/z, rt)
-#'                 tolerances, the first two for X dataset features and the
-#'                 second two for Y dataset features.
+#'                 tolerances, the first pair for X dataset features and the
+#'                 second pair for Y dataset features.
 #'
-#' @param balanced  Logical. Optional processing of "balanced" groups (defined as
-#'                  groups with equal numbers of features from X & Y datasets with
-#'                  no conflicting top-matches).
+#' @param balanced  Logical. Optional processing of "balanced" groups, defined as
+#'                  groups with equal numbers of features from input datasets where
+#'                  all features have a 1-1 match.
 #'
 #' @param remove  Logical. Option to keep or discard rows deemed removable (labeled
 #'                "REMOVE" in \code{combinedTable})
@@ -40,11 +38,11 @@
 #' in this argument will be ignored
 #'
 #' @details
-#' \code{metabCombiner} initially reports all possible feature alignments in the
-#'  rows of \code{combinedTable} report. Most of these are misalignments that
-#'  require inspection and removal. This function is used to automate most of the
-#'  reduction process by labeling rows as removable or conflicting, based on
-#'  certain conditions, and is performed after computing similarity scores.
+#' \code{metabCombiner} initially reports all possible FPAs in the rows of the
+#' \code{combinedTable} report. Most of these are misalignments that
+#'  require removal. This function is used to automate most of the reduction
+#'  process by labeling rows as removable or conflicting, based on certain
+#'  conditions, and is performed after computing similarity scores.
 #'
 #'  A label may take on one of four values:
 #'
