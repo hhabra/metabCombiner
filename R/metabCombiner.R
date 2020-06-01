@@ -66,13 +66,13 @@ metabCombiner <- function(xdata, ydata, binGap = 0.005){
                        binGap = binGap)
 
     object@stats[["input_size_X"]] = nrow(xset)
-    object@nongrouped[["x"]] = dplyr::filter(xygroups[["x"]], .data$group == 0)
+    object@nonmatched[["x"]] = dplyr::filter(xygroups[["x"]], .data$group == 0)
     xset = dplyr::filter(xygroups[["x"]], .data$group > 0) %>%
            dplyr::arrange(.data$group)
     object@stats[["grouped_size_X"]] = nrow(xset)
 
     object@stats[["input_size_Y"]] = nrow(yset)
-    object@nongrouped[["y"]] = dplyr::filter(xygroups[["y"]], .data$group == 0)
+    object@nonmatched[["y"]] = dplyr::filter(xygroups[["y"]], .data$group == 0)
     yset = dplyr::filter(xygroups[["y"]], .data$group > 0) %>%
            dplyr::arrange(.data$group)
     object@stats[["grouped_size_Y"]] = nrow(yset)

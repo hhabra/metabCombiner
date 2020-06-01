@@ -16,7 +16,7 @@ key object statistics.
 \item{\code{combinedTable}}{A data.frame combining tables measurements and displaying
 all feature alignments}
 
-\item{\code{nongrouped}}{A list of data frames containing features from input tables
+\item{\code{nonmatched}}{A list of data frames containing features from input tables
 that could not be paired in \code{combinedTable}}
 
 \item{\code{anchors}}{A data.frame consisting of feature alignments to be used for

@@ -43,7 +43,7 @@ setClass("metabData", slots = c(data = "data.frame",
 #' @slot combinedTable  A data.frame combining tables measurements and displaying
 #' all feature alignments
 #'
-#' @slot nongrouped A list of data frames containing features from input tables
+#' @slot nonmatched A list of data frames containing features from input tables
 #' that could not be paired in \code{combinedTable}
 #'
 #' @slot anchors  A data.frame consisting of feature alignments to be used for
@@ -61,7 +61,7 @@ setClass("metabData", slots = c(data = "data.frame",
 #'
 #' @export
 setClass("metabCombiner", slots = c(combinedTable = "data.frame",
-                                    nongrouped = "list",
+                                    nonmatched = "list",
                                     anchors = "data.frame",
                                     model = "list",
                                     coefficients = "list",
@@ -71,7 +71,7 @@ setClass("metabCombiner", slots = c(combinedTable = "data.frame",
                           ),
                           prototype = prototype(
                                    combinedTable = data.frame(),
-                                   nongrouped = list(),
+                                   nonmatched = list(),
                                    anchors = data.frame(),
                                    model = list(),
                                    coefficients = list(),

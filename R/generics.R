@@ -3,12 +3,12 @@
 #' @title Obtain metabCombiner Feature Alignment Report
 #'
 #' @description Obtain constructed table reporting every possible metabolomics
-#' feature alignment (as determined by m/z binGap parameter).
+#' feature alignment.
 #'
 #' @param object metabCombiner object.
 #'
-#' @return Data frame combinedTable merged feature alignment report. The columns
-#' of the report are as follows:
+#' @return  Feature Pair Alignment report data.frame. The columns of the report
+#' are as follows:
 #'
 #' \item{idx}{Identities of features from dataset X}
 #' \item{idy}{Identities of features from dataset Y}
@@ -29,7 +29,6 @@
 #'
 #' @export
 setGeneric("combinedTable", function(object) standardGeneric("combinedTable"))
-
 
 
 #' @title Get Ordered Retention Time Pairs
@@ -93,6 +92,7 @@ setGeneric("getModel", function(object, fit = c("gam", "loess")) standardGeneric
 #' @export
 setGeneric("getData", function(object) standardGeneric("getData"))
 
+
 #' Get Extra Data Column Names
 #'
 #' @param object metabCombiner or metabData object
@@ -105,12 +105,10 @@ setGeneric("getData", function(object) standardGeneric("getData"))
 setGeneric("getExtra", function(object, data = c("x", "y")) standardGeneric("getExtra"))
 
 
-
-
 #' @title Get Sample Names From metabCombiner Object
 #'
-#' \code{metabCombiner} objects consist of two formatted metabolomics feature
-#' tables. This method returns the sample names from one of the two datasets.
+#' @description \code{metabCombiner} objects consist of two formatted metabolomics
+#' feature tables. This method returns the sample names from one of the two datasets.
 #'
 #' @param object  metabCombiner or metabData object
 #'
@@ -125,6 +123,9 @@ setGeneric("getSamples", function(object, data = c("x", "y")) standardGeneric("g
 
 #' Get Object Statistics
 #'
+#' @description Prints out a list of object-specific statistics for both
+#' \code{metabCombiner} and \code{metabData} objects
+#'
 #' @param object metabCombiner or metabData object
 #'
 #' @return list of object-specific statistics
@@ -133,19 +134,19 @@ setGeneric("getSamples", function(object, data = c("x", "y")) standardGeneric("g
 setGeneric("getStats", function(object) standardGeneric("getStats"))
 
 
-#' @title Get Nongrouped Features
+#' @title Get Nonmatched Features
 #'
 #' @description
-#' Features that lack a close m/z counterpart in the complementary dataset are
-#' not grouped and can be obtained from this method. The \code{data} argument
-#' specifies from which dataset the non-grouped feature comes from.
+#' Features that lack a any counterparts in the complementary dataset may be
+#' obtained from this method.
 #'
 #' @param object  metabCombiner object
 #'
-#' @param data    Either one of 'x' or 'y'
+#' @param data    Either one of 'x' or 'y', specifying which dataset's nonmatched
+#'                features to return.
 #'
-#' @return If data is "x", returns non-grouped X features ; if "y", returns
-#'         non-grouped Y features
+#' @return If data is "x", returns non-matched X features ; if "y", returns
+#'         non-matched Y features
 #'
 #' @export
-setGeneric("nongrouped", function(object, data = c("x", "y")) standardGeneric("nongrouped"))
+setGeneric("nonmatched", function(object, data = c("x", "y")) standardGeneric("nonmatched"))

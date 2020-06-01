@@ -2,15 +2,15 @@
 #' @include generics.R classes.R
 
 
-#' @title Obtain Combiner Feature Alignment Report
+#' @title Obtain metabCombiner Report
 #'
-#' @description Obtain constructed table reporting every possible metabolomics
-#' feature alignment (as determined by m/z binGap parameter in metabCombiner().
+#' @description Returns the constructed table reporting every possible metabolomics
+#' feature pair alignment, as determined from m/z grouping step.
 #'
 #' @param object metabCombiner object.
 #'
-#' @return Data frame combinedTable merged feature alignment report. The columns
-#' of the report are as follows:
+#' @return data.frame \code{combinedTable} merged feature alignment report. The
+#' columns of the report are as follows:
 #'
 #' \item{idx}{Identities of features from dataset X}
 #' \item{idy}{Identities of features from dataset Y}
@@ -18,10 +18,10 @@
 #' \item{mzy}{m/z values of features from dataset Y}
 #' \item{rtx}{retention time values of features from dataset X}
 #' \item{rty}{retention time values of features from dataset Y}
-#' \item{rtProj}{model-projected (X->Y) retention times values}
+#' \item{rtProj}{model-projected retention time values from X to Y}
 #' \item{Qx}{abundance quantile values of features from dataset X}
 #' \item{Qy}{abundance quantile values of features from dataset Y}
-#' \item{group}{m/z feature group of feature pairing}
+#' \item{group}{m/z feature group}
 #' \item{score}{computed similarity scores of feature pairing}
 #' \item{rankX}{ranking of pairing score for X dataset features}
 #' \item{rankY}{ranking of pairing score for Y dataset features}
@@ -70,7 +70,16 @@ setMethod("getCoefficients", signature = "metabCombiner", function(object){
     return(object@coefficients)
 })
 
-#' @describeIn getModel Method for 'metabCombiner' object
+
+#' @title Get Fitted RT Model
+#'
+#' @description Returns the last fited RT projected model from a metabCombiner
+#' object of type "gam" or "loess".
+#'
+#' @param object \code{metabCombiner} object
+#'
+#' @param fit Choice of either "gam" or "loess" model
+#'
 #' @export
 setMethod("getModel", signature = "metabCombiner", function(object, fit = c("gam", "loess")){
     fit = match.arg(fit)
@@ -114,17 +123,18 @@ setMethod("getStats", signature = "metabCombiner", function(object){
     return(object@stats)
 })
 
-#' @describeIn nongrouped Method for 'metabCombiner' objects
+
+#' @describeIn nonmatched Method for 'metabCombiner' objects
 #'
 #' @export
-setMethod("nongrouped", signature = "metabCombiner", function(object, data = c("x", "y")){
+setMethod("nonmatched", signature = "metabCombiner", function(object, data = c("x", "y")){
   data = match.arg(data)
 
   if(data == "x")
-    return(object@nongrouped[["x"]])
+    return(object@nonmatched[["x"]])
 
   if(data == "y")
-    return(object@nongrouped[["y"]])
+    return(object@nonmatched[["y"]])
 })
 
 #' @rdname plot_Combiner
