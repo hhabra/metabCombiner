@@ -7,16 +7,16 @@
 detectFields(Data, table, mz, rt, id, adduct, samples, extra, Q)
 }
 \arguments{
-\item{Data}{a metabData object.}
+\item{Data}{a \code{metabData} object.}
 
 \item{table}{data frame containing metabolomics features or path to
 metabolomics data file.}
 
-\item{mz}{Character name(s) or regular expression associated with data
+\item{mz}{Character name(s) / regular expressions associated with data
 column containing m/z values. The first column whose name contains this
 expression will be selected for analysis.}
 
-\item{rt}{Character name(s) or regular expression associated with data
+\item{rt}{Character name(s) / regular expression associated with data
 column containing retention time values. The first column whose name contains
 this expression will be selected for analysis.}
 
@@ -43,5 +43,7 @@ feature abundance quantiles.}
 an initialized and formatted \code{metabData} object.
 }
 \description{
-Detect metabData Input Columns
+This function ensures that metabolomics datasets used as inputs
+for the program possess all of the required fields, plus any optional columns
+that may appear in the final report table.
 }
