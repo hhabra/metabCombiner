@@ -21,7 +21,8 @@ getStats(object)
 list of object-specific statistics
 }
 \description{
-Get Object Statistics
+Prints out a list of object-specific statistics for both
+\code{metabCombiner} and \code{metabData} objects
 }
 \section{Methods (by class)}{
 \itemize{

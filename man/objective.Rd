@@ -8,7 +8,7 @@ objective(cTable, identities, A, B, C, minScore, mzdiff, rtdiff, qdiff,
   rtrange, adductdiff, penalty, matches, mismatches)
 }
 \arguments{
-\item{cTable}{data frame. Abridged metabCombiner report table.}
+\item{cTable}{data frame. Abridged \code{metabCombiner} report table.}
 
 \item{identities}{data frame containing all evaluated identities}
 
@@ -33,15 +33,15 @@ observed retention time}
 \item{adductdiff}{Numeric divisors of computed score when non-empty adduct
 labels do not match}
 
-\item{penalty}{numeric. Subtractive mismatch penalty.}
+\item{penalty}{positive numeric penalty wherever S(i,j) > S(i,i), i \ne j}
 
 \item{matches}{integer row indices of identity matches}
 
 \item{mismatches}{list of integer mismatching identity rows for each identity}
 }
 \value{
-A numeric value quantifying the separability of similarity scores of
-features with matching ids vs mismatching ids.
+A numeric value quantifying total separability of compound match similarity
+scores from mismatch scores, given A,B,C values
 }
 \description{
 This function evaluates the A, B, C weight parameters in terms of score
@@ -58,10 +58,10 @@ Then, the objective value for a similarity S is evaluated as:
 
 -S(i,i) represents the similarity between correct identity alignments \cr
 -S(i,j), represents the maximum similarity of i to grouped feature j,
-        i \eqn{\leq} j (the highest-scoring misalignment) \cr
+        i \eqn{\ne} j (the highest-scoring misalignment) \cr
 -h(x) = x if x > \code{minScore}, 0 otherwise \cr
 -p(COND) = 0 if the condition is true, and a \code{penalty} value otherwise.
 
-This is summed over all labeled compound identitiesfound to be common
-in both input datasets.
+This is summed over all labeled compound identities (e.g. idx = idy) shared
+between input datasets.
 }

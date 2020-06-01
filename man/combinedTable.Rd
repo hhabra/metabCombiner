@@ -10,8 +10,8 @@ combinedTable(object)
 \item{object}{metabCombiner object.}
 }
 \value{
-Data frame combinedTable merged feature alignment report. The columns
-of the report are as follows:
+Feature Pair Alignment report data.frame. The columns of the report
+are as follows:
 
 \item{idx}{Identities of features from dataset X}
 \item{idy}{Identities of features from dataset Y}
@@ -32,5 +32,5 @@ of the report are as follows:
 }
 \description{
 Obtain constructed table reporting every possible metabolomics
-feature alignment (as determined by m/z binGap parameter).
+feature alignment.
 }

@@ -3,7 +3,7 @@
 \docType{methods}
 \name{combinedTable,metabCombiner-method}
 \alias{combinedTable,metabCombiner-method}
-\title{Obtain Combiner Feature Alignment Report}
+\title{Obtain metabCombiner Report}
 \usage{
 \S4method{combinedTable}{metabCombiner}(object)
 }
@@ -11,8 +11,8 @@
 \item{object}{metabCombiner object.}
 }
 \value{
-Data frame combinedTable merged feature alignment report. The columns
-of the report are as follows:
+data.frame \code{combinedTable} merged feature alignment report. The
+columns of the report are as follows:
 
 \item{idx}{Identities of features from dataset X}
 \item{idy}{Identities of features from dataset Y}
@@ -20,10 +20,10 @@ of the report are as follows:
 \item{mzy}{m/z values of features from dataset Y}
 \item{rtx}{retention time values of features from dataset X}
 \item{rty}{retention time values of features from dataset Y}
-\item{rtProj}{model-projected (X->Y) retention times values}
+\item{rtProj}{model-projected retention time values from X to Y}
 \item{Qx}{abundance quantile values of features from dataset X}
 \item{Qy}{abundance quantile values of features from dataset Y}
-\item{group}{m/z feature group of feature pairing}
+\item{group}{m/z feature group}
 \item{score}{computed similarity scores of feature pairing}
 \item{rankX}{ranking of pairing score for X dataset features}
 \item{rankY}{ranking of pairing score for Y dataset features}
@@ -32,6 +32,6 @@ of the report are as follows:
 \item{...}{Sample and extra columns from both datasets X & Y}
 }
 \description{
-Obtain constructed table reporting every possible metabolomics
-feature alignment (as determined by m/z binGap parameter in metabCombiner().
+Returns the constructed table reporting every possible metabolomics
+feature pair alignment, as determined from m/z grouping step.
 }

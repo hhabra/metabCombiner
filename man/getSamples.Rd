@@ -2,10 +2,7 @@
 % Please edit documentation in R/generics.R
 \name{getSamples}
 \alias{getSamples}
-\title{Get Sample Names From metabCombiner Object
-
-\code{metabCombiner} objects consist of two formatted metabolomics feature
-tables. This method returns the sample names from one of the two datasets.}
+\title{Get Sample Names From metabCombiner Object}
 \usage{
 getSamples(object, data = c("x", "y"))
 }
@@ -19,8 +16,6 @@ If data is "x", returns sample names for dataset X; if "y", returns
 sample names from dataset Y.
 }
 \description{
-Get Sample Names From metabCombiner Object
-
-\code{metabCombiner} objects consist of two formatted metabolomics feature
-tables. This method returns the sample names from one of the two datasets.
+\code{metabCombiner} objects consist of two formatted metabolomics
+feature tables. This method returns the sample names from one of the two datasets.
 }
