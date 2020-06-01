@@ -279,14 +279,14 @@ void findCons(SEXP labels, int* sub, int* alt, int* max, int *start,
  * 1) "IDENTITY" - Features with matching pre-determined identities. These rows not
  *    labeled as removable, even if score or rank restrictions are violated.
  *
- * 2) "CONFLICT" - Rows that have a conflicting match that is within m/z and rt
+ * 2) "CONFLICT" - Rows that have a conflicting match that is within score or m/z and rt
  *	  tolerances defined by "conflict", as well as meeting rank and score
- *	  restrictions defined by rankX, rankY, and minScore.
+ *	  restrictions defined by maxRankX, maxRankY, and minScore.
  *
  * 3) "REMOVE" - Rows that fail to meet at least one of the criteria (score <
- *    minScore, rankX > maxRankX, rankY > maxRankY, non-conflicting non-top match).
+ *    minScore, rankX > maxRankX, rankY > maxRankY, ...).
  *
- * 4) "" (empty) - feature alignments with no competitive matches
+ * 4) "" (empty) - feature pair alignments with no competitive matches
  *
  * Returns: Vector of labels.
  *
@@ -334,6 +334,7 @@ SEXP labelRows(SEXP labels, SEXP subgroup, SEXP alt, SEXP mzx, SEXP mzy, SEXP rt
 {
 	SEXP labels_c = PROTECT(duplicate(labels));
 
+	//R variables in C
 	int* subgroup_c = INTEGER(subgroup);
 	int* alt_c = INTEGER(alt);
 
@@ -352,28 +353,30 @@ SEXP labelRows(SEXP labels, SEXP subgroup, SEXP alt, SEXP mzx, SEXP mzy, SEXP rt
 	int maxRankX_c = INTEGER(maxRankX)[0];
 	int maxRankY_c = INTEGER(maxRankY)[0];
 	
-	//handling conflict detection method
+	//choosing conflict detection method
 	int method_c = INTEGER(method)[0];
 	void (*detect_fun)(SEXP, int*, int*, int, int, double*, double*, double*, double*,
 	                   int*, int, int*);
 	                   
-	int* head;   //special variable for score-conflict method
+	int* head;   //head index of subgroup; special variable for score-conflict method
 	
-	if(method_c == 1){
+	if (method_c == 2){
+	    detect_fun = detect_con_mzrt;
+		head = calloc(1, sizeof(int));
+	}
+	
+	else{
         detect_fun = detect_con_score;
         head = calloc(LENGTH(group), sizeof(int));
 	}
 	
-	else if (method_c == 2)
-	    detect_fun = detect_con_mzrt;
-		    	
 	//loop variables
 	int cursor = 0;
 	int* start = calloc(1,sizeof(int));
 	int* end = calloc(1,sizeof(int));
-	int* maxSub = calloc(1, sizeof(int)); 
+	int* maxSub = calloc(1, sizeof(int));    //current subgroup number
 	
-	//
+	//Main loop
 	while(cursor < LENGTH(group)){
 		cursor = detectGroup(cursor, group_c, start, end, LENGTH(group));
 
