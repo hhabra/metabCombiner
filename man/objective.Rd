@@ -33,7 +33,7 @@ observed retention time}
 \item{adductdiff}{Numeric divisors of computed score when non-empty adduct
 labels do not match}
 
-\item{penalty}{positive numeric penalty wherever S(i,j) > S(i,i), i \ne j}
+\item{penalty}{positive numeric penalty wherever S(i,j) > S(i,i), i =/= j}
 
 \item{matches}{integer row indices of identity matches}
 
@@ -58,7 +58,7 @@ Then, the objective value for a similarity S is evaluated as:
 
 -S(i,i) represents the similarity between correct identity alignments \cr
 -S(i,j), represents the maximum similarity of i to grouped feature j,
-        i \eqn{\ne} j (the highest-scoring misalignment) \cr
+        i =/= j (the highest-scoring misalignment) \cr
 -h(x) = x if x > \code{minScore}, 0 otherwise \cr
 -p(COND) = 0 if the condition is true, and a \code{penalty} value otherwise.
 
