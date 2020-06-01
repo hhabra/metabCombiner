@@ -1,11 +1,11 @@
 #' @title Read Metabolomics Feature Table From File.
 #'
 #' @description Reads in the input file as a data frame. Only a tab-delimited
-#'   .txt file or a .csv file will be accepted.
+#' .txt file or a .csv file will be accepted.
 #'
-#' @param file     character. File path to tab-delimited .txt or .csv file
+#' @param file  character. File path to tab-delimited .txt or .csv file
 #'
-#' @return     The input file read in as a data frame
+#' @return  The input file read in as a data frame
 #'
 #' @examples
 #' readData("data1.csv")
@@ -27,7 +27,6 @@ readData <- function(file){
     return(data)
 }
 
-##
 #' @title Detect Keywords in Column Names
 #'
 #' @description Helper function for metabData() constructor, used to detect
@@ -209,16 +208,20 @@ selectColumn <- function(table, col = NULL){
 
 #' @title Detect metabData Input Columns
 #'
-#' @param Data      a metabData object.
+#' @description This function ensures that metabolomics datasets used as inputs
+#' for the program possess all of the required fields, plus any optional columns
+#' that may appear in the final report table.
 #'
-#' @param table     data frame containing metabolomics features or path to
+#' @param Data  a \code{metabData} object.
+#'
+#' @param table data frame containing metabolomics features or path to
 #' metabolomics data file.
 #'
-#' @param mz    Character name(s) or regular expression associated with data
+#' @param mz    Character name(s) / regular expressions associated with data
 #' column containing m/z values. The first column whose name contains this
 #' expression will be selected for analysis.
 #'
-#' @param rt    Character name(s) or regular expression associated with data
+#' @param rt    Character name(s) / regular expression associated with data
 #' column containing retention time values. The first column whose name contains
 #' this expression will be selected for analysis.
 #'

@@ -50,7 +50,7 @@ mismatchScore <- function(cTable, mismatches)
 #' separability of matching versus mismatching compound alignments. Higher
 #' objective function value imply a superior weight parameter selection.
 #'
-#' @param cTable  data frame. Abridged metabCombiner report table.
+#' @param cTable  data frame. Abridged \code{metabCombiner} report table.
 #'
 #' @param identities  data frame containing all evaluated identities
 #'
@@ -75,7 +75,7 @@ mismatchScore <- function(cTable, mismatches)
 #' @param adductdiff Numeric divisors of computed score when non-empty adduct
 #'                   labels do not match
 #'
-#' @param penalty  numeric. Subtractive mismatch penalty.
+#' @param penalty  positive numeric penalty wherever S(i,j) > S(i,i), i \ne j
 #'
 #' @param matches  integer row indices of identity matches
 #'
@@ -91,16 +91,16 @@ mismatchScore <- function(cTable, mismatches)
 #'
 #' -S(i,i) represents the similarity between correct identity alignments \cr
 #' -S(i,j), represents the maximum similarity of i to grouped feature j,
-#'         i \eqn{\leq} j (the highest-scoring misalignment) \cr
+#'         i \eqn{\ne} j (the highest-scoring misalignment) \cr
 #' -h(x) = x if x > \code{minScore}, 0 otherwise \cr
 #' -p(COND) = 0 if the condition is true, and a \code{penalty} value otherwise.
 #'
-#' This is summed over all labeled compound identitiesfound to be common
-#' in both input datasets.
+#' This is summed over all labeled compound identities (e.g. idx = idy) shared
+#' between input datasets.
 #'
 #' @return
-#' A numeric value quantifying the separability of similarity scores of
-#' features with matching ids vs mismatching ids.
+#' A numeric value quantifying total separability of compound match similarity
+#' scores from mismatch scores, given A,B,C values
 objective <- function(cTable, identities, A, B, C, minScore, mzdiff, rtdiff,
                       qdiff, rtrange, adductdiff, penalty, matches, mismatches)
 {
