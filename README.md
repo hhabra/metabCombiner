@@ -1,8 +1,8 @@
-# metabCombiner: LC-MS metabolomics Feature-Matching 
+#metabCombiner
 
-This is an R package for cross-dataset alignment of disparately-acquired untargeted LC-MS metabolomics datasets. metabCombiner takes a pair of peak-picked and aligned untargeted LC-MS datasets and determines overlapping <mass-to-charge (m/z), retention time (rt)>  features, concatenating their measurements to form a combined table of sample mass spectral measurements.
+This is an R package for aligning a pair of disparately-acquired untargeted LC-MS metabolomics . metabCombiner takes peak-picked and conventionally aligned untargeted LC-MS datasets and determines the overlapping <mass-to-charge (m/z), retention time (rt)>  features, concatenating their measurements to form a combined table of sample mass spectral measurements.
 
-##installation
+#installation
 
 ```r
 #if devtools is not already installed:
@@ -11,9 +11,10 @@ install.packages("devtools")
 devtools::install_github("hhabra/metabCombiner")
 library(metabCombiner)
 ```
-##How to Use R Package
 
-In the [/inst directory](/inst/) directory, we have an example script showing an example of how to use this package. A longer description can be obtained by viewing the vignette, e.g. using browseVignettes("metabCombiner"). 
+# How to Use metabCombiner
+
+In the [/inst directory](/inst/) directory, we have an example metabCombiner script showing a demonstration of the package's utilities. See the vignette, e.g. type browseVignettes("metabCombiner"), for a more detailed description of how to use metabCombiner.
 
 
 
