@@ -12,7 +12,7 @@ devtools::install_github("hhabra/metabCombiner")
 library(metabCombiner)
 ```
 
-# How to Use metabCombiner
+## How to Use metabCombiner
 
 In the [/inst directory](/inst/) directory, we have an example metabCombiner script showing a demonstration of the package's utilities. See the vignette, e.g. type browseVignettes("metabCombiner"), for a more detailed description of how to use metabCombiner.
 
