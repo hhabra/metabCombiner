@@ -1,8 +1,8 @@
-#metabCombiner
+# metabCombiner
 
 This is an R package for aligning a pair of disparately-acquired untargeted LC-MS metabolomics . metabCombiner takes peak-picked and conventionally aligned untargeted LC-MS datasets and determines the overlapping <mass-to-charge (m/z), retention time (rt)>  features, concatenating their measurements to form a combined table of sample mass spectral measurements.
 
-#installation
+## installation
 
 ```r
 #if devtools is not already installed:
