@@ -19,19 +19,20 @@
 #' name contains this expression will be selected for analysis.
 #'
 #' @param adduct   Character name(s) or regular expression associated with data
-#' column containing adduct, formula, or additional annotations. The first
-#' column whose name contains this expression will be selected for analysis.
+#' column containing adduct or chemical formula annotations. The first column
+#' whose name contains this expression will be selected for analysis.
 #'
-#' @param samples   Character names of columns containing sample values. All
-#' numeric columns containing these keywords are selected for analysis. If no
-#' keywords given, will search for longest stretch of numeric columns remaining.
+#' @param samples   Character name(s) or regular expression associated with data
+#' columns. All numeric columns whose names contain these keywords are selected
+#' for analysis. If no keywords given, program searches longest stretch of
+#' remaining numeric columns.
 #'
 #' @param extra  Character names of columns containing additional feature
 #' information, e.g.  non-analyzed sample values. All columns containing these
-#' keywords are selected for analysis.
+#' keywords selected and will be displayed in the final output.
 #'
 #' @param Q   Character name(s) or regular expression associated with numeric
-#' feature abundance quantiles. If NULL, abundance quantiles will be calculated
+#' feature abundance quantiles. If NULL, abundance quantiles are calculated
 #' from sample intensities.
 #'
 #' @param rtmin     Numeric. Minimum retention time for analysis.
