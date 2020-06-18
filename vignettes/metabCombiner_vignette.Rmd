@@ -232,7 +232,7 @@ combined.table = combinedTable(p.combined.4)
 combined.table.2 = labelRows(combined.table, minScore = 0.5, maxRankX = 3, maxRankY = 3, method = "score", conflict = 0.2, remove = FALSE, balanced = TRUE)
 
 ##version 2: mzrt-based conflict detection
-combined.table.3 = labels(combined.table, minScore = 0.5, maxRankX = 3, maxRankY = 3, method = "mzrt", conflict = c(0.003,0.5,0.003,0.2), remove = FALSE, balanced = TRUE)
+combined.table.3 = labelRows(combined.table, minScore = 0.5, maxRankX = 3, maxRankY = 3, method = "mzrt", conflict = c(0.003,0.5,0.003,0.2), remove = FALSE, balanced = TRUE)
 ```
 
 Some agruments that must be specified are the *minScore*, *maxRankX* & *maxRankY* threshold values, as well as the *conflict* value. Conflicts occur between pairs of FPAs that share one feature in common and may require inspection to discern the correct match. There are two methods for detecting conflicts: 1) "score" and 2) "mzrt". In both, the top-scoring FPAs (rankX = 1 & rankY = 1) are used as a benchmark; if the difference in scores of the conflicting FPAs is small (first method), or the unshared feature is within a set m/z & rt tolerance (second method), then both FPAs are flagged. Otherwise, the lower-ranked FPA is deemed removable.
