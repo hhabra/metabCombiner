@@ -133,11 +133,11 @@ objective <- function(cTable, identities, A, B, C, minScore, mzdiff, rtdiff,
 #' @title Evaluate Similarity Score Parameters
 #'
 #' @description
-#' This function provides a method for guiding selection of suitable parameters for
-#' A, B, & C weight arguments in the \code{\link{calcScores}} method. Combinations
-#' of parameters are evaluated based on the similarity scores of matching and
-#' mismatching identity labels. Input datasets must have at least one compound
-#' identity in common (i.e. idx = idy), and preferably more than 10.
+#' This function provides a method for guiding selection of suitable values for
+#' A, B, & C weight arguments in the \code{\link{calcScores}} method, based on
+#' the similarity scores of shared identified compounds. Datasets must have at
+#' least one identity in common (i.e. idx = idy, case-insensitive), and
+#' preferably more than 10.
 #'
 #' @param object metabCombiner object
 #'

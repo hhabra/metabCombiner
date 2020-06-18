@@ -48,11 +48,11 @@ A data frame with the following columns:
 \item{score}{objective function evaluation of (A,B,C) weights}
 }
 \description{
-This function provides a method for guiding selection of suitable parameters for
-A, B, & C weight arguments in the \code{\link{calcScores}} method. Combinations
-of parameters are evaluated based on the similarity scores of matching and
-mismatching identity labels. Input datasets must have at least one compound
-identity in common (i.e. idx = idy), and preferably more than 10.
+This function provides a method for guiding selection of suitable values for
+A, B, & C weight arguments in the \code{\link{calcScores}} method, based on
+the similarity scores of shared identified compounds. Datasets must have at
+least one identity in common (i.e. idx = idy, case-insensitive), and
+preferably more than 10.
 }
 \details{
 An objective function, based on the accurate and inaccurate alignments of shared
