@@ -27,8 +27,7 @@ observed retention time}
 labels do not match}
 }
 \value{
-Pairwise score between two grouped features(between 0 & 1) evaluating
-         the likelihood of a compound match.
+Numeric similarity score between 0 & 1
 }
 \description{
 Helper function for \code{\link{calcScores}} &
@@ -40,11 +39,12 @@ The score between two grouped features x & y is calculated as:
 
 \deqn{S = -exp(-A |mzx - mzy| - B |rty - rtproj|/rtrange - C |Qx - Qy|)}
 
-where mzx & Qx correspond to the m/z and abundance quantile values of feature
-x; mzy, rty, and Qy correspond to the m/z, retention time, and abundance
-quantile values of feature y; rtproj is the model-projected retention time of
-feature x onto the retention times of the dataset containing y, and rtrange is
-the range of retention times of y dataset features. A, B, C are non-negative
-constant weight parameters for penalizing m/z, rt, and Q  differences. Values
-vary between 0 (no confidence combination) and 1 (high confidence alignment).
+where \code{mzx} & \code{Qx} correspond to the m/z and abundance quantile
+values of feature x; \code{mzy}, \code{rty}, and \code{Qy} correspond to the
+m/z, retention time, and abundance quantile values of feature y; \code{rtproj}
+is the model-projected retention time of feature x onto the Y dataset
+chromatogram and \code{rtrange} is the retention time range of the Y dataset
+chromatogram. \code{A}, \code{B}, \code{C} are non-negative constant weight
+parameters for penalizing m/z, rt, and Q  differences. Values between 0 (no
+confidence alignment) and 1 (high confidence alignment).
 }

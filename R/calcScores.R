@@ -55,16 +55,16 @@ mzdiff <- function(mzx, mzy, usePPM){
 #'
 #' \deqn{S = -exp(-A |mzx - mzy| - B |rty - rtproj|/rtrange - C |Qx - Qy|)}
 #'
-#' where mzx & Qx correspond to the m/z and abundance quantile values of feature
-#' x; mzy, rty, and Qy correspond to the m/z, retention time, and abundance
-#' quantile values of feature y; rtproj is the model-projected retention time of
-#' feature x onto the retention times of the dataset containing y, and rtrange is
-#' the range of retention times of y dataset features. A, B, C are non-negative
-#' constant weight parameters for penalizing m/z, rt, and Q  differences. Values
-#' vary between 0 (no confidence combination) and 1 (high confidence alignment).
+#' where \code{mzx} & \code{Qx} correspond to the m/z and abundance quantile
+#' values of feature x; \code{mzy}, \code{rty}, and \code{Qy} correspond to the
+#' m/z, retention time, and abundance quantile values of feature y; \code{rtproj}
+#' is the model-projected retention time of feature x onto the Y dataset
+#' chromatogram and \code{rtrange} is the retention time range of the Y dataset
+#' chromatogram. \code{A}, \code{B}, \code{C} are non-negative constant weight
+#' parameters for penalizing m/z, rt, and Q  differences. Values between 0 (no
+#' confidence alignment) and 1 (high confidence alignment).
 #'
-#' @return  Pairwise score between two grouped features(between 0 & 1) evaluating
-#'          the likelihood of a compound match.
+#' @return  Numeric similarity score between 0 & 1
 scorePairs <- function(A, B, C, mzdiff, rtdiff, qdiff, rtrange, adductdiff){
 
     nlogScore = A * abs(mzdiff) + B * abs(rtdiff) / rtrange + C * abs(qdiff)
@@ -79,7 +79,8 @@ scorePairs <- function(A, B, C, mzdiff, rtdiff, qdiff, rtrange, adductdiff){
 #' @title Compute Feature Similarity Scores
 #'
 #' @description Calculates a pairwise similarity (between 0 & 1) between all
-#' grouped features in \code{metabCombiner} object.
+#' grouped features in \code{metabCombiner} object. The similarity score
+#' calculation is described in \code{\link{scorePairs}}.
 #'
 #' @param object  metabCombiner object.
 #'
@@ -112,6 +113,34 @@ scorePairs <- function(A, B, C, mzdiff, rtdiff, qdiff, rtrange, adductdiff){
 #' computed model; score will contain the computed pairwise similarity scores of
 #' features from datasets x & y; rankX & rankY are the integer ranks of scores
 #' for x & y features in descending order.
+#'
+#' @details
+#'
+#' This function updates the \code{rtProj}, \code{score}, \code{rankX},
+#' and \code{rankY} columns in the \code{combinedTable} report. First, using the
+#' RT mapping model computed in the previous step(s), \code{rtx} values are
+#' projected onto \code{rty}. Then the program calculates similarity scores based
+#' on m/z, rt (fitted vs observed), and Q differences, with multiplicative weight
+#' penalties \code{A}, \code{B}, and \code{C}.
+#'
+#' If there are a sufficiently representative set of shared identities (idx = idy),
+#' the \code{\link{evaluateParams}} provides some guidance on appropriate \code{A},
+#'  \code{B}, and \code{C} values. In testing, the best values for \code{A} should
+#' lie between 50 and 120, according to mass accuracy; \code{B} should lie between
+#' 5 and 15 (higher if datasets processed under roughly identical conditions)
+#' depending on fitting accuracy; \code{C} should vary between 0 and 1, depending
+#' on sample similarity. See examples below.
+#'
+#' If using ppm (\code{usePPM} = TRUE), do not use the above guidelines for
+#' \code{A} values. The suggested range is between 0.01 and 0.05, though this
+#' hasn't been thoroughly tested yet. Also, if using adduct information
+#' (\code{useAdduct} = TRUE), the score is divided by the numeric \code{adduct}
+#' argument if non-empty and non-bracketed adduct values do not match. Be sure
+#' that adduct annotations are accurate before using this functionality.
+#'
+#' @seealso
+#' \code{\link{evaluateParams}}, \code{\link{scorePairs}}
+#'
 #'
 #' @examples
 #' \dontrun{

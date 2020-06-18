@@ -44,7 +44,31 @@ for x & y features in descending order.
 }
 \description{
 Calculates a pairwise similarity (between 0 & 1) between all
-grouped features in \code{metabCombiner} object.
+grouped features in \code{metabCombiner} object. The similarity score
+calculation is described in \code{\link{scorePairs}}.
+}
+\details{
+This function updates the \code{rtProj}, \code{score}, \code{rankX},
+and \code{rankY} columns in the \code{combinedTable} report. First, using the
+RT mapping model computed in the previous step(s), \code{rtx} values are
+projected onto \code{rty}. Then the program calculates similarity scores based
+on m/z, rt (fitted vs observed), and Q differences, with multiplicative weight
+penalties \code{A}, \code{B}, and \code{C}.
+
+If there are a sufficiently representative set of shared identities (idx = idy),
+the \code{\link{evaluateParams}} provides some guidance on appropriate \code{A},
+ \code{B}, and \code{C} values. In testing, the best values for \code{A} should
+lie between 50 and 120, according to mass accuracy; \code{B} should lie between
+5 and 15 (higher if datasets processed under roughly identical conditions)
+depending on fitting accuracy; \code{C} should vary between 0 and 1, depending
+on sample similarity. See examples below.
+
+If using ppm (\code{usePPM} = TRUE), do not use the above guidelines for
+\code{A} values. The suggested range is between 0.01 and 0.05, though this
+hasn't been thoroughly tested yet. Also, if using adduct information
+(\code{useAdduct} = TRUE), the score is divided by the numeric \code{adduct}
+argument if non-empty and non-bracketed adduct values do not match. Be sure
+that adduct annotations are accurate before using this functionality.
 }
 \examples{
 \dontrun{
@@ -86,4 +110,7 @@ p.combined = calcScores(p.combined, A = 90, B = 14, C = 0.5, useAdduct = TRUE,
 cTable = combinedTable(p.combined)
 }
 
+}
+\seealso{
+\code{\link{evaluateParams}}, \code{\link{scorePairs}}
 }
