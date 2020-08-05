@@ -1,5 +1,5 @@
 Package: metabCombiner
-Version: 1.0.0
+Version: 1.0.1
 Date: 2019-09-27
 Title: Method for Combining LC-MS Metabolomics Feature Measurements
 Author: Authors@R: c(
@@ -39,7 +39,7 @@ Collate:
     'methods-metabCombiner.R'
     'methods-metabData.R'
     'mzGroup.R'
-    'plot_Combiner.R'
+    'plot_fit.R'
     'selectAnchors.R'
     'write2file.R'
 Suggests: 
