@@ -4,33 +4,37 @@
 \alias{selectAnchors}
 \title{Select Anchors for Nonlinear RT Model}
 \usage{
-selectAnchors(object, useID = FALSE, tolMZ = 0.003, tolQ = 0.3,
-  windX = 0.03, windY = 0.03, brackets_ignore = c("(", "[", "{"))
+selectAnchors(object, useID = FALSE, tolmz = 0.003, tolQ = 0.3,
+  tolrtq = 0.5, windx = 0.03, windy = 0.03,
+  brackets_ignore = c("(", "[", "{"))
 }
 \arguments{
 \item{object}{metabCombiner object.}
 
 \item{useID}{logical. Option to first search for IDs as anchors.}
 
-\item{tolMZ}{numeric. m/z tolerance for prospective anchors}
+\item{tolmz}{numeric. m/z tolerance for prospective anchors}
 
 \item{tolQ}{numeric. Quantile Q tolerance for prospective anchors}
 
-\item{windX}{numeric. Retention time exclusion window around each anchor in
+\item{tolrtq}{numeric. Linear RT quantile tolerance for prosepctive anchors.}
+
+\item{windx}{numeric. Retention time exclusion window around each anchor in
 X dataset. Optimal values are between 0.01 and 0.05 min (1-3s)}
 
-\item{windY}{numeric. Retention time exclusion window around each anchor in
+\item{windy}{numeric. Retention time exclusion window around each anchor in
 dataset Y. Optimal values are between 0.01 and 0.05 min (1-3s)}
 
 \item{brackets_ignore}{If useID = TRUE, bracketed identity strings of the types
 included in this argument will be ignored.}
 }
 \value{
-An updated metabCombiner object containing a table of ordered feature
-pairs for fitting a nonlinear rt fitting model. The columns are as follows:
+\code{metabCombiner} object with updated \code{anchors} slot. This
+is a data.frame of feature pairs that shall be used to map between retention
+times using a nonlinear spline model.
 
-\item{idx}{Identities of features from dataset X}
-\item{idy}{Identities of features from dataset Y}
+\item{idx}{identities of features from dataset X}
+\item{idy}{identities of features from dataset Y}
 \item{mzx}{m/z values of features from dataset X}
 \item{mzy}{m/z values of features from dataset Y}
 \item{rtx}{retention time values of features from dataset X}
@@ -40,13 +44,13 @@ pairs for fitting a nonlinear rt fitting model. The columns are as follows:
 \item{adductX}{adduct label of features from dataset X}
 \item{adductY}{adduct label of features from dataset Y}
 \item{group}{m/z feature group of feature pairing}
-\item{labels}{Anchor labels; "I" for identity, "A" for normal anchors}
+\item{labels}{anchor labels; "I" for identity, "A" for normal anchors}
 }
 \description{
 A subset of all possible alignments in the \code{combinedTable} are used as
 ordered pairs to anchor a retention time projection model. Alignments of
 abundant features are prominent targets for anchor selection, but shared
-identified metabolites may also be used.
+identified features (i.e. feature pairs where idx = idy) may also be used.
 }
 \details{
 In order to map between two sets of retention times, a set of ordered pairs
@@ -54,9 +58,14 @@ need to be selected for the spline fit. This function relies on mutually
 abundant features to select these ordered pairs. In iterative steps, the most
 abundant (as indicated by Q value) in one dataset is selected along with its
 counterpart, and all features within some retention time window specified by
-\code{windX} & \code{windY} arguments are excluded. This process is repeated
-until all features have been considered. \code{tolQ} & \code{tolMZ} arguments
-can restrict to pairs that have differences in Q & m/z within these tolerances.
+\code{windx} & \code{windy} arguments are excluded. This process is repeated
+until all features have been considered.
+
+\code{tolQ} & \code{tolmz} arguments restrict to feature pairs that have
+differences in Q & m/z within these tolerances. \code{tolrtq} further limits
+feature pairs to those with absolute differences in linear retention time
+quantiles, here calculated as rtqx = (rtx - min(rtx)) / (max(rtx) - min(rtx))
+and rtqy = (rty - min(rty)) / (max(rty) - min(rty))
 
 Shared identities (in which idx & idy columns have matching, non-empty &
 non-bracketed strings) may be used if \code{useID} ise set to \code{TRUE}. In
@@ -75,15 +84,19 @@ p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
 p.combined = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
 
 ##example 1 (no known IDs used)
-p.combined = selectAnchors(p.combined, tolMZ = 0.003, tolQ = 0.3, windX = 0.03,
-                           windY = 0.02)
+p.combined = selectAnchors(p.combined, tolmz = 0.003, tolQ = 0.3, windx = 0.03,
+                           windy = 0.02)
 
 ##example 2 (known IDs used)
-p.combined = selectAnchors(p.combined, useID = TRUE, tolMZ = 0.003, tolQ = 0.3)
+p.combined = selectAnchors(p.combined, useID = TRUE, tolmz = 0.003, tolQ = 0.3)
 
 ##To View Plot of Ordered Pairs
 anchors = getAnchors(p.combined)
 plot(anchors$rtx, anchors$rty, main = "Selected Anchor Ordered Pairs",
      xlab = "rtx", ylab = "rty")
 }
+
+}
+\seealso{
+\code{\link{getAnchors}}, \code{\link{fit_gam}}, \code{\link{fit_loess}}
 }
