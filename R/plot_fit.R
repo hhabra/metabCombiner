@@ -1,19 +1,21 @@
 #' @title Plot metabCombiner Fits
 #'
 #' @description
-#' This is a plotting method for metabCombiner objects. It displays anchoring
+#' This is a plotting method for metabCombiner objects. It displays
 #' ordered pairs and a curve fit computed using \code{fit_gam} or
-#' \code{fit_loess}, using R's basic graphics.
+#' \code{fit_loess}, using base R graphics.
 #'
 #' @param object metabCombiner object
 #'
-#' @param fit Choice of model (either "gam" or "loess").
+#' @param fit choice of model (either "gam" or "loess").
 #'
 #' @param pcol color of the points (ordered pairs) in the plot.
 #'
 #' @param lcol color of the fitted line in the plot
 #'
-#' @param lwd line width of the curve fit between anchor points.
+#' @param lwd line width of the curve fit between anchor points
+#'
+#' @param remove.outliers logical, option to exclude outlier anchors in plot
 #'
 #' @param ... Other variables passed into graphics::plot
 #'
@@ -33,15 +35,17 @@
 #' ##plot of GAM fit
 #' plot(p.combined, main = "Example GAM Fit Plot", xlab = "X Dataset RTs",
 #'      ylab = "Y Dataset RTs", pcol = "red", lcol = "blue", lwd = 5, pch = 19)
+#'
 #' grid(lwd =  2, lty = 3 ) #adding gridlines
 #'
 #' ##plot of loess fit
 #' plot(p.combined, fit = "loess", main = "Example loess Fit Plot",
 #'      xlab = "X Dataset RTs", ylab = "Y Dataset RTs", pcol = "dark orange",
-#'      lcol = "dark green", pch = 8)
-#' }
+#'      lcol = "dark green", pch = 8, remove.outliers = TRUE)
+#'}
 #' @export
-plot_Combiner <- function(object, fit = c("gam","loess"), pcol, lcol, lwd,...)
+plot_fit <- function(object, fit = c("gam","loess"), pcol, lcol, lwd,
+                     remove.outliers = FALSE, ...)
 {
     fit = match.arg(fit)
     model = getModel(object, fit = fit)
@@ -58,10 +62,13 @@ plot_Combiner <- function(object, fit = c("gam","loess"), pcol, lcol, lwd,...)
     else if (fit == "gam")
         data = data.frame(rtx = model$model$rtx,
                           rty = model$model$rty,
-                          pred = model[["fitted.values"]],
+                          preds = model[["fitted.values"]],
                           weights = model[["prior.weights"]])
 
-    data = dplyr::arrange(data, rtx)
+    data = dplyr::arrange(data, .data$rtx)
+
+    if(remove.outliers)
+        data = dplyr::filter(data, .data$weights > 0)
 
     if(missing(pcol))
         pcol = "black"
@@ -74,6 +81,6 @@ plot_Combiner <- function(object, fit = c("gam","loess"), pcol, lcol, lwd,...)
     rty = data[["rty"]]
 
     graphics::plot(rtx, rty, type = "p", col = pcol,...)
-    graphics::lines(x = data[["rtx"]], y = data[["pred"]],
+    graphics::lines(x = data[["rtx"]], y = data[["preds"]],
                     col = lcol, lwd = lwd,...)
 }
