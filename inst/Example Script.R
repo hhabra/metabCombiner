@@ -40,8 +40,8 @@ data.report = combinedTable(data.combined)  ###a template of the final report ta
 
 ########################### Compute RT Mapping ################################
 
-data.combined = selectAnchors(data.combined, useID = TRUE, windX = 0.03,
-                              windY = 0.03, tolMZ = 0.003, tolQ = 0.3)
+data.combined = selectAnchors(data.combined, useID = TRUE, windx = 0.03,
+                              windy = 0.03, tolmz = 0.003, tolQ = 0.3)
 
 anchors = getAnchors(data.combined)   #to view the results of anchor selection
 
