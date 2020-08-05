@@ -137,7 +137,7 @@ setMethod("nonmatched", signature = "metabCombiner", function(object, data = c("
     return(object@nonmatched[["y"]])
 })
 
-#' @rdname plot_Combiner
+#' @rdname plot_fit
 #'
 #' @param x  \code{metabCombiner} object
 #'
@@ -145,7 +145,7 @@ setMethod("nonmatched", signature = "metabCombiner", function(object, data = c("
 #'
 #'@export
 setMethod("plot", signature = "metabCombiner", function(x,y,...){
-    plot_Combiner(object = x,...)
+    plot_fit(object = x,...)
 })
 
 
