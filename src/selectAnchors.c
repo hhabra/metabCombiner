@@ -19,19 +19,19 @@
  * Function: updateLabels
  * -------------------------
  *
- * Helper function. All features within windX units in rtx or windY units in rty of the
+ * Helper function. All features within windx units in rtx or windy units in rty of the
  * matched identity are eliminated as potential anchors by being labeled "N".
  *  
 */
-void updateLabels(SEXP labels, int f, double windX, double windY, 
+void updateLabels(SEXP labels, int f, double windx, double windy, 
 				   double* rtx, double* rty, double* rts)
 {
 	const char *label = CHAR(STRING_ELT(labels, f)); 
 			
 	if(strcmp(label,"P") == 0)
 	{
-		if(	fabs(rtx[f] - rts[0]) < windX || 
-			fabs(rty[f] - rts[1]) < windY)
+		if(	fabs(rtx[f] - rts[0]) < windx || 
+			fabs(rty[f] - rts[1]) < windy)
 		{
 			SET_STRING_ELT(labels, f, mkChar("N"));
 		}
@@ -82,7 +82,7 @@ int findMaxQ(SEXP labels, double* Qx, double* Qy, double* rtx, int length)
  * -----------------------------
  * 
  * For each previously assigned identity pair, removes feature pairs labeled "P" 
- * (potential anchors) whose rtx or rty is within windX or windY units. 
+ * (potential anchors) whose rtx or rty is within windx or windy units. 
  * 
  * Returns: updated labels ("I" for identity, "P" for potential, "N" for non-anchor)
  * 
@@ -97,15 +97,15 @@ int findMaxQ(SEXP labels, double* Qx, double* Qy, double* rtx, int length)
  *
  * rty: vector of numeric retention times corresponding to y-dataset features 
  *
- * windX: numeric retention time window value. Features within windX units in rtx 
+ * windx: numeric retention time window value. Features within windx units in rtx 
  * are labeled "N" (for non-anchor).
  *
- * windY: numeric retention time window value. Features within windY units of anchor
+ * windy: numeric retention time window value. Features within windy units of anchor
  * in rty are labeled "N" (for non-anchor).
  *
 */ 
 SEXP selectAnchorsByID(SEXP labels, SEXP ids, SEXP rtx, SEXP rty, 
-					   SEXP windX, SEXP windY)
+					   SEXP windx, SEXP windy)
 {
 
 	//duplicate copy of labels
@@ -115,8 +115,8 @@ SEXP selectAnchorsByID(SEXP labels, SEXP ids, SEXP rtx, SEXP rty,
 	int* ids_c = INTEGER(ids);
 	double* rtx_c = REAL(rtx);
 	double* rty_c = REAL(rty);
-	double windX_c = REAL(windX)[0];
-	double windY_c = REAL(windY)[0];
+	double windx_c = REAL(windx)[0];
+	double windy_c = REAL(windy)[0];
 	
 	int length = LENGTH(labels);
 	int numIds = LENGTH(ids);
@@ -128,7 +128,7 @@ SEXP selectAnchorsByID(SEXP labels, SEXP ids, SEXP rtx, SEXP rty,
 		rts[1] = rty_c[index];
 		
 		for(int feat = 0; feat < length; feat++){
-			updateLabels(labels_copy, feat, windX_c, windY_c, rtx_c, rty_c, rts);
+			updateLabels(labels_copy, feat, windx_c, windy_c, rtx_c, rty_c, rts);
 		}
 	}
 	
@@ -158,15 +158,15 @@ SEXP selectAnchorsByID(SEXP labels, SEXP ids, SEXP rtx, SEXP rty,
  *
  * Qy: vector of numeric abundance Q values corresponding to y-dataset features  
  *
- * windX: numeric RT window value. Features within windX units of anchor in rtx 
+ * windx: numeric RT window value. Features within windx units of anchor in rtx 
  * are labeled "N" (for non-anchor).
  *
- * windY: numeric RT window value. Features within windY units of anchor in rty
+ * windy: numeric RT window value. Features within windy units of anchor in rty
  * are labeled "N" (for non-anchor)
  *
 */
 SEXP selectIterativeAnchors(SEXP labels, SEXP rtx, SEXP rty, SEXP Qx, SEXP Qy, 
-							SEXP windX, SEXP windY)
+							SEXP windx, SEXP windy)
 {						
 	//duplicate copy of labels
 	SEXP labels_copy = PROTECT(duplicate(labels));
@@ -177,8 +177,8 @@ SEXP selectIterativeAnchors(SEXP labels, SEXP rtx, SEXP rty, SEXP Qx, SEXP Qy,
 	double* Qx_c = REAL(Qx);
 	double* Qy_c = REAL(Qy);
 	
-	double windX_c = REAL(windX)[0];
-	double windY_c = REAL(windY)[0];
+	double windx_c = REAL(windx)[0];
+	double windy_c = REAL(windy)[0];
 	
 	//loop variables
 	int length = LENGTH(labels);
@@ -198,7 +198,7 @@ SEXP selectIterativeAnchors(SEXP labels, SEXP rtx, SEXP rty, SEXP Qx, SEXP Qy,
 		
 		//update labels: exclude features within RT window of labeled anchors
 		for(int feat = 0; feat < length; feat++){
-			updateLabels(labels_copy, feat, windX_c, windY_c, rtx_c, rty_c, rts);			
+			updateLabels(labels_copy, feat, windx_c, windy_c, rtx_c, rty_c, rts);			
 		}		
 	}
 		
