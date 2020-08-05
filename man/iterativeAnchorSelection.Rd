@@ -4,24 +4,27 @@
 \alias{iterativeAnchorSelection}
 \title{Iteratively Select Ordered Feature Pairs}
 \usage{
-iterativeAnchorSelection(cTable, windX, windY, swap = FALSE)
+iterativeAnchorSelection(cTable, windx, windy, swap = FALSE)
 }
 \arguments{
 \item{cTable}{data frame, contains only feature ids, mzs, rts, Qs, & labels}
 
-\item{windX}{numeric positive retention time exclusion window in X dataset.}
+\item{windx}{numeric positive retention time exclusion window in X dataset.}
 
-\item{windY}{numeric positive retention time exclusion windown in Y dataset.}
+\item{windy}{numeric positive retention time exclusion windown in Y dataset.}
 
 \item{swap}{logical. When FALSE, searches for abundant features in dataset X,
 complemented by dataset Y features; when TRUE, searches for abundant features
 in dataset Y, complemented by dataset X features.}
 }
 \value{
-Data frame of anchor feature alignments.
+data frame of anchor feature alignments.
 }
 \description{
 This is a helper function for \code{selectAnchors}. Anchors are iteratively
 selected from highly abundant feature pairs, subject to feature m/z, rt, & Q
 constraints set by the user.
+}
+\seealso{
+\code{\link{selectAnchors}}
 }
