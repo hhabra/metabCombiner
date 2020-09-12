@@ -1,0 +1,47 @@
+##########################
+# LabelRows Test
+##########################
+
+context("labelRows + full-workflow")
+
+test_that("full workflow + row labeling", {
+    data("plasma20")
+    data("plasma30")
+
+    p20 = metabData(plasma20, zero = TRUE, samples = "CHEAR")
+    p30 = metabData(plasma30, zero = TRUE, samples = "CHEAR")
+
+    p = metabCombiner(p30,p20, binGap = 0.0075)
+    p = selectAnchors(p, windx = 0.03, windy = 0.02)
+
+    set.seed(100)
+    p = fit_gam(p, k = seq(14,20,2), family = "gaussian", iterFilter = 2,
+                method = "GCV.Cp")
+
+    scores = evaluateParams(p, A = seq(60,100,10), B = seq(10,15),
+                            C = seq(0,0.5,0.1), minScore = 0.7)
+
+    p = calcScores(p, A = scores$A[1], B = scores$B[1], C = scores$C[1])
+
+    p = labelRows(p, minScore = 0.5, maxRankX = 2, maxRankY = 2,
+                    method = "score", conflict = 0.15, remove = TRUE)
+
+    p.output = combinedTable(p)
+
+    labels = c("", "CONFLICT", "IDENTITY")
+    expect_equal(sort(unique(p.output[["labels"]])), labels)
+    expect_equal(sum(p.output[["labels"]] == "IDENTITY"), 527)
+
+    p.output.2 = dplyr::filter(p.output, .data$labels != "IDENTITY")
+    expect_equal(max(p.output.2[["rankX"]]), 2)
+    expect_equal(max(p.output.2[["rankY"]]), 2)
+
+    expect_false(any(p.output.2[["score"]] < 0.5))
+
+    expect_error(labelRows(p, method = "mzrt", conflict = 0.1))
+    expect_error(labelRows(p, minScore = 1, conflict = 0.1))
+    expect_error(labelRows(p, maxRankX = 0, conflict = 0.1))
+})
+
+
+

@@ -22,15 +22,15 @@ test_that("field detection tests",{
     plasma20$rt[25] = plasma20$rt[25] * -1
     expect_error(metabData(plasma20, samples = "RedCross", extra = "CHEAR"))
 
-    plasma20$rt[25] = plasma20$rt[25] * -100
+    plasma20$rt[25] = plasma20$rt[25] * -10000
     expect_warning(metabData(plasma20, samples = "RedCross", extra = "CHEAR"))
 
-    plasma20$rt[25] = plasma20$rt[25] * 1/100
+    plasma20$rt[25] = plasma20$rt[25] * 1/10000
     plasma20$mz[3] = plasma20$mz[3] * 100
     expect_warning(metabData(plasma20, samples = "RedCross", extra = "CHEAR"))
 
     plasma20$mz[3] = plasma20$mz[3] / 100
-    p20 = metabData(plasma20)
+    p20 = suppressWarnings(metabData(plasma20))
     expect_equivalent(grep("POOL|CHEAR|Red|Bl", names(plasma20), value = TRUE),
                       getSamples(p20))
 
@@ -42,8 +42,8 @@ test_that("RT filtering test", {
     data("plasma20")
     p20 = metabData(plasma20, samples = "CHEAR", misspc = 15, rtmax = 17.25)
 
-    expect_less_than(max(getData(p20)[["rt"]]), 17.25)
-    expect_more_than(getStats(p20)[["filtered_by_rt"]], 0)
+    expect_lt(max(getData(p20)[["rt"]]), 17.25)
+    expect_gt(getStats(p20)[["filtered_by_rt"]], 0)
 })
 
 
