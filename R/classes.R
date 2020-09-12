@@ -5,16 +5,15 @@
 #' @title 'metabData' Single Metabolomics Dataset Class
 #'
 #' @description
-#' This class is designed to pre-process, format, and facilitate the subsequent
-#' combining of input metabolomics feature tables. It stores the information of
-#' a single metabolomics dataset, including the formatted feature table, sample
-#' names, and feature statistics.
+#' This class is designed to process and format input metabolomics feature
+#' tables. It stores the information from individual metabolomics datasets,
+#' including the formatted feature table, sample names, and feature statistics.
 #'
-#' @slot data A formatted metabolomics data frame.
+#' @slot data formatted metabolomics data frame.
 #'
-#' @slot samples A character vector of analyzed samples.
+#' @slot samples character vector of analyzed sample names
 #'
-#' @slot extra A character vector of names pertaining to non-analyzed columns
+#' @slot extra character vector of non-analyzed columns names
 #'
 #' @slot stats A list of dataset statistics
 #'
@@ -23,12 +22,12 @@ setClass("metabData", slots = c(data = "data.frame",
                                 samples = "character",
                                 extra = "character",
                                 stats = "list"),
-                      prototype = prototype(
-                                 data = data.frame(),
-                                 samples = character(),
-                                 extra = character(),
-                                 stats = list()
-                      )
+                    prototype = prototype(
+                                data = data.frame(),
+                                samples = character(),
+                                extra = character(),
+                                stats = list()
+                    )
 )
 
 
@@ -40,24 +39,22 @@ setClass("metabData", slots = c(data = "data.frame",
 #' projection model, the ordered pair anchors used to generate this model, and
 #' key object statistics.
 #'
-#' @slot combinedTable  A data.frame combining tables measurements and displaying
-#' all feature alignments
+#' @slot combinedTable data.frame displaying all feature pair alignments,
+#' combining measurements of all possible shared compounds
 #'
-#' @slot nonmatched A list of data frames containing features from input tables
-#' that could not be paired in \code{combinedTable}
+#' @slot nonmatched list of data frames consisting of nonmatched features
 #'
-#' @slot anchors  A data.frame consisting of feature alignments to be used for
-#' fitting a nonlinear retention time projection model
+#' @slot anchors data.frame of of feature alignments used for rt modeling
 #'
-#' @slot model  A list containing the last fitted nonlinear model(s).
+#' @slot model  list containing the last fitted nonlinear model(s)
 #'
-#' @slot coefficients A list of last used A,B,C similarity weight values
+#' @slot coefficients list of last used A,B,C similarity weight values
 #'
-#' @slot samples A list of sample name character vectors from input datasets
+#' @slot samples list of sample name vectors from input datasets
 #'
-#' @slot extra A list of extra column chacter name vectors from input datasets
+#' @slot extra list of extra column name vectors from input datasets
 #'
-#' @slot stats A set of useful metabCombiner statistics
+#' @slot stats set of useful metabCombiner statistics
 #'
 #' @export
 setClass("metabCombiner", slots = c(combinedTable = "data.frame",
@@ -68,15 +65,15 @@ setClass("metabCombiner", slots = c(combinedTable = "data.frame",
                                     samples = "list",
                                     extra = "list",
                                     stats = "list"
-                          ),
-                          prototype = prototype(
-                                   combinedTable = data.frame(),
-                                   nonmatched = list(),
-                                   anchors = data.frame(),
-                                   model = list(),
-                                   coefficients = list(),
-                                   samples = list(),
-                                   extra = list(),
-                                   stats = list()
-                          )
+                            ),
+                            prototype = prototype(
+                                    combinedTable = data.frame(),
+                                    nonmatched = list(),
+                                    anchors = data.frame(),
+                                    model = list(),
+                                    coefficients = list(),
+                                    samples = list(),
+                                    extra = list(),
+                                    stats = list()
+                            )
 )
