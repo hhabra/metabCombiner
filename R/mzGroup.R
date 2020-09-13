@@ -9,7 +9,8 @@
 #'
 #' @param yset data frame containing metabolomics features
 #'
-#' @param binGap numeric. Gap between concecutive sorted pooled feature m/z values.
+#' @param binGap numeric gap value between consecutive sorted & pooled feature
+#'              m/z values.
 #'
 #' @details
 #' The m/z values from both datasets are pooled, sorted, and binned by the
@@ -24,7 +25,8 @@ mzGroup <- function(xset, yset, binGap){
     mzGroups <- data.frame(`mz` = c(xset[["mz"]], yset[["mz"]])) %>%
                 dplyr::mutate(`set` = c(rep("x", nrow(xset)),
                                         rep("y", nrow(yset))),
-                              `index` = c(1:nrow(xset), 1:nrow(yset))) %>%
+                            `index` = c(seq(1,nrow(xset)),
+                                        seq(1,nrow(yset)))) %>%
                 dplyr::arrange(.data$mz)
 
     if(!is.numeric(mzGroups[["mz"]]) | any(is.na(mzGroups[["mz"]])) |
@@ -32,15 +34,15 @@ mzGroup <- function(xset, yset, binGap){
         stop("At least one negative, missing, or non-numeric m/z value")
 
     mzGroups[["group"]] <- .Call("binByMZ",
-                                  mz = mzGroups[["mz"]],
-                                  datasets = mzGroups[["set"]],
-                                  gap = binGap,
-                                  PACKAGE = "metabCombiner")
+                                    mz = mzGroups[["mz"]],
+                                    datasets = mzGroups[["set"]],
+                                    gap = binGap,
+                                    PACKAGE = "metabCombiner")
 
     xgroups <- dplyr::filter(mzGroups, .data$set == "x") %>%
-               dplyr::arrange(.data$index)
+                dplyr::arrange(.data$index)
     ygroups <- dplyr::filter(mzGroups, .data$set == "y") %>%
-               dplyr::arrange(.data$index)
+                dplyr::arrange(.data$index)
 
     xset[["group"]] = xgroups[["group"]]
     yset[["group"]] = ygroups[["group"]]

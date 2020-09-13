@@ -1,4 +1,4 @@
-##
+
 #' @title Form Combiner Report Table
 #'
 #' @description  Takes previously computed m/z groups using \code{mzGroup()}
@@ -16,26 +16,25 @@
 #' @return metabCombiner object with initialized combinedTable data frame.
 ##
 formCombinedTable <- function(object, xset, yset, nGroups){
-    if(class(object) != "metabCombiner")
+    if(!methods::is(object, "metabCombiner"))
         stop(paste(object, "is not a metabCombiner object"))
 
     groupCountX = as.integer(table(xset[["group"]]))
     groupCountY = as.integer(table(yset[["group"]]))
 
-    if(any(groupCountX * groupCountY > 10000))
-        stop("Irregular group size detected (n > 10000)! Check m/z values.")
+    if(any(groupCountX * groupCountY >= 10000))
+        stop("irregular group size detected (n > 10000); check m/z values")
 
     totalRows = sum(groupCountX * groupCountY)
 
     xreps = rep(groupCountY, times = groupCountX)
-    xCombine = dplyr::slice(xset, rep(1:n(), times = xreps))
+    xCombine = dplyr::slice(xset, rep(seq(1,n()), times = xreps))
 
-    yreps = lapply(1:nGroups, function(number){
+    yreps = lapply(seq(1,nGroups), function(number){
         counts = base::rep(x = which(yset[["group"]] == number),
-                           times = groupCountX[number])
+                            times = groupCountX[number])
         return(counts)
     }) %>% unlist()
-
     yCombine = yset[yreps,]
 
     #combine groups into data frame
@@ -57,6 +56,8 @@ formCombinedTable <- function(object, xset, yset, nGroups){
                         stringsAsFactors = FALSE, check.names = FALSE
     )
 
+    cTable = dplyr::arrange(cTable, .data$group, .data$mzx, .data$rtx,
+                            .data$mzy, .data$rty)
     object@combinedTable = cTable
 
     return(object)
