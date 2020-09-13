@@ -1,18 +1,18 @@
 ---
-title: Combining LC-MS Metabolomics Datasets with metabCombiner
+title: Combine LC-MS Metabolomics Datasets with metabCombiner
 author: "Hani Habra"
 output: rmarkdown::html_vignette
 date: "`r Sys.Date()`"
 vignette: >
-  %\VignetteIndexEntry{Combine LC-MS Metabolomics Datasets with metabCombiner}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+    %\VignetteIndexEntry{Combine LC-MS Metabolomics Datasets with metabCombiner}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+    collapse = TRUE,
+    comment = "#>"
 )
 ```
 
@@ -28,7 +28,7 @@ Typically you will need to load a dataset from file into an R data.frame, e.g. u
 
 ```{r, eval = FALSE}
 metdata = read.delim("path_to_data_file.txt", sep = "\t", header = TRUE,
-                     stringsAsFactors = FALSE)
+                    stringsAsFactors = FALSE)
 ```
 
 There are three major assumptions that these datasets must conform to:
@@ -85,30 +85,35 @@ For the first five of these (mz, rt, id, adduct, Q), `metabData` searches for th
 
 Examples of keyword uses are below:
 ```{r, eval = FALSE}
-p20 = metabData(plasma20, mz = "mz", rt = "rt", id = "id", adduct = "adduct", samples = "CHEAR.20min", ...)
+p20 = metabData(plasma20, mz = "mz", rt = "rt", id = "id", adduct = "adduct", 
+                samples = "CHEAR.20min", ...)
 
 ##all of the following values for id argument give the same result
 p20 = metabData(plasma20, ..., id = "identity", ...)    #full column name   
 p20 = metabData(plasma20, ..., id = "^id", ...)  #column names starting with id
-p20 = metabData(plasma20, ..., id = c("compound|identity|name"),...)  #any one of these three keywords
 
-##all of the following values for samples argument give the same result
-p20 = metabData(plasma20, ..., samples = c("CHEAR.20min.1, CHEAR.20min.2, CHEAR.20min.3, CHEAR.20min.4, CHEAR.20min.5"), ...)     #explicit naming
+#any one of these three keywords
+p20 = metabData(plasma20, ..., id = c("compound,identity,name"),...)
 
-p20 = metabData(plasma20, ..., samples = names(plasma20)[6:10], ...) #column name indexing
+##all of the following inputs for samples argument give the same result
+p20 = metabData(plasma20, samples = c("CHEAR.20min.1, CHEAR.20min.2, 
+                                CHEAR.20min.3, CHEAR.20min.4, CHEAR.20min.5")
 
-#recommended method: use a keyword common and exclusive to sample names of interest
-p20 = metabData(plasma20, ..., samples = samples = "CHEAR", ...)  
-p20 = metabData(plasma20, ..., samples = samples = "CH", ...) 
+p20 = metabData(plasma20, samples = names(plasma20)[6:10], ...)
+
+#recommended: use a keyword common and exclusive to sample names of interest
+p20 = metabData(plasma20, ..., samples = "CHEAR", ...)  
+p20 = metabData(plasma20, ..., samples = "CH", ...) 
 ```
 
 To use one set of samples (e.g. CHEAR) for this analysis and retain the rest as "extra columns". Be sure that the correct sample and "extra" column names have been selected.
 
 ```{r, eval = FALSE}
-p20 = metabData(plasma20, mz = "mz", rt = "rt", id = "id", adduct = "adduct", samples = "CHEAR", extra = c("Red", "POOL", "Blank"),...)
+p20 = metabData(plasma20, mz = "mz", rt = "rt", id = "id", adduct = "adduct", 
+                samples = "CHEAR", extra = c("Red", "POOL", "Blank"),...)
 
 getSamples(p20)   #should return column names containing "CHEAR"
-getExtra(p20)   #should return column names containing "Red Cross", "POOL", and "Blank"
+getExtra(p20)   #should return column containing "Red Cross", "POOL", "Blank"
 ```
 
 ##Filtering Features
@@ -131,7 +136,10 @@ Once feature-filtering is performed, the central measure of feature intensities 
 Here is the full `metabData` function call for our "plasma20" dataset.
 
 ```{r}
-p20 <- metabData(table = plasma20, mz = "mz", rt = "rt", id = "identity", adduct = "adduct", samples = "CHEAR", extra = c("Red", "POOL", "Blank"), rtmin = "min", rtmax = 17, misspc = 50, measure = "median", zero = FALSE, duplicate = c(0.0025, 0.05))
+p20 <- metabData(table = plasma20, mz = "mz", rt = "rt", id = "identity", 
+                adduct = "adduct", samples = "Red", extra = c("CHEAR", "POOL"), 
+                rtmin = "min", rtmax = 17.25, measure = "median", zero = FALSE, 
+                duplicate = c(0.0025, 0.05))
 ```
 
 For the above call, the program defaults are used except for the arguments table, samples, extra, rtmax which needed specification. We must also use `metabData` for the other dataset we wish to align.
@@ -172,9 +180,10 @@ A central step of the workflow is retention time mapping, and we break it into t
 The method of selecting anchors relies on mutually abundant pairs of features. This is performed using the `selectAnchors` function. The results of this function can be viewed using the `getAnchors` method.
 
 ```{r, fig.width= 5, fig.height=4, fig.align='center'}
-p.combined.2 = selectAnchors(p.combined, windx = 0.03, windy = 0.02, tolmz = 0.003, tolQ = 0.3, useID = FALSE)
-anchors = getAnchors(p.combined.2)
-plot(anchors$rtx, anchors$rty, main = "Anchors Plot", xlab = "rtx", ylab = "rty")
+p.combined.2 = selectAnchors(p.combined, windx = 0.03,windy = 0.02, tolQ = 0.3,
+                            tolmz = 0.003, useID = FALSE)
+a = getAnchors(p.combined.2)
+plot(a$rtx, a$rty, main = "Fit Template", xlab = "rtx", ylab = "rty")
 ```
 
 Shown above is a rough outline of the path through which we may fit a nonlinear curve. The arguments *windx* and *windy* are retention time windows drawn in the X and Y direction around the anchor points; in general, smaller values for these window arguments increases the number of anchors (including outliers). *tolmz* and *tolQ* restrict the m/z and Q differences of selected anchors. *useID* modifies the anchor selection algorithm by first searching for shared identities (i.e. feature pairs where idx is the same as idy, case-insensitive) before searching for the remaining abundant feature pairs. *useID* is set to FALSE by default, but prior or acquired knowledge of matching features may be useful for enhancing this process.
@@ -188,7 +197,10 @@ The most important parameters here are *k* and *iterFilter*. *k* represents the 
 Other important parameters are *useID*, which if set to TRUE prevents identity-based outliers marked from the previous step from being excluded; *bs* gives the choice of smoother (currently only "bs" for B-splines and "ps" for P-splines supported); and *family*, which accepts either "scat" (default) or "gaussian." Choosing the "scat" option makes the model less susceptible to outliers, but is more computationally intensive, whereas "gaussian" computes faster but is typically more susceptible to outliers. Other parameters are part of the gam function in the mgcv package.
 
 ```{r}
-p.combined.3 = fit_gam(p.combined.2, useID = FALSE, k = seq(12,20,2), iterFilter = 2, ratio = 2, frac = 0.5, bs = "bs", family = "gaussian", weights = 1, m = c(3,2), seed = 100)
+set.seed(100) #controls cross validation pseudo-randomness
+p.combined.3 = fit_gam(p.combined.2, useID = FALSE, k = seq(12,20,2), 
+                        iterFilter = 2, ratio = 2, frac = 0.5, bs = "bs",
+                        family = "gaussian", m = c(3,2))
 ```
 
 ##plotting
@@ -196,7 +208,8 @@ p.combined.3 = fit_gam(p.combined.2, useID = FALSE, k = seq(12,20,2), iterFilter
 *metabCombiner* contains a built-in plotting method for model fits that is based on R's base plotting graphics. These plots can modified like a normal R plot (e.g. with titles, axis labels, legends, etc...). We highly recommend inspecting plots to tune parameters from the RT mapping steps. Note that if you're `fit_loess` as opposed to `fit_gam`, be sure to set *fit* to "loess" instead of the default "gam".
 
 ```{r,fig.width= 5, fig.height=4, fig.align='center'}
-plot(p.combined.3, main = "Example metabCombiner Plot", xlab = "P30 RTs", ylab = "P20 RTs", lcol = "blue", pcol = "black", lwd = 3, pch = 19, fit = "gam")
+plot(p.combined.3, main = "Example metabCombiner Plot", xlab = "P30 RTs",
+    ylab = "P20 RTs", lcol = "blue", pcol = "black", lwd = 3, pch = 19)
 
 grid(lty = 2, lwd = 1)
 ```
@@ -206,13 +219,16 @@ grid(lty = 2, lwd = 1)
 We assign to all feature pair alignments (FPAs) a score between 0 & 1, based on an expression penalizing differences in observed m/z, relative abundance (Q), and relative predicted RT error. A score close to 1 implies a high degree of observed similarity, implying a potentially matching compounds, whereas a score near 0 implies a discardable misalignment. See `help(scorePairs)` for more details on the expression used to score features.
 
 ```{r}
-p.combined.4 = calcScores(p.combined.3, A = 70, B = 15, C = 0.5, usePPM = FALSE, useAdduct = FALSE, groups = NULL)
+p.combined.4 = calcScores(p.combined.3, A = 70, B = 15, C = 0.5, 
+                        usePPM = FALSE, useAdduct = FALSE, groups = NULL)
 ```
 
 The arguments *A*,*B*,*C* are positive numeric weights penalizing m/z, RT fit, and Q deviations, respectively. The values of these parameters should generally be between 50-120 for *A*, 5-15 for *B*, and 0-1 for *C*, depending on factors such as mass accuracy, fit quality, and biological sample similarity. An in-package function called `evaluateParams` can help provide a general region of values that can be used, based on matching identity strings (case-insensitive). This is the only package method in which shared identified compounds are required, and we recommend that these be sufficiently representative.
 
 ```{r}
-scores = evaluateParams(p.combined.3, A = seq(50, 120, 10), B = 5:15, C = seq(0,1,0.1), usePPM = FALSE, minScore = 0.5, penalty = 10)
+scores = evaluateParams(p.combined.3, A = seq(50, 120, 10), B = 5:15, 
+                        C = seq(0,1,0.1), usePPM = FALSE, minScore = 0.5,
+                        penalty = 10)
 
 head(scores)
 ```
@@ -229,13 +245,17 @@ In the final step of this pipeline, we use all information gathered from this an
 combined.table = combinedTable(p.combined.4)
 
 ##version 1: score-based conflict detection
-combined.table.2 = labelRows(combined.table, minScore = 0.5, maxRankX = 3, maxRankY = 3, method = "score", conflict = 0.2, remove = FALSE, balanced = TRUE)
+combined.table.2 = labelRows(combined.table, minScore = 0.5, maxRankX = 3, 
+                            maxRankY = 3, method = "score", conflict = 0.2,
+                            remove = FALSE, balanced = TRUE)
 
 ##version 2: mzrt-based conflict detection
-combined.table.3 = labelRows(combined.table, minScore = 0.5, maxRankX = 3, maxRankY = 3, method = "mzrt", conflict = c(0.003,0.5,0.003,0.2), remove = FALSE, balanced = TRUE)
+combined.table.3 = labelRows(combined.table, minScore = 0.5, maxRankX = 3, 
+                            maxRankY = 3, method = "mzrt", balanced = TRUE,
+                            conflict = c(0.003,0.5,0.003,0.2))
 ```
 
-Some agruments that must be specified are the *minScore*, *maxRankX* & *maxRankY* threshold values, as well as the *conflict* value. Conflicts occur between pairs of FPAs that share one feature in common and may require inspection to discern the correct match. There are two methods for detecting conflicts: 1) "score" and 2) "mzrt". In both, the top-scoring FPAs (rankX = 1 & rankY = 1) are used as a benchmark; if the difference in scores of the conflicting FPAs is small (first method), or the unshared feature is within a set m/z & rt tolerance (second method), then both FPAs are flagged. Otherwise, the lower-ranked FPA is deemed removable.
+Some arguments that must be specified are the *minScore*, *maxRankX* & *maxRankY* threshold values, as well as the *conflict* value. Conflicts occur between pairs of FPAs that share one feature in common and may require inspection to discern the correct match. There are two methods for detecting conflicts: 1) "score" and 2) "mzrt". In both, the top-scoring FPAs (rankX = 1 & rankY = 1) are used as a benchmark; if the difference in scores of the conflicting FPAs is small (first method), or the unshared feature is within a set m/z & rt tolerance (second method), then both FPAs are flagged. Otherwise, the lower-ranked FPA is deemed removable.
 
 The function adds three new columns that follow the first fifteen fields. The column called "labels" contains program- annotated assignments: "IDENTITY" for feature pairs with matching identity strings, "REMOVE" if they meet at least one of several removal criteria, or "CONFLICT" if two or more conflicting FPAs (i.e. sharing a feature in common) require closer inspection to discern the correct match. Rows labeled "CONFLICT" are assigned a "subgroup" number; features conflicting with multiple subgroups are assigned an "alt" (alternative subgroup) number. Selecting the best match among a conflicting pair or leaving multiple possibilities until further validation is an option we leave to the user. Additional information, such as chromatographic region-specific retention time fit tolerance, retention order, spectral quality, and adduct/fragment annotations may resolve these conflicts or find mismatches FPAs that do not have a conflicting match. 
 
@@ -244,7 +264,7 @@ The function adds three new columns that follow the first fifteen fields. The co
 *metabCombiner* contains a specially-designed report file printing option, `write2file`. This is similar to the `write.table` in base R, but it adds a blank line between m/z groups that facilitate examination of each individual group separately from the other groups. Note that the *sep* character is replaced by a '.' if it appears in any character string in the dataset (e.g. a comma in any named compound identity).
 
 ```{r, eval = FALSE}
-write2file(p.combined.table, file = "plasma.Combined-Table.Report.txt", sep = "\t")
+write2file(combined.table, file = "Combined.Table.Report.txt", sep = "\t")
 ```
 
 #Additional Notes
