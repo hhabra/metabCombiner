@@ -11,7 +11,8 @@ adjustData(Data, misspc, measure, rtmin, rtmax, zero, duplicate)
 
 \item{misspc}{Numeric. Threshold missingness percentage for analysis.}
 
-\item{measure}{Character. Central abundance measure, either "median" or "mean".}
+\item{measure}{Character. Choice of central abundance measure; either
+"median" or "mean".}
 
 \item{rtmin}{Numeric. Minimum retention time for analysis.}
 
@@ -23,24 +24,23 @@ adjustData(Data, misspc, measure, rtmin, rtmax, zero, duplicate)
 duplicate feature search.}
 }
 \value{
-An updated metabData object. The \code{data} field is processed by the listed
-steps and
+Updated \code{metabData} object. The \code{data} field is processed by the
+listed steps and \code{stats} list updated to contain feature statistics.
 }
 \description{
-\code{adjustData()} contains a set of pre-analysis steps for processing LC-MS
-metabolomics feature tables.
+\code{adjustData} contains a set of pre-analysis steps for processing LC-MS
+metabolomics feature tables individually
 }
 \details{
 The pre-analysis adjustment steps include:
 1) Restriction to a feature retention time range \code{rtmin} \eqn{\le}
    rt \eqn{\le} \code{rtmax}
-2) Removal of features with a missing value percentage exceeding \code{misspc}
+2) Removal of features with a percent missingness exceeding \code{misspc}
 3) Removal of duplicate metabolomics features.
 
-After reducing the table, abundance quantile values are calculated for the
-remaining features (unless initially supplied by the user). The \code{measure}
-argument determines which central abundance statistic ("mean" or "median") is
-used to rank features.
+After processing, abundance quantile (Q) values are calculated between 0 & 1
+for the remaining features, as ranked by the \code{measure} argument, unless
+provided by the user.
 }
 \seealso{
 \code{\link{metabData}}: the constructor for metabData objects,

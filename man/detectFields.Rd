@@ -30,7 +30,7 @@ column whose name contains this expression will be selected for analysis.}
 
 \item{samples}{Character names of columns containing sample values. All
 numeric columns containing these keywords are selected for analysis. If no
-keywords given, will search for longest stretch of numeric columns remaining.}
+keywords given, searches for longest stretch of numeric columns remaining.}
 
 \item{extra}{Character names of columns containing additional feature
 information, e.g.  non-analyzed sample values. All columns containing these
