@@ -11,16 +11,16 @@ dataset2 = read.delim("file_path_to_dataset1.txt", sep = "\t",
 
 
 ##column headings in example datasets
-names(dataset1)   #identity, m/z, rt, adduct, samp1, samp2, samp3, samp4, samp5,...
+names(dataset1) #identity, m/z, rt, adduct, samp1, samp2, samp3, samp4, ...
 
-names(dataset2)  #ID, mz, RT, gr1.1, gr1.2, gr1.3, gr2.1, gr2.2, gr2.3,...
+names(dataset2) #ID, mz, RT, gr1.1, gr1.2, gr1.3, gr2.1, gr2.2, gr2.3,...
 
 
 ############## use metabData to stage each dataset individually ##############
 data1 = metabData(dataset1, mz = "m/z", rt = "rt", id = "identity",
-                  adduct = "adduct", samples = "samp", extra = NULL, rtmin = 0.5,
-                  rtmax = "max", misspc = 50, measure = "median", zero = TRUE,
-                  duplicate = c(0.0025,0.05))
+                  adduct = "adduct", samples = "samp", extra = NULL,
+                  rtmin = 0.5,rtmax = , misspc = 50, measure = "median",
+                  zero = TRUE, duplicate = c(0.0025,0.05))
 
 data2 = metabData(dataset2, mz = "mz", rt = "RT", id = "ID",  adduct = NULL,
                   samples = "gr1", extra = "gr2", rtmin = 0.5, rtmax = 29.5,
@@ -35,8 +35,7 @@ getStats(data1)     #feature statistics
 
 data.combined = metabCombiner(xdata = data1, ydata = data2, binGap = 0.005)
 
-data.report = combinedTable(data.combined)  ###a template of the final report table
-
+data.report = combinedTable(data.combined) #template of the final report table
 
 ########################### Compute RT Mapping ################################
 
@@ -45,18 +44,19 @@ data.combined = selectAnchors(data.combined, useID = TRUE, windx = 0.03,
 
 anchors = getAnchors(data.combined)   #to view the results of anchor selection
 
+set.seed(100)
 data.combined = fit_gam(data.combined, useID = TRUE, k = seq(12, 20, 2),
                         iterFilter = 2,ratio = 2, frac = 0.5, bs = "bs",
                         family = "scat", weights = 1, method = "REML",
                         optimizer = "newton")
 
 ##visual of mapping results
-plot(data.combined, fit = "gam", main = "Example Fit", xlab = "data1", ylab = "data2",
-     pch = 19, lcol = "red", pcol = "black")
+plot(data.combined, fit = "gam", main = "Example Fit", xlab = "data1",
+     ylab = "data2", pch = 19, lcol = "red", pcol = "black")
 
 ###################### Score Feature Pair Alignments ##########################
 
-# only run evaluateParams if you have sufficiently representative shared IDs
+# optional function; only run if you have sufficiently representative shared IDs
 scores = evaluateParams(data.combined, A = seq(60, 150, by = 10),
                         B = seq(6, 20), C = seq(0.1, 1 ,0.1), fit = "gam",
                         PPM = FALSE, useAdduct = FALSE, minScore = 0.7,
@@ -71,8 +71,8 @@ data.combined = calcScores(data.combined, A = 100, B = 15, C = 0.5,
 
 data.report = combinedTable(data.combined)
 
-#new column added to report table: program-determined labels
-data.report = labelRows(data.report, maxRankX = 3, maxRankY = 3, minScore = 0.5,
+#new columns added to report table: program-determined labels
+data.report = labelRows(data.report, maxRankX = 3,maxRankY = 3, minScore = 0.5,
                         conflict = 0.1, method = "score", balanced = TRUE,
                         remove = FALSE)
 
