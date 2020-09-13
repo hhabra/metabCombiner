@@ -5,19 +5,18 @@
 \alias{metabData-class}
 \title{'metabData' Single Metabolomics Dataset Class}
 \description{
-This class is designed to pre-process, format, and facilitate the subsequent
-combining of input metabolomics feature tables. It stores the information of
-a single metabolomics dataset, including the formatted feature table, sample
-names, and feature statistics.
+This class is designed to process and format input metabolomics feature
+tables. It stores the information from individual metabolomics datasets,
+including the formatted feature table, sample names, and feature statistics.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{data}}{A formatted metabolomics data frame.}
+\item{\code{data}}{formatted metabolomics data frame.}
 
-\item{\code{samples}}{A character vector of analyzed samples.}
+\item{\code{samples}}{character vector of analyzed sample names}
 
-\item{\code{extra}}{A character vector of names pertaining to non-analyzed columns}
+\item{\code{extra}}{character vector of non-analyzed columns names}
 
 \item{\code{stats}}{A list of dataset statistics}
 }}

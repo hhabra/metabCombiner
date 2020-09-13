@@ -4,9 +4,17 @@
 \alias{labelRows}
 \title{Annotate and Remove Report Rows}
 \usage{
-labelRows(object, maxRankX = 3, maxRankY = 3, minScore = 0.3,
-  conflict, method = c("score", "mzrt"), balanced = TRUE,
-  remove = FALSE, brackets_ignore = c("(", "[", "{"))
+labelRows(
+  object,
+  maxRankX = 3,
+  maxRankY = 3,
+  minScore = 0.3,
+  conflict,
+  method = c("score", "mzrt"),
+  balanced = TRUE,
+  remove = FALSE,
+  brackets_ignore = c("(", "[", "{")
+)
 }
 \arguments{
 \item{object}{Either a \code{metabCombiner} object or \code{combinedTable}.}
@@ -18,41 +26,41 @@ labelRows(object, maxRankX = 3, maxRankY = 3, minScore = 0.3,
 \item{minScore}{Numeric. Minimum allowable score (between 0 & 1) for
 metabolomics FPAs.}
 
-\item{conflict}{Numeric. If method = "score", a constant (between 0 & 1)
-score difference between a pair of conflicting FPAs.
-If method = "mzrt", a length 4 numeric: (m/z, rt, m/z, rt)
-tolerances, the first pair for X dataset features and the
-second pair for Y dataset features.}
+\item{conflict}{numeric used to determine subgroups. If method = "score", a
+constant (between 0 & 1) score difference between a pair of
+conflicting FPAs. If method = "mzrt", a length 4 numeric:
+(m/z, rt, m/z, rt) tolerances, the first pair for X dataset
+features and the second pair for Y dataset features.}
 
-\item{method}{Conflict detection method. If equal to "score" (default method),
+\item{method}{Conflict detection method. If equal to "score" (default),
 assigns a conflict subgroup if score of lower-ranking FPA is
 within some tolerance of higher-ranking FPA. If set to "mzrt",
 assigns a conflicting subgroup if within a small m/z & rt
 distance of the top-ranked FPA.}
 
-\item{balanced}{Logical. Optional processing of "balanced" groups, defined as
-groups with equal numbers of features from input datasets where
-all features have a 1-1 match.}
+\item{balanced}{Logical. Optional processing of "balanced" groups, defined
+as groups with an equal number of features from input
+datasets where all features have a 1-1 match.}
 
-\item{remove}{Logical. Option to keep or discard rows deemed removable (labeled
-"REMOVE" in \code{combinedTable})}
+\item{remove}{Logical. Option to keep or discard rows deemed removable.}
 
 \item{brackets_ignore}{character. Bracketed identity strings of the types
 in this argument will be ignored}
 }
 \value{
 updated \code{combinedTable} or \code{metabCombiner} object. The
-tabel will have three new columns:
+table will have three new columns:
 
 \item{labels}{characterization of feature alignments as described}
 \item{subgroup}{conflicting subgroup number of feature alignments}
-\item{alt}{alternative subgroup for rows conflicting with multiple top-matches}
+\item{alt}{alternate subgroup for rows in multiple feature pair conflicts}
 }
 \description{
-Automated method for determining identity-matching, removable, and conflicting
-feature pair alignments (FPAs) in \code{combinedTable}. FPAs that may require
-further inspection are labeled "CONFLICT" and organized into subgroups if they
-fall within some small measure (in score or mz/rt) of the top-ranked FPA.
+Method for annotation of identity-matched, removable, & conflicting feature
+pair alignments (FPAs) in \code{combinedTable}. FPAs that fall within some
+small measure (in score or mz/rt) of the top-ranked FPA may require further
+inspection are organized into subgroups.
+.
 }
 \details{
 \code{metabCombiner} initially reports all possible FPAs in the rows of the
@@ -81,27 +89,23 @@ The labeling rules are as follows:
    \code{conflict} thresholds: labeled "REMOVE". Otherwise,
 }
 \examples{
-\dontrun{
-library(metabCombiner)
 data(plasma30)
 data(plasma20)
 
 p30 <- metabData(plasma30, samples = "CHEAR")
 p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
-p.combined = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
-p.combined = selectAnchors(p.combined, tolMZ = 0.003, tolQ = 0.3, windY = 0.02)
-p.combined = fit_gam(p.combined, k = seq(12,20,2), iterFilter = 1)
-p.combined = calcScores(p.combined, A = 90, B = 14, C = 0.5)
-cTable = combinedTable(p.combined)
+p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+p.comb = selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
+p.comb = fit_gam(p.comb, k = 20, iterFilter = 1)
+p.comb = calcScores(p.comb, A = 90, B = 14, C = 0.5)
+cTable = combinedTable(p.comb)
 
 ##example using score-based conflict detection method
-lTable = labelRows(cTable, method = "score", conflict = 0.2)
+lTable = labelRows(cTable, maxRankX = 3, maxRankY = 2, minScore = 0.5,
+    method = "score", conflict = 0.2)
 
 ##example using mzrt-based conflict detection method
-lTable = labelRows(cTable, method = "mzrt", conflict = c(0.005, 1, 0.005,0.5))
+lTable = labelRows(cTable, method = "mzrt", maxRankX = 3, maxRankY = 2,
+                     conflict = c(0.005, 1, 0.005,0.5))
 
-##example changing thresholds for rank and minimum score
-lTable = labelRows(cTable, minScore = 0.5, maxRankX = 2, maxRankY = 2,
-                   method = "score", conflict = 0.1)
-}
 }

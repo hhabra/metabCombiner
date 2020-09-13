@@ -2,7 +2,7 @@
 % Please edit documentation in R/selectAnchors.R
 \name{iterativeAnchorSelection}
 \alias{iterativeAnchorSelection}
-\title{Iteratively Select Ordered Feature Pairs}
+\title{Iterative Selection of Ordered Pairs}
 \usage{
 iterativeAnchorSelection(cTable, windx, windy, swap = FALSE)
 }
@@ -13,9 +13,9 @@ iterativeAnchorSelection(cTable, windx, windy, swap = FALSE)
 
 \item{windy}{numeric positive retention time exclusion windown in Y dataset.}
 
-\item{swap}{logical. When FALSE, searches for abundant features in dataset X,
-complemented by dataset Y features; when TRUE, searches for abundant features
-in dataset Y, complemented by dataset X features.}
+\item{swap}{logical. When FALSE, searches for abundant features in dataset
+X, complemented by dataset Y features; when TRUE, searches for abundant
+features in dataset Y, complemented by dataset X features.}
 }
 \value{
 data frame of anchor feature alignments.

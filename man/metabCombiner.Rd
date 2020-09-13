@@ -3,15 +3,14 @@
 \docType{package}
 \name{metabCombiner}
 \alias{metabCombiner}
-\alias{metabCombiner-package}
 \title{Form a metabCombiner object.}
 \usage{
 metabCombiner(xdata, ydata, binGap = 0.005)
 }
 \arguments{
-\item{xdata}{metabData object. One of two datasets to be Combined.}
+\item{xdata}{metabData object. One of two datasets to be combined.}
 
-\item{ydata}{metabData object. One of two datasets to be Combined.}
+\item{ydata}{metabData object. One of two datasets to be combined.}
 
 \item{binGap}{numeric. Parameter used for grouping features by m/z.
 See ?mzGroup for more details.}
@@ -21,8 +20,8 @@ a metabCombiner object
 }
 \description{
 \code{metabCombiner()} takes two metabolomics featurelists, contained in
-\code{metabData} objects,and constructs a merged dataset containing groups of
-features detected in both featurelists with similar m/z values.
+\code{metabData} objects and constructs a merged dataset containing groups
+of features detected in both featurelists with similar m/z values.
 
 Takes two untargeted metabolomics feature lists (consisting of m/z,
 rt, and sample intensity measurements, plus optional identifiers & adduct
@@ -37,14 +36,12 @@ m/z features. \code{metabCombiner} objects are used for all subsequent
 processing steps.
 }
 \examples{
-\dontrun{
-library(metabCombiner)
 data(plasma30)
 data(plasma20)
 
 p30 <- metabData(plasma30, samples = "CHEAR")
 p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
 
-p.combined = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
-}
+p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+
 }

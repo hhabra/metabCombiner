@@ -4,9 +4,18 @@
 \alias{calcScores}
 \title{Compute Feature Similarity Scores}
 \usage{
-calcScores(object, A, B, C, fit = c("gam", "loess"), usePPM = FALSE,
-  useAdduct = FALSE, adduct = 1.25, groups = NULL,
-  brackets_ignore = c("(", "[", "{"))
+calcScores(
+  object,
+  A,
+  B,
+  C,
+  fit = c("gam", "loess"),
+  groups = NULL,
+  useAdduct = FALSE,
+  adduct = 1.25,
+  usePPM = FALSE,
+  brackets_ignore = c("(", "[", "{")
+)
 }
 \arguments{
 \item{object}{metabCombiner object.}
@@ -16,21 +25,21 @@ calcScores(object, A, B, C, fit = c("gam", "loess"), usePPM = FALSE,
 \item{B}{Numeric weight for penalizing differences between fitted & observed
 retention times}
 
-\item{C}{Numeric weight for penalizing differences in Q (abundance quantiles).}
+\item{C}{Numeric weight for differences in Q (abundance quantiles).}
 
 \item{fit}{Character. Choice of fitted rt model, "gam" or "loess."}
 
-\item{usePPM}{logical. Option to use relative (as opposed to absolute) m/z
-differences in score computations.}
-
-\item{useAdduct}{logical. Option to penalize mismatches in (non-empty) adduct
-column labels.}
-
-\item{adduct}{numeric. If useAdduct is TRUE, divides mismatching and non-empty
-adduct column labels by this value.}
-
 \item{groups}{integer. Vector of feature groups to score. If set to NULL
 (default), will compute scores for all feature groups.}
+
+\item{useAdduct}{logical. Option to penalize mismatches in (non-empty,
+non-bracketed) adduct column annotations.}
+
+\item{adduct}{numeric. If useAdduct is TRUE, divides score of mismatched,
+non-empty and non-bracked adduct column labels by this value.}
+
+\item{usePPM}{logical. Option to use relative (as opposed to absolute) m/z
+differences in score computations.}
 
 \item{brackets_ignore}{If useAdduct = TRUE, bracketed adduct character
 strings of these types will be ignored according to this argument}
@@ -38,9 +47,9 @@ strings of these types will be ignored according to this argument}
 \value{
 \code{metabCombiner} object with updated \code{combinedTable}.
 rtProj column will contain fitted retention times determined from previously
-computed model; score will contain the computed pairwise similarity scores of
-features from datasets x & y; rankX & rankY are the integer ranks of scores
-for x & y features in descending order.
+computed model; score will contain computed pairwise similarity scores of
+feature pairs; rankX & rankY are the integer ranks of scores for x & y
+features in descending order.
 }
 \description{
 Calculates a pairwise similarity (between 0 & 1) between all
@@ -48,20 +57,20 @@ grouped features in \code{metabCombiner} object. The similarity score
 calculation is described in \code{\link{scorePairs}}.
 }
 \details{
-This function updates the \code{rtProj}, \code{score}, \code{rankX},
-and \code{rankY} columns in the \code{combinedTable} report. First, using the
+This function updates the \code{rtProj}, \code{score}, \code{rankX}, and
+\code{rankY} columns in the \code{combinedTable} report. First, using the
 RT mapping model computed in the previous step(s), \code{rtx} values are
-projected onto \code{rty}. Then the program calculates similarity scores based
-on m/z, rt (fitted vs observed), and Q differences, with multiplicative weight
+projected onto \code{rty}. Then similarity scores are calculated based on
+m/z, rt (fitted vs observed), and Q differences, with multiplicative weight
 penalties \code{A}, \code{B}, and \code{C}.
 
-If there are a sufficiently representative set of shared identities (idx = idy),
-the \code{\link{evaluateParams}} provides some guidance on appropriate \code{A},
- \code{B}, and \code{C} values. In testing, the best values for \code{A} should
-lie between 50 and 120, according to mass accuracy; \code{B} should lie between
-5 and 15 (higher if datasets processed under roughly identical conditions)
-depending on fitting accuracy; \code{C} should vary between 0 and 1, depending
-on sample similarity. See examples below.
+If the datasets contain representative set of shared identities (idx = idy),
+\code{\link{evaluateParams}} provides some guidance on appropriate \code{A},
+ \code{B}, and \code{C} values to use. In testing, the best values for
+ \code{A} should lie between 50 and 120, according to mass accuracy;
+ \code{B} should lie between 5 and 15 depending on fitting accuracy (higher
+ if datasets processed under roughly identical conditions) ; \code{C} should
+  vary between 0 and 1, depending on sample similarity. See examples below.
 
 If using ppm (\code{usePPM} = TRUE), do not use the above guidelines for
 \code{A} values. The suggested range is between 0.01 and 0.05, though this
@@ -71,44 +80,37 @@ argument if non-empty and non-bracketed adduct values do not match. Be sure
 that adduct annotations are accurate before using this functionality.
 }
 \examples{
-\dontrun{
-library(metabCombiner)
+
 data(plasma30)
 data(plasma20)
 
 p30 <- metabData(plasma30, samples = "CHEAR")
 p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
-p.combined = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
 
-p.combined = selectAnchors(p.combined, tolMZ = 0.003, tolQ = 0.3, windY = 0.02)
-p.combined = fit_gam(p.combined, k = seq(12,20,2), iterFilter = 1)
+p.comb = selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
+p.comb = fit_gam(p.comb, k = 20, iterFilter = 1)
 
-#example 1: moderate m/z deviation, excellent rt fit, moderate sample similarity
-p.combined = calcScores(p.combined, A = 90, B = 14, C = 0.5)
+#example: moderate m/z deviation, accurate rt fit, high sample similarity
+p.comb = calcScores(p.comb, A = 90, B = 14, C = 0.8, useAdduct = FALSE,
+         groups = NULL, fit = "gam", usePPM = FALSE)
+cTable = combinedTable(p.comb)  #to view results
 
 #example 2: high m/z deviation, moderate rt fit, low sample similarity
-p.combined = calcScores(p.combined, A = 50, B = 8, C = 0.2)
+p.comb = calcScores(p.comb, A = 50, B = 8, C = 0.2)
 
-#example 3: low m/z deviation, poor rt fit, high sample similarity
-p.combined = calcScores(p.combined, A = 120, B = 5, C = 0.8)
+#example 3: low m/z deviation, poor rt fit, moderate sample similarity
+p.comb = calcScores(p.comb, A = 120, B = 5, C = 0.5)
 
-#example 4: using LOESS fit
-p.combined = fit_loess(p.combined, spans = seq(0.2,0.3,0.02), iterFilter = 1)
-p.combined = calcScores(p.combined, fit = "loess", A = 90, B = 12, C = 0.5)
+#example 4: using ppm for mass deviation; note different A value
+p.comb = calcScores(p.comb, A = 0.05, B = 14, C = 0.5, usePPM = TRUE)
 
-#example 5: using ppm for mass deviation; note A value
-p.combined = calcScores(p.combined, A = 0.05, B = 14, C = 0.5, usePPM = TRUE)
+#example 5: limiting to specific m/z groups 1-1000
+p.comb = calcScores(p.comb, A = 90, B = 14, C = 0.5, groups = seq(1,1000))
 
-#example 6: limiting to specific m/z groups 1-1000
-p.combined = calcScores(p.combined, A = 90, B = 14, C = 0.5, groups = 1:1000)
-
-#example 7: using adduct information
-p.combined = calcScores(p.combined, A = 90, B = 14, C = 0.5, useAdduct = TRUE,
-                        adduct = 1.5)
-
-#extracting output
-cTable = combinedTable(p.combined)
-}
+#example 6: using adduct information
+p.comb = calcScores(p.comb, A = 90, B = 14, C = 0.5, useAdduct = TRUE,
+                     adduct = 1.25)
 
 }
 \seealso{

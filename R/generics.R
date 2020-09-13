@@ -3,11 +3,11 @@
 #' @title Obtain metabCombiner Feature Alignment Report
 #'
 #' @description Obtain constructed table reporting every possible metabolomics
-#' feature alignment.
+#'     feature alignment.
 #'
 #' @param object metabCombiner object.
 #'
-#' @return  Feature Pair Alignment report data.frame. The columns of the report
+#' @return Feature Pair Alignment report data.frame. The columns of the report
 #' are as follows:
 #'
 #' \item{idx}{Identities of features from dataset X}
@@ -27,6 +27,16 @@
 #' \item{adductY}{adduct label of features from dataset Y}
 #' \item{...}{Sample and extra columns from both datasets X & Y}
 #'
+#' @examples
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 = metabData(plasma30, samples = "CHEAR")
+#' p20 = metabData(plasma20, samples = "Red")
+#'
+#' p.comb = metabCombiner(p30, p20)
+#' p.comb.table = combinedTable(p.comb)
+#'
 #' @export
 setGeneric("combinedTable", function(object) standardGeneric("combinedTable"))
 
@@ -44,6 +54,18 @@ setGeneric("combinedTable", function(object) standardGeneric("combinedTable"))
 #' @seealso
 #' \code{\link{selectAnchors}}
 #'
+#' @examples
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 = metabData(plasma30, samples = "CHEAR")
+#' p20 = metabData(plasma20, samples = "Red")
+#'
+#' p.comb = metabCombiner(p30, p20)
+#' p.comb = selectAnchors(p.comb, windx = 0.05, windy = 0.03)
+#'
+#' anchors = getAnchors(p.comb)
+#'
 #' @export
 setGeneric("getAnchors", function(object) standardGeneric("getAnchors"))
 
@@ -58,16 +80,31 @@ setGeneric("getAnchors", function(object) standardGeneric("getAnchors"))
 #'
 #' @return A list of the last used weight parameters:
 #' \item{A}{Specific weight penalizing feature m/z differences}
-#' \item{B}{Specific weight penalizing relative error of retention time projection}
+#' \item{B}{Specific weight penalizing retention time projection error}
 #' \item{C}{Specific weight penalizing differences in abundance quantiles}
 #'
+#' @examples
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 = metabData(plasma30, samples = "CHEAR")
+#' p20 = metabData(plasma20, samples = "Red")
+#'
+#' p.comb = metabCombiner(p30, p20)
+#' p.comb = selectAnchors(p.comb, windx = 0.05, windy = 0.03)
+#' p.comb = fit_gam(p.comb, k = 20, iterFilter = 1)
+#' p.comb = calcScores(p.comb, A = 90, B = 14, C = 0.5)
+#'
+#' getCoefficients(p.comb)
+#'
 #' @export
-setGeneric("getCoefficients", function(object) standardGeneric("getCoefficients"))
+setGeneric("getCoefficients", function(object)
+            standardGeneric("getCoefficients"))
 
 #' @title Get Fitted RT Model
 #'
 #' @description
-#' Returns the last fitted RT projected model from a metabCombiner object of
+#' Returns the last fitted RT projection model from a metabCombiner object of
 #' type "gam" or "loess".
 #'
 #' @param object  metabCombiner object
@@ -79,15 +116,33 @@ setGeneric("getCoefficients", function(object) standardGeneric("getCoefficients"
 #' @seealso
 #' \code{\link{fit_gam}}, \code{\link{fit_loess}}
 #'
+#' @examples
+#' data(plasma30)
+#' data(plasma20)
+#' p30 <- metabData(plasma30, samples = "CHEAR")
+#' p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
+#' p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
+#' p.comb = selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
+#' p.comb = fit_gam(p.comb, iterFilter = 1, k = 20)
+#' p.comb = fit_loess(p.comb, iterFilter = 1, spans = 0.2)
+#' model.gam = getModel(p.comb, fit = "gam")
+#' model.loess = getModel(p.comb, fit = "loess")
+#'
 #' @export
-setGeneric("getModel", function(object, fit = c("gam", "loess")) standardGeneric("getModel"))
-
+setGeneric("getModel", function(object, fit = c("gam", "loess"))
+            standardGeneric("getModel"))
 
 #' Get Processed Dataset
 #'
 #' @param object metabData object
 #'
 #' @return Single Metabolomics Data Frame
+#'
+#' @examples
+#' data(plasma30)
+#'
+#' p30 = metabData(plasma30, samples = "CHEAR")
+#' data = getData(p30)
 #'
 #' @export
 setGeneric("getData", function(object) standardGeneric("getData"))
@@ -101,24 +156,46 @@ setGeneric("getData", function(object) standardGeneric("getData"))
 #'
 #' @return character vector of extra column names
 #'
-#' @export
-setGeneric("getExtra", function(object, data = c("x", "y")) standardGeneric("getExtra"))
-
-
-#' @title Get Sample Names From metabCombiner Object
+#' @examples
+#' data(plasma30)
+#' p30 = metabData(plasma30, samples = "CHEAR", extra = "Red")
+#' getExtra(p30)
 #'
-#' @description \code{metabCombiner} objects consist of two formatted metabolomics
-#' feature tables. This method returns the sample names from one of the two datasets.
+#' @export
+setGeneric("getExtra", function(object, data = c("x", "y"))
+            standardGeneric("getExtra"))
+
+
+#' @title Get Sample Names From metabCombiner or metabData Object
+#'
+#' @description Returns the sample names from one of the two datasets used in
+#' metabCombiner analysis, denoted as 'x' or 'y.'
 #'
 #' @param object  metabCombiner or metabData object
 #'
 #' @param data   Character. One of either 'x' or 'y'.
 #'
-#' @return If data is "x", returns sample names for dataset X; if "y", returns
-#' sample names from dataset Y.
+#' @return character vector of sample names. For \code{metabCombiner} objects
+#'     these may come from the 'x' dataset (if \code{data} = "x") or the 'y'
+#'     dataset (if \code{data} = "y").
+#'
+#' @examples
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 <- metabData(plasma30, samples = "CHEAR")
+#' p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
+#'
+#' p.comb = metabCombiner(xdata = p30, ydata = p20)
+#'
+#' getSamples(p30)
+#' getSamples(p.comb, data = "x")  #equivalent to previous
+#' getSamples(p20)
+#' getSamples(p.comb, data = "y")  #equivalent to previous
 #'
 #' @export
-setGeneric("getSamples", function(object, data = c("x", "y")) standardGeneric("getSamples"))
+setGeneric("getSamples", function(object, data = c("x", "y"))
+            standardGeneric("getSamples"))
 
 
 #' Get Object Statistics
@@ -130,9 +207,23 @@ setGeneric("getSamples", function(object, data = c("x", "y")) standardGeneric("g
 #'
 #' @return list of object-specific statistics
 #'
+#' @examples
+#' data(plasma30)
+#' data(plasma20)
+#' p30 <- metabData(plasma30, samples = "CHEAR")
+#' p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
+#'
+#' getStats(p30) #metabData stats
+#'
+#' p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
+#' p.comb = selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
+#' p.comb = fit_gam(p.comb, iterFilter = 1, k = 20)
+#'
+#' getStats(p.comb) #metabCombiner stats
+#'
+#'
 #' @export
 setGeneric("getStats", function(object) standardGeneric("getStats"))
-
 
 #' @title Get Nonmatched Features
 #'
@@ -142,11 +233,23 @@ setGeneric("getStats", function(object) standardGeneric("getStats"))
 #'
 #' @param object  metabCombiner object
 #'
-#' @param data    Either one of 'x' or 'y', specifying which dataset's nonmatched
-#'                features to return.
+#' @param data  Either one of 'x' or 'y', specifying which dataset's nonmatched
+#'      features to return.
 #'
 #' @return If data is "x", returns non-matched X features ; if "y", returns
 #'         non-matched Y features
 #'
+#' @examples
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 <- metabData(plasma30, samples = "CHEAR")
+#' p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
+#' p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
+#'
+#' nnmx = nonmatched(p.comb, data = "x")
+#' nnmy = nonmatched(p.comb, data = "y")
+#'
 #' @export
-setGeneric("nonmatched", function(object, data = c("x", "y")) standardGeneric("nonmatched"))
+setGeneric("nonmatched", function(object, data = c("x", "y"))
+            standardGeneric("nonmatched"))

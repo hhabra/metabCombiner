@@ -13,23 +13,21 @@ key object statistics.
 \section{Slots}{
 
 \describe{
-\item{\code{combinedTable}}{A data.frame combining tables measurements and displaying
-all feature alignments}
+\item{\code{combinedTable}}{data.frame displaying all feature pair alignments,
+combining measurements of all possible shared compounds}
 
-\item{\code{nonmatched}}{A list of data frames containing features from input tables
-that could not be paired in \code{combinedTable}}
+\item{\code{nonmatched}}{list of data frames consisting of nonmatched features}
 
-\item{\code{anchors}}{A data.frame consisting of feature alignments to be used for
-fitting a nonlinear retention time projection model}
+\item{\code{anchors}}{data.frame of of feature alignments used for rt modeling}
 
-\item{\code{model}}{A list containing the last fitted nonlinear model(s).}
+\item{\code{model}}{list containing the last fitted nonlinear model(s)}
 
-\item{\code{coefficients}}{A list of last used A,B,C similarity weight values}
+\item{\code{coefficients}}{list of last used A,B,C similarity weight values}
 
-\item{\code{samples}}{A list of sample name character vectors from input datasets}
+\item{\code{samples}}{list of sample name vectors from input datasets}
 
-\item{\code{extra}}{A list of extra column chacter name vectors from input datasets}
+\item{\code{extra}}{list of extra column name vectors from input datasets}
 
-\item{\code{stats}}{A set of useful metabCombiner statistics}
+\item{\code{stats}}{set of useful metabCombiner statistics}
 }}
 

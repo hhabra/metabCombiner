@@ -4,10 +4,22 @@
 \alias{metabData}
 \title{Constructor for the metabData object.}
 \usage{
-metabData(table, mz = "mz", rt = "rt", id = "id",
-  adduct = "adduct", samples = NULL, Q = NULL, extra = NULL,
-  rtmin = "min", rtmax = "max", misspc = 50, measure = c("median",
-  "mean"), zero = FALSE, duplicate = c(0.0025, 0.05))
+metabData(
+  table,
+  mz = "mz",
+  rt = "rt",
+  id = "id",
+  adduct = "adduct",
+  samples = NULL,
+  Q = NULL,
+  extra = NULL,
+  rtmin = "min",
+  rtmax = "max",
+  misspc = 50,
+  measure = c("median", "mean"),
+  zero = FALSE,
+  duplicate = c(0.0025, 0.05)
+)
 }
 \arguments{
 \item{table}{Path to file containing feature table or data.frame object
@@ -18,8 +30,8 @@ column containing m/z values. The first column whose name contains this
 expression will be selected for analysis.}
 
 \item{rt}{Character name(s) or regular expression associated with data
-column containing retention time values. The first column whose name contains
-this expression will be selected for analysis.}
+column containing retention time values. The first column whose name
+contains this expression will be selected for analysis.}
 
 \item{id}{Character name(s) or regular expression associated with data
 column containing metabolomics feature identifiers. The first column whose
@@ -48,13 +60,13 @@ keywords selected and will be displayed in the final output.}
 
 \item{misspc}{Numeric. Threshold missingness percentage for analysis.}
 
-\item{measure}{Character. Central abundance measure, either "median" or "mean".}
+\item{measure}{Central quantitation measure, either "median" or "mean".}
 
 \item{zero}{Logical. Whether to consider zero values as missing.}
 
-\item{duplicate}{Numeric ordered pair (m/z, rt) feature tolerances. Pairs of
-features within these tolerances are deemed duplicates and one of the pair is
-removed (see: \code{\link{findDuplicates}})}
+\item{duplicate}{Numeric ordered pair (m/z, rt) duplicate feature
+tolerances. Pairs of features within these tolerances are deemed duplicates
+and one of the pair is removed (see: \code{\link{findDuplicates}})}
 }
 \value{
 An object of class metabData containing the specific information
@@ -65,48 +77,46 @@ adjusted by pre-processing steps.
 This is a constructor for objects of type \code{metabData}.
 }
 \details{
-A processed metabolomics feature data frame must contain columns for m/z, rt,
-and numeric sample intensities. The user may also supply some optional fields
-such as identity \code{id} and \code{adduct} label columns. Non-analyzed columns
-can be included into the final output by specifying the names of these columns
-in the \code{extra} argument. All required arguments are checked for validity
-(e.g. no negative m/z or rt values, each column is used at most once,
-column types are valid, etc...).
+Processed metabolomics feature table must contain columns for m/z, rt,
+and numeric sample intensities. Some optional fields such as identity
+\code{id} and \code{adduct} label columns may also be supplied. Non-analyzed
+columns can be included into the final output by specifying the names of
+these columns in the \code{extra} argument. All required arguments are
+checked for validity (e.g. no negative m/z or rt values, each column is used
+at most once, column types are valid, etc...).
 
-Following construction is a pre-analysis filtering of rows that are either,
-1) Outside of the specified retention time range (\code{rtmin},\code{rtmax}),
+Following this is a pre-analysis filtering of rows that are either:
+1) Outside of a specified retention time range (\code{rtmin},\code{rtmax}),
 2) Missing in excess of \code{misspc} percent of analyzed samples, or
-3) deemed duplicates by small pairwise differences (mzTol,rtTol) as specified
-by the \code{duplicate} argument. Remaining features are ranked by abundance
-quantiles, Q, using a central \code{measure}, either "median" or "mean."
-Alternatively, the abundance quantiles column can be specified in the
-argument \code{Q}.
+3) deemed duplicates by small pairwise <m/z, rt> differences  as specified
+by the \code{duplicate} argument.
+
+Remaining features are ranked by abundance quantiles, Q, using a central
+\code{measure}, either "median" or "mean." Alternatively, the abundance
+quantiles column can be specified in the argument \code{Q}.
 }
 \examples{
-\dontrun{
-library(metabCombiner)
-
 data(plasma30)
-data(plasma20)
 
-#analyzing CHEAR plasma samples; RedCross samples non-analyzed "extra" columns
-p30 <- metabData(plasma30, mz = "mz", rt = "rt", id = "identity", adduct = "adduct",
-                 samples = "CHEAR", extra = "RedCross")
+#samples: CHEAR; RedCross samples non-analyzed "extra" columns
+p30 <- metabData(plasma30, mz = "mz", rt = "rt", id = "identity",
+                 adduct = "adduct", samples = "CHEAR", extra = "RedCross")
 
-#equivalent
+#equivalent to above
 p30 <- metabData(plasma30, id = "id", samples = "CHEAR", extra = "Red")
-
 
 getSamples(p30)  #should print names of 5 CHEAR Sample column names
 getExtra(p30)    #should print names of 5 Red Cross Sample column names
 
+\dontrun{
+data(plasma20)
 #analyzing Red Cross samples with retention time limitations (0.5-17.5min)
 p20 <- metabData(plasma20, samples = "Red", rtmin = 0.5, rtmax = 17.5)
 data = getData(p20)
 range(data$rt)
 
 #using regular expressions for field searches
-p30.2 <- metabData(plasma30, id = "identity|id|ID", samples = ".[3-5]$")
-getSamples(p30.2)    #should print all column names ending in .3, .4, .5
+p20.2 <- metabData(plasma20, id = "identity|id|ID", samples = ".[3-5]$")
+getSamples(p20.2)    #should print all column names ending in .3, .4, .5
 }
 }

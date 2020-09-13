@@ -10,7 +10,7 @@ scorePairs(A, B, C, mzdiff, rtdiff, qdiff, rtrange, adductdiff)
 \item{A}{Numeric weight for penalizing m/z differences.}
 
 \item{B}{Numeric weight for penalizing differences between fitted & observed
-retention times}
+retention times.}
 
 \item{C}{Numeric weight for differences in Q (abundance quantiles).}
 
@@ -31,7 +31,7 @@ Numeric similarity score between 0 & 1
 }
 \description{
 Helper function for \code{\link{calcScores}} &
-\code{\link{evaluateParams}}. Calculates the pairwise similarity score between
+\code{\link{evaluateParams}}. Calculates a pairwise similarity score between
 grouped features using differences in m/z, rt, and Q.
 }
 \details{
@@ -41,7 +41,7 @@ The score between two grouped features x & y is calculated as:
 
 where \code{mzx} & \code{Qx} correspond to the m/z and abundance quantile
 values of feature x; \code{mzy}, \code{rty}, and \code{Qy} correspond to the
-m/z, retention time, and abundance quantile values of feature y; \code{rtproj}
+m/z, retention time, and quantile values of feature y; \code{rtproj}
 is the model-projected retention time of feature x onto the Y dataset
 chromatogram and \code{rtrange} is the retention time range of the Y dataset
 chromatogram. \code{A}, \code{B}, \code{C} are non-negative constant weight

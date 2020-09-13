@@ -24,10 +24,10 @@ Pairs of features with nearly identical m/z and retention time values are
 removed in this step.
 }
 \details{
-Pairs of features are deemed duplicates if their differences in m/z & rt fall
-within tolerances defined by the \code{duplicate} parameter. If a pair of
-duplicate features is found, one of the pair is removed. The determination of
-which feature to remove is first by percent missingness, followed by which has
-a lower central abundance measure. If the features have equal missingness and
-abundance, then row priority arbitrarily determines the feature to be removed.
+Pairs of features are deemed duplicates if pairwise differences in m/z & rt
+fall within tolerances defined by the \code{duplicate} argument. If a pair
+of duplicate features is found, one member is removed. The determination of
+which feature to remove is first by percent missingness, followed by central
+abundance measure (median or mean). If the features have equal missingness
+and abundance, then row order determines the feature to be removed.
 }

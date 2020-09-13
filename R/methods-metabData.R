@@ -1,8 +1,7 @@
 ##Methods For metabData Objects
 #' @include generics.R classes.R
 
-
-#' @describeIn getData Method for "metabData" objects
+#' @rdname getData
 #'
 #' @export
 ##
@@ -11,12 +10,20 @@ setMethod("getData", signature = "metabData", function(object){
     return(data)
 })
 
+#' @rdname getExtra
+#'
+#' @export
+##
+setMethod("getExtra", signature = "metabData", function(object){
+    extra = object@extra
+    return(extra)
+})
 
-#' @title Obtain Metabolomics Sample Names
+#' @rdname getSamples
 #'
 #' @param object A metabData object
 #'
-#' @return Names of samples of formatted dataset.
+#' @return names of samples of formatted dataset.
 #'
 #' @export
 setMethod("getSamples", signature = "metabData", function(object){
@@ -25,26 +32,12 @@ setMethod("getSamples", signature = "metabData", function(object){
     return(samples)
 })
 
-
-#' @describeIn getExtra Method for "metabData" Objects
-#'
-#' @export
-##
-setMethod("getExtra", signature = "metabData", function(object){
-    extra = object@extra
-
-    return(extra)
-})
-
-
-##
-#' @describeIn getStats Method for 'metabData' object
+#' @rdname getStats
 #'
 #' @export
 ##
 setMethod("getStats", signature = "metabData", function(object){
     extra = object@stats
-
     return(extra)
 })
 
@@ -56,7 +49,7 @@ setMethod("show", signature = "metabData", function(object){
     samples = getSamples(object)
     stats = getStats(object)
 
-    timeUnit = ifelse(max(data[["rt"]]) < 180, "minutes", "seconds")
+    unit = ifelse(max(data[["rt"]]) < 180, "minutes", "seconds")
 
     cat("A metabData object\n")
     cat("-------------------------\n")
@@ -64,7 +57,7 @@ setMethod("show", signature = "metabData", function(object){
 
     cat("Mass Range: ", min(data[["mz"]]), "-", max(data[["mz"]]), " ",
         "m/z\n", sep = "" )
-    cat("Time Range: ", min(data[["rt"]]), "-", max(data[["rt"]]), " ", timeUnit,
+    cat("Time Range: ", min(data[["rt"]]), "-", max(data[["rt"]]), " ", unit,
         "\n", sep = "")
 
     cat("Input Feature Count:", stats[["input_size"]], "\n")

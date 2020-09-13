@@ -11,7 +11,8 @@ mzGroup(xset, yset, binGap)
 
 \item{yset}{data frame containing metabolomics features}
 
-\item{binGap}{numeric. Gap between concecutive sorted pooled feature m/z values.}
+\item{binGap}{numeric gap value between consecutive sorted & pooled feature
+m/z values.}
 }
 \value{
 list object containing updated xset & yset with group information

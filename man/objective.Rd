@@ -4,22 +4,36 @@
 \alias{objective}
 \title{Weight Parameter Objective Function}
 \usage{
-objective(cTable, identities, A, B, C, minScore, mzdiff, rtdiff, qdiff,
-  rtrange, adductdiff, penalty, matches, mismatches)
+objective(
+  cTable,
+  idtable,
+  A,
+  B,
+  C,
+  minScore,
+  mzdiff,
+  rtdiff,
+  qdiff,
+  rtrange,
+  adductdiff,
+  penalty,
+  matches,
+  mismatches
+)
 }
 \arguments{
 \item{cTable}{data frame. Abridged \code{metabCombiner} report table.}
 
-\item{identities}{data frame containing all evaluated identities}
+\item{idtable}{data frame containing all evaluated identities}
 
 \item{A}{Numeric weight for penalizing m/z differences.}
 
 \item{B}{Numeric weight for penalizing differences between fitted &
 observed retention times}
 
-\item{C}{Numeric weight for penalizing differences in Q (abundance quantiles)}
+\item{C}{Numeric weight for differences in Q (abundance quantiles).}
 
-\item{minScore}{numeric. Minimum score to count towards objective function value.}
+\item{minScore}{numeric. Minimum score to count towards objective value.}
 
 \item{mzdiff}{numeric differences between feature m/z values}
 
@@ -37,7 +51,7 @@ labels do not match}
 
 \item{matches}{integer row indices of identity matches}
 
-\item{mismatches}{list of integer mismatching identity rows for each identity}
+\item{mismatches}{list of integer identity row mismatches for each identity}
 }
 \value{
 A numeric value quantifying total separability of compound match similarity
@@ -60,7 +74,7 @@ Then, the objective value for a similarity S is evaluated as:
 -S(i,j), represents the maximum similarity of i to grouped feature j,
         i =/= j (the highest-scoring misalignment) \cr
 -h(x) = x if x > \code{minScore}, 0 otherwise \cr
--p(COND) = 0 if the condition is true, and a \code{penalty} value otherwise.
+-p(COND) = 0 if the condition is true, and a \code{penalty} value otherwise
 
 This is summed over all labeled compound identities (e.g. idx = idy) shared
 between input datasets.

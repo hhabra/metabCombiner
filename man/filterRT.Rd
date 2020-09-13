@@ -9,15 +9,15 @@ filterRT(data, rtmin, rtmax)
 \arguments{
 \item{data}{formatted metabolomics data frame.}
 
-\item{rtmin}{lower range of retention times for analysis. If "min", defaults
-to minimum observed retention time.
+\item{rtmin}{lower range of retention times for analysis. If "min",
+defaults to minimum observed retention time.
 .}
 
 \item{rtmax}{upper range of retention times for analysis. If "max", defaults
 to maximum observed retention time.}
 }
 \value{
-A data frame of metabolomics features, limited to retention time window
+A data frame of metabolomics features, limited to time window
 \code{rtmin} \eqn{\le} rt \eqn{\le} \code{rtmax})
 }
 \description{
@@ -25,10 +25,10 @@ Restricts input metabolomics feature table in \code{metabData} object to a
 range of retention times defined by \code{rtmin} & \code{rtmax}.
 }
 \details{
-Retention time restriction is often a recommended step to aid the analysis of
-comparable metabolomics datasets. For example, the beginning and end of a
-chromatogram contain features that do not correspond with a true
-a biological compound derived from the sample. It is recommended to set rtmin
-slightly before the first observed common metabolite, and rtmax slightly after
-the last observed metabolite.
+Retention time restriction is often recommended to aid the analysis of
+comparable metabolomics datasets. The beginning and end of a chromatogram
+typically contain features that do not correspond with true biological
+compounds derived from the sample. \code{rtmin} and \code{rtmax} should be
+set slightly before and slightly after the first and last commonly observed
+metabolites, respectively.
 }

@@ -4,10 +4,18 @@
 \alias{evaluateParams}
 \title{Evaluate Similarity Score Parameters}
 \usage{
-evaluateParams(object, A = seq(60, 150, by = 10), B = seq(6, 15),
-  C = seq(0.1, 0.5, by = 0.1), fit = c("gam", "loess"),
-  usePPM = FALSE, useAdduct = FALSE, adduct = 1, minScore = 0.5,
-  penalty = 5, groups = NULL, brackets_ignore = c("(", "[", "{"))
+evaluateParams(
+  object,
+  A = seq(60, 150, by = 10),
+  B = seq(6, 15),
+  C = seq(0.1, 0.5, by = 0.1),
+  fit = c("gam", "loess"),
+  usePPM = FALSE,
+  minScore = 0.5,
+  penalty = 5,
+  groups = NULL,
+  brackets_ignore = c("(", "[", "{")
+)
 }
 \arguments{
 \item{object}{metabCombiner object}
@@ -17,28 +25,23 @@ evaluateParams(object, A = seq(60, 150, by = 10), B = seq(6, 15),
 \item{B}{Numeric weights for penalizing differences between fitted
 & observed retention times}
 
-\item{C}{Numeric weights for penalizing differences in Q (abundance quantiles)}
+\item{C}{Numeric weight for differences in Q (abundance quantiles).}
 
 \item{fit}{Character. Choice of fitted rt model, "gam" or "loess."}
 
-\item{usePPM}{logical. Option to use relative ppm (as opposed to absolute) m/z
-differences in score computations.}
+\item{usePPM}{logical. Option to use relative parts per million (ppm) as
+opposed to absolute) m/z differences in score computations.}
 
-\item{useAdduct}{logical. Option to penalize mismatches in (non-empty) adduct
-column labels.}
-
-\item{adduct}{numeric. If useAdduct is TRUE, divides mismatching and non-empty
-adduct column labels by this value.}
-
-\item{minScore}{numeric. Minimum score to count towards objective function value.}
+\item{minScore}{numeric minimum score to count towards objective function
+calculation for known matching features (idx = idy) and mismatches.}
 
 \item{penalty}{numeric. Subtractive mismatch penalty.}
 
 \item{groups}{integer. Vector of feature groups to score. If set to NULL
 (default), will compute scores for all feature groups.}
 
-\item{brackets_ignore}{bracketed identity character strings of these types
-will be ignored according to this argument}
+\item{brackets_ignore}{bracketed identity and adduct character strings of
+these types will be ignored according to this argument}
 }
 \value{
 A data frame with the following columns:
@@ -55,8 +58,9 @@ least one identity in common (i.e. idx = idy, case-insensitive), and
 preferably more than 10.
 }
 \details{
-An objective function, based on the accurate and inaccurate alignments of shared
-pre-identified compounds. For more details, see: \code{\link{objective}}.
+This uses an objective function, based on the accurate and inaccurate
+alignments of  shared pre-identified compounds. For more details, see:
+\code{\link{objective}}.
 }
 \note{
 In contrast to \code{\link{calcScores}} function, A, B, & C take numeric
@@ -64,34 +68,26 @@ vectors as input, as opposed to constants. The total number of rows in the
 output will be equal to the products of the lengths of these input vectors
 }
 \examples{
-\dontrun{
-library(metabCombiner)
+
 data(plasma30)
 data(plasma20)
 
 p30 <- metabData(plasma30, samples = "CHEAR")
 p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
-p.combined = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
 
-p.combined = selectAnchors(p.combined, tolMZ = 0.003, tolQ = 0.3, windY = 0.02)
-p.combined = fit_gam(p.combined, k = seq(12,20,2), iterFilter = 1)
+p.comb = selectAnchors(p.comb, windx = 0.03, windy = 0.02)
+p.comb = fit_gam(p.comb, k = 20, iterFilter = 2)
 
-##example 1
-scores = evaluateParams(p.combined, minScore = 0.7, penalty = 5)
+#example 1
+scores = evaluateParams(p.comb, A = seq(60,100,10), B = seq(10,15), C = 0.5,
+    minScore = 0.7, penalty = 10)
 
-##example 2: changing A, B, C parameters
-scores = evaluateParams(p.combined, A = seq(70,150,5), B = seq(7, 20, 0.5),
-                        C = c(0.2,0.3,0.5))
+##example 2: using PPM mass deviation (note change to A argument)
+scores = evaluateParams(p.comb, usePPM = TRUE, A = seq(0.01,0.05,0.01))
 
-##example 3: using PPM mass deviation (note change to A argument)
-scores = evaluateParams(p.combined, usePPM = TRUE, A = seq(0.01,0.1,0.01))
-
-##example 4: limiting to groups 1-2000
-scores = evaluateParams(p.combined, minScore = 0.5, groups = 1:2000)
-
-##After evaluation
-p.combined = calcScores(p.combined, A = 90, B = 14, C = 0.5)
-}
+##example 3: limiting to groups 1-2000
+scores = evaluateParams(p.comb, minScore = 0.5, groups = 1:2000)
 
 }
 \seealso{

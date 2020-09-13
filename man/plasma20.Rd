@@ -6,16 +6,6 @@
 \title{20 minute Metabolomics Analysis of Human Plasma}
 \format{
 A data frame with 8910 rows and 22 columns:
-\describe{
-  \item{feature}{generic feature identifiers}
-  \item{identity}{identities of feature (if known); feature identifier (if
-                   unknown); names in parantheses if ambiguous)}
-  \item{adduct}{adduct, fragment, or multimer annotations; labels in
-                parantheses if ambiguous}
-  \item{mz}{m/z values of metabolomics features}
-  \item{rt}{rt values of metabolomics features}
-  \item{...}{column names for CHEAR, Red Cross, Pooled, and Blank samples}
-}
 }
 \usage{
 data(plasma20)
