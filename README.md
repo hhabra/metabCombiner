@@ -14,7 +14,7 @@ library(metabCombiner)
 
 ## How to Use metabCombiner
 
-In the [/inst directory](/inst/) directory, we have an example R script showing a demonstration of the package's utilities. See the vignette by entering browseVignettes("metabCombiner") for a more detailed description of how to use *metabCombiner*.
+In the [/demo](/demo/) directory, we have an example R script showing a demonstration of the package's utilities. See the vignette by entering browseVignettes("metabCombiner") for a more detailed description of how to use *metabCombiner*.
 
 
 
