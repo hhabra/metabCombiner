@@ -3,8 +3,8 @@
 #' Ignore Bracketed Strings
 #'
 #' @description
-#' This function is generally used to ignore certain strings that are
-#' bracketed for the purposes of string comparisons
+#' This function is generally used to ignore certain strings that are bracketed
+#' for the purposes of string comparisons
 #'
 #' @param s  a character vector
 #'
@@ -34,18 +34,20 @@ ignore_brackets = function(s, brackets)
 #'
 #' @param s2  One of two character vectors to be compared
 #'
-#' @param match The value to give for matching s1 and s2 strings
+#' @param match value to give for matching s1 and s2 strings
 #'
-#' @param mismatch The value to give for mismatching or empty s1 and s2 strings
+#' @param mismatch value to give for mismatching / empty s1 and s2 strings
 #'
 #' @param brackets  bracketed character strings of these types will be
 #' ignored according to this argument
+#'
+#' @param type Option to assign match-based
 #'
 #' @return  vector. Indices of matching strings are equal to value of match,
 #'          with mismatching strings equal to value of mismatch
 #'
 #' @noRd
-compare_strings <- function(s1,s2, match, mismatch, brackets)
+compare_strings <- function(s1,s2, match, mismatch, brackets, type = "m")
 {
     s1 = ifelse(is.na(s1), "", s1)
     s2 = ifelse(is.na(s2), "", s2)
@@ -53,36 +55,11 @@ compare_strings <- function(s1,s2, match, mismatch, brackets)
     s1 = ignore_brackets(s1, brackets)
     s2 = ignore_brackets(s2, brackets)
 
-    ifelse(!(s1 == "" | s2 == "") & tolower(s1) == tolower(s2), match, mismatch)
+    if (type == "m")
+        return(ifelse(!(s1 == "" | s2 == "") & tolower(s1) == tolower(s2),
+                match, mismatch))
+
+    else if (type == "mm")
+        return(ifelse(!(s1 == "" | s2 == "") & tolower(s1) != tolower(s2),
+                mismatch, match))
 }
-
-#' Determine Matching Adduct Strings
-#'
-#' @param s1  One of two character vectors to be compared
-#'
-#' @param s2  One of two character vectors to be compared
-#'
-#' @param match The value to give for matching s1 and s2 strings
-#'
-#' @param mismatch The value to give for mismatching or empty s1 and s2 strings
-#'
-#' @param brackets  bracketed character strings of these types will be
-#' ignored according to this argument
-#'
-#' @return  character vector. Indices of mismatching strings are equal to value
-#'          of mismatch, with remaining indices left as empty characters.
-#'
-#' @noRd
-compare_adduct_strings <- function(s1,s2, match, mismatch, brackets)
-{
-    s1 = ifelse(is.na(s1), "", s1)
-    s2 = ifelse(is.na(s2), "", s2)
-
-    s1 = ignore_brackets(s1, brackets)
-    s2 = ignore_brackets(s2, brackets)
-
-    ifelse(!(s1 == "" | s2 == "") & tolower(s1) != tolower(s2), mismatch, match)
-}
-
-
-
