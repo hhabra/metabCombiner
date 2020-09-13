@@ -1,35 +1,48 @@
 Package: metabCombiner
-Version: 1.0.1
-Date: 2019-09-27
+Version: 0.99.0
+Date: 2020-09-06
 Title: Method for Combining LC-MS Metabolomics Feature Measurements
 Author: Authors@R: c(
-	   person("Habra", "Hani", email = "hhabra1@gmail.com", role = c("aut","cre")),
-	   person("Karnovsky", "Alla", email = "akarnovs@med.umich.edu", role = "ths"))
+	   person("Habra", "Hani", email = "hhabra1@gmail.com",role = c("aut","cre")),
+	   person("Karnovsky", "Alla", email = "akarnovs@med.umich.edu",role = "ths"))
 Maintainer: Hani Habra <hhabra1@gmail.com>
 License: GPL-3
-Description: Accepts two untargeted metabolomics feature lists (consisting of m/z,
-  rt, and sample intensity measurements, plus optional identifiers & adduct 
-	labels) as input and outputs a combined table of feature pair alignments, ranked
-	by a similarity score within groups of features of similar m/z. Input tables are 
-	assumed to be derived from biologically similar samples acquired using similar 
-	(but not necessarily identical) analytical methods.
-Depends: R (>= 3.2.0), dplyr
-Imports: methods, mgcv, caret, S4Vectors, stats, utils, rlang
+Description: Accepts two LC-MS metabolomics feature tables (consisting of 
+    m/z, rt, and per-sample abundance measurements, plus optional identifiers & 
+    adduct annotations) as input and outputs a combined table of feature 
+    pair alignments, ranked by a similarity score within groups of features of
+    similar m/z. Input tables are assumed to be derived from biologically 
+    similar samples acquired using similar (but not necessarily identical) 
+    analytical methods.
+Depends: R (>= 3.5.0), dplyr
+Imports: 
+    methods, 
+    mgcv, 
+    caret, 
+    S4Vectors, 
+    stats, 
+    utils, 
+    rlang, 
+    graphics
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat
 BugReports: https://www.github.com/hhabra/metabCombiner/issues
 NeedsCompilation: yes
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
 Encoding: UTF-8
 Collate: 
     'adjustData.R'
     'calcScores.R'
+    'check_pars.R'
     'classes.R'
-    'combinerError.R'
+    'combinerCheck.R'
     'compare_strings.R'
     'data.R'
     'detectFields.R'
     'evaluateParams.R'
-    'fit_gam.R'
-    'fit_loess.R'
+    'fit_model.R'
     'formCombinedTable.R'
     'generics.R'
     'labelRows.R'
@@ -42,7 +55,7 @@ Collate:
     'plot_fit.R'
     'selectAnchors.R'
     'write2file.R'
-Suggests: 
-    knitr,
-    rmarkdown
+    'zzz.R'
 VignetteBuilder: knitr
+biocViews: Software, MassSpectrometry, Metabolomics
+LazyData: false
