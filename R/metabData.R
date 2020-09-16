@@ -79,23 +79,21 @@
 #' p30 <- metabData(plasma30, mz = "mz", rt = "rt", id = "identity",
 #'                  adduct = "adduct", samples = "CHEAR", extra = "RedCross")
 #'
-#' #equivalent to above
-#' p30 <- metabData(plasma30, id = "id", samples = "CHEAR", extra = "Red")
-#'
 #' getSamples(p30)  #should print names of 5 CHEAR Sample column names
 #' getExtra(p30)    #should print names of 5 Red Cross Sample column names
 #'
-#' \dontrun{
-#' data(plasma20)
+#' #equivalent to above
+#' p30 <- metabData(plasma30, id = "id", samples = "CHEAR", extra = "Red")
+#'
 #' #analyzing Red Cross samples with retention time limitations (0.5-17.5min)
-#' p20 <- metabData(plasma20, samples = "Red", rtmin = 0.5, rtmax = 17.5)
-#' data = getData(p20)
+#' p30 <- metabData(plasma30, samples = "Red", rtmin = 0.5, rtmax = 17.5)
+#' data = getData(p30)
 #' range(data$rt)
 #'
 #' #using regular expressions for field searches
-#' p20.2 <- metabData(plasma20, id = "identity|id|ID", samples = ".[3-5]$")
-#' getSamples(p20.2)    #should print all column names ending in .3, .4, .5
-#' }
+#' p30.2 <- metabData(plasma30, id = "identity|id|ID", samples = ".[3-5]$")
+#' getSamples(p30.2)    #should print all column names ending in .3, .4, .5
+#'
 #' @export
 metabData <- function(table, mz = "mz", rt = "rt", id = "id",
                         adduct = "adduct", samples = NULL, Q = NULL,
