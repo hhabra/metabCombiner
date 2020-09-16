@@ -1,20 +1,22 @@
 Package: metabCombiner
-Version: 0.99.0
-Date: 2020-09-06
+Version: 0.99.1
+Date: 2020-09-16
 Title: Method for Combining LC-MS Metabolomics Feature Measurements
-Author: Authors@R: c(
+Authors@R: c(
 	   person("Habra", "Hani", email = "hhabra1@gmail.com",role = c("aut","cre")),
 	   person("Karnovsky", "Alla", email = "akarnovs@med.umich.edu",role = "ths"))
 Maintainer: Hani Habra <hhabra1@gmail.com>
 License: GPL-3
-Description: Accepts two LC-MS metabolomics feature tables (consisting of 
-    m/z, rt, and per-sample abundance measurements, plus optional identifiers & 
-    adduct annotations) as input and outputs a combined table of feature 
-    pair alignments, ranked by a similarity score within groups of features of
-    similar m/z. Input tables are assumed to be derived from biologically 
-    similar samples acquired using similar (but not necessarily identical) 
+Description: This package aligns LC-HRMS metabolomics datasets acquired from 
+    biologically similar specimens analyzed under similar, but not necessarily 
+    identical, conditions. Two peak-picked and aligned metabolomics feature 
+    tables (consisting of m/z, rt, and per-sample abundance measurements, plus 
+    optional identifiers & adduct annotations) are accepted as input. The 
+    package  outputs a combined table of feature pair alignments, organized 
+    into groups of similar m/z, and ranked by a similarity score. Input tables 
+    are assumed to be  acquired using similar (but not necessarily identical) 
     analytical methods.
-Depends: R (>= 3.5.0), dplyr
+Depends: R (>= 4.0), dplyr
 Imports: 
     methods, 
     mgcv, 
