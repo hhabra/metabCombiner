@@ -2,7 +2,7 @@
 title: Combine LC-MS Metabolomics Datasets with metabCombiner
 author: "Hani Habra"
 output: rmarkdown::html_vignette
-date: "`r Sys.Date()`"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
 vignette: >
     %\VignetteIndexEntry{Combine LC-MS Metabolomics Datasets with metabCombiner}
     %\VignetteEngine{knitr::rmarkdown}
