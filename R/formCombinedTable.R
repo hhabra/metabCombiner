@@ -56,9 +56,6 @@ formCombinedTable <- function(object, xset, yset, nGroups){
                         stringsAsFactors = FALSE, check.names = FALSE
     )
 
-    cTable = dplyr::arrange(cTable, .data$group, .data$mzx, .data$rtx,
-                            .data$mzy, .data$rty)
     object@combinedTable = cTable
-
     return(object)
 }
