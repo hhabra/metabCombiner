@@ -68,7 +68,7 @@ plot_fit <- function(object, fit = c("gam","loess"), pcol, lcol, lwd,
     if(missing(lcol))
         lcol = "red"
     if(missing(lwd))
-        lwd = 4
+        lwd = 3
 
     rtx = data[["rtx"]]
     rty = data[["rty"]]
