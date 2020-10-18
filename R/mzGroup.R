@@ -44,8 +44,8 @@ mzGroup <- function(xset, yset, binGap){
     ygroups <- dplyr::filter(mzGroups, .data$set == "y") %>%
                 dplyr::arrange(.data$index)
 
-    xset[["group"]] = xgroups[["group"]]
-    yset[["group"]] = ygroups[["group"]]
+    xset[["group"]] <- xgroups[["group"]]
+    yset[["group"]] <- ygroups[["group"]]
 
     return(list(x = xset, y = yset))
 }
