@@ -7,9 +7,14 @@ This is an R package for aligning a pair of disparately-acquired untargeted LC-M
 ```r
 #if devtools is not already installed:
 install.packages("devtools")
+Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true")
 
+#for R versions 4.0 and later
 devtools::install_github("hhabra/metabCombiner", build_vignettes = TRUE)
 library(metabCombiner)
+
+#for R versions between 3.5 and 4
+devtools::install_github("hhabra/metabCombiner", build_vignettes = TRUE, ref = "R3.5")
 ```
 
 ## How to Use metabCombiner
