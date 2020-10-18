@@ -16,13 +16,13 @@
 ignore_brackets = function(s, brackets)
 {
     if("(" %in% brackets | ")" %in% brackets | "()" %in% brackets)
-        s = gsub("^\\([^&]*\\)$", "", s)
+        s <- gsub("^\\([^&]*\\)$", "", s)
 
     if("[" %in% brackets | "]" %in% brackets | "[]" %in% brackets)
-        s = gsub("^\\[[^&]*\\]$", "", s)
+        s <- gsub("^\\[[^&]*\\]$", "", s)
 
     if("{" %in% brackets | "}" %in% brackets | "{}" %in% brackets)
-        s = gsub("^\\{[^&]*\\}$", "", s)
+        s <- gsub("^\\{[^&]*\\}$", "", s)
 
     return(s)
 }
@@ -49,11 +49,11 @@ ignore_brackets = function(s, brackets)
 #' @noRd
 compare_strings <- function(s1,s2, match, mismatch, brackets, type = "m")
 {
-    s1 = ifelse(is.na(s1), "", s1)
-    s2 = ifelse(is.na(s2), "", s2)
+    s1 <- ifelse(is.na(s1), "", s1)
+    s2 <- ifelse(is.na(s2), "", s2)
 
-    s1 = ignore_brackets(s1, brackets)
-    s2 = ignore_brackets(s2, brackets)
+    s1 <- ignore_brackets(s1, brackets)
+    s2 <- ignore_brackets(s2, brackets)
 
     if (type == "m")
         return(ifelse(!(s1 == "" | s2 == "") & tolower(s1) == tolower(s2),
