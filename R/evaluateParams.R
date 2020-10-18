@@ -19,22 +19,22 @@ hinge <- function(value, thresh){
 #'
 #' @noRd
 form_idtable <- function(cTable){
-    idtable = dplyr::filter(cTable, .data$label == "IDENTITY") %>%
+    idtable <- dplyr::filter(cTable, .data$label == "IDENTITY") %>%
         dplyr::select(.data$idx) %>%
         dplyr::mutate(`match`= 0, `mismatch`= 0,`penalty`= 0,`score`= 0) %>%
         dplyr::rename("id" = "idx")
 
     #look for duplicate identity names within a group
-    counts = table(idtable[["id"]])
+    counts <- table(idtable[["id"]])
 
     if(any(counts > 1)){
-        duplicates = which(counts > 1)
-        dupliNames = names(counts)[duplicates]
-        dupliGroups = paste(unique(vapply(strsplit(dupliNames, "_"), "[[", 2,
+        duplicates <- which(counts > 1)
+        dupliNames <- names(counts)[duplicates]
+        dupliGroups <- paste(unique(vapply(strsplit(dupliNames, "_"), "[[", 2,
                                     FUN.VALUE = character(1))), collapse = ",")
         warning("At least one identity appears multiple times in a group.",
                 "See groups: ", dupliGroups)
-        idtable = dplyr::filter(idtable, !(id %in% duplicates))
+        idtable <- dplyr::filter(idtable, !(id %in% duplicates))
     }
 
     if(nrow(idtable) == 0)
@@ -57,7 +57,7 @@ form_idtable <- function(cTable){
 #' @noRd
 mismatchfind <- function(cTable, id)
 {
-    mm = which(cTable[["idx"]] == id & cTable[["idy"]] != id |
+    mm <- which(cTable[["idx"]] == id & cTable[["idy"]] != id |
                 cTable[["idx"]] != id & cTable[["idy"]] == id)
 
     return(mm)
@@ -141,7 +141,7 @@ mismatchScore <- function(cTable, mismatches)
 objective <- function(cTable, idtable, A, B, C, minScore, mzdiff, rtdiff,
                     qdiff, rtrange, adductdiff, penalty, matches, mismatches)
 {
-    cTable[["score"]] = scorePairs( A = A,
+    cTable[["score"]] <- scorePairs(A = A,
                                     B = B,
                                     C = C,
                                     mzdiff = mzdiff,
@@ -150,19 +150,19 @@ objective <- function(cTable, idtable, A, B, C, minScore, mzdiff, rtdiff,
                                     rtrange = rtrange,
                                     adductdiff = adductdiff)
 
-    idtable[["match"]] = cTable[["score"]][matches]
+    idtable[["match"]] <- cTable[["score"]][matches]
 
-    idtable[["mismatch"]] = as.numeric(vapply(mismatches, function(mm)
+    idtable[["mismatch"]] <- as.numeric(vapply(mismatches, function(mm)
                                     mismatchScore(cTable, mm), numeric(1)))
 
-    idtable[["penalty"]]= ifelse(idtable[["match"]] > idtable[["mismatch"]],
+    idtable[["penalty"]] <- ifelse(idtable[["match"]] > idtable[["mismatch"]],
                                     0, penalty)
 
-    idtable[["score"]] = hinge(idtable[["match"]], minScore) -
+    idtable[["score"]] <- hinge(idtable[["match"]], minScore) -
                             hinge(idtable[["mismatch"]], minScore) -
                             idtable[["penalty"]]
 
-    value = sum(idtable[["score"]])
+    value <- sum(idtable[["score"]])
 
     return(value)
 }
@@ -248,38 +248,38 @@ evaluateParams <- function(object, A = seq(60,150,by = 10), B = seq(6,15),
                         groups = NULL,brackets_ignore = c("(", "[", "{"))
 {
     combinerCheck(isMetabCombiner(object), "metabCombiner")
-    cTable = combinedTable(object)[,seq(1,15)]
-    fit = match.arg(fit)
-    model = getModel(object, fit = fit)
-    if(is.null(groups))  groups = seq(1,max(cTable[["group"]]))
+    cTable <- combinedTable(object)[,seq(1,15)]
+    fit <- match.arg(fit)
+    model <- getModel(object, fit = fit)
+    if(is.null(groups))  groups <- seq(1,max(cTable[["group"]]))
     check_score_pars(cTable, A, B, C, model, fit, groups, minScore, penalty)
-    rtrange = max(cTable[["rty"]]) - min(cTable[["rty"]])
-    rows = which(cTable[["group"]] %in% groups)
-    cTable = cTable[rows,]
-    cTable[["label"]] = compare_strings(cTable[["idx"]], cTable[["idy"]],
+    rtrange <- max(cTable[["rty"]]) - min(cTable[["rty"]])
+    rows <- which(cTable[["group"]] %in% groups)
+    cTable <- cTable[rows,]
+    cTable[["label"]] <- compare_strings(cTable[["idx"]], cTable[["idy"]],
                                         "IDENTITY", "", brackets_ignore)
     if(!any(cTable[["label"]] == "IDENTITY"))
         stop("must have at least one shared labeled identities (idx = idy)")
 
-    cTable[["idx"]] = paste(tolower(cTable[["idx"]]), cTable[["group"]],
+    cTable[["idx"]] <- paste(tolower(cTable[["idx"]]), cTable[["group"]],
                             sep = "_")
-    cTable[["idy"]] = paste(tolower(cTable[["idy"]]),cTable[["group"]],
+    cTable[["idy"]] <- paste(tolower(cTable[["idy"]]),cTable[["group"]],
                             sep = "_")
-    idtable = form_idtable(cTable)
-    cTable = dplyr::filter(cTable, .data$idx %in% idtable[["id"]] |
+    idtable <- form_idtable(cTable)
+    cTable <- dplyr::filter(cTable, .data$idx %in% idtable[["id"]] |
                             .data$idy %in% idtable[["id"]])
 
-    cTable[["rtProj"]] = predict(model, newdata = cTable)
-    massdiff = mzdiff(cTable[["mzx"]], cTable[["mzy"]], usePPM)
-    rtdiff = abs(cTable[["rty"]] - cTable[["rtProj"]])
-    qdiff = abs(cTable[["Qx"]] - cTable[["Qy"]])
-    scores = data.frame(A = rep(A, each = length(B)*length(C)),
+    cTable[["rtProj"]] <- predict(model, newdata = cTable)
+    massdiff <- mzdiff(cTable[["mzx"]], cTable[["mzy"]], usePPM)
+    rtdiff <- abs(cTable[["rty"]] - cTable[["rtProj"]])
+    qdiff <- abs(cTable[["Qx"]] - cTable[["Qy"]])
+    scores <- data.frame(A = rep(A, each = length(B)*length(C)),
                         B = rep(B, each = length(C)), C = C, score = 0)
 
-    matches = which(cTable[["label"]] == "IDENTITY")
-    mismatches = lapply(idtable[["id"]], function(id) mismatchfind(cTable,id))
+    matches <- which(cTable[["label"]] == "IDENTITY")
+    mismatches <- lapply(idtable[["id"]], function(id) mismatchfind(cTable,id))
 
-    scores[["score"]] = mapply(function(A,B,C)
+    scores[["score"]] <- mapply(function(A,B,C)
                     objective(cTable = cTable, idtable = idtable,
                                 A = A, B = B, C = C, minScore = minScore,
                                 mzdiff = massdiff, rtdiff = rtdiff,
@@ -288,6 +288,6 @@ evaluateParams <- function(object, A = seq(60,150,by = 10), B = seq(6,15),
                                 mismatches = mismatches, penalty = penalty),
                                 scores[["A"]],  scores[["B"]], scores[["C"]])
 
-    scores = dplyr::arrange(scores, desc(.data$score))
+    scores <- dplyr::arrange(scores, desc(.data$score))
     return(scores)
 }

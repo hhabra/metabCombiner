@@ -42,36 +42,36 @@
 plot_fit <- function(object, fit = c("gam","loess"), pcol, lcol, lwd,
                     remove.outliers = FALSE, ...)
 {
-    fit = match.arg(fit)
-    model = getModel(object, fit = fit)
+    fit <- match.arg(fit)
+    model <- getModel(object, fit = fit)
 
     if(is.null(model))
         stop(paste("object missing model of type", fit))
 
     if(fit == "loess")
-        data = data.frame(rtx = model[["x"]], rty = model[["y"]],
+        data <- data.frame(rtx = model[["x"]], rty = model[["y"]],
                             pred = model[["fitted"]],
                             weights = model[["weights"]])
 
     else if (fit == "gam")
-        data = data.frame(rtx = model$model$rtx, rty = model$model$rty,
+        data <- data.frame(rtx = model$model$rtx, rty = model$model$rty,
                             preds = model[["fitted.values"]],
                             weights = model[["prior.weights"]])
 
-    data = dplyr::arrange(data, .data$rtx)
+    data <- dplyr::arrange(data, .data$rtx)
 
     if(remove.outliers)
-        data = dplyr::filter(data, .data$weights > 0)
+        data <- dplyr::filter(data, .data$weights > 0)
 
     if(missing(pcol))
-        pcol = "black"
+        pcol <- "black"
     if(missing(lcol))
-        lcol = "red"
+        lcol <- "red"
     if(missing(lwd))
-        lwd = 3
+        lwd <- 3
 
-    rtx = data[["rtx"]]
-    rty = data[["rty"]]
+    rtx <- data[["rtx"]]
+    rty <- data[["rty"]]
 
     graphics::plot(rtx, rty, type = "p", col = pcol,...)
     graphics::lines(x = data[["rtx"]], y = data[["preds"]],
