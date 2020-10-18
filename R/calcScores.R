@@ -16,11 +16,12 @@
 #' @noRd
 ##
 mzdiff <- function(mzx, mzy, usePPM){
-    diffs = mzx - mzy
-    mins = ifelse(diffs < 0, mzx, mzy)
+    diffs <- mzx - mzy
 
-    if(usePPM)
-        diffs = 1e6*abs(diffs)/ mins
+    if(usePPM){
+        mins <- ifelse(diffs < 0, mzx, mzy)
+        diffs <- 1e6*abs(diffs)/ mins
+    }
 
     return(diffs)
 }
@@ -68,9 +69,9 @@ mzdiff <- function(mzx, mzy, usePPM){
 #' @return  Numeric similarity score between 0 & 1
 scorePairs <- function(A, B, C, mzdiff, rtdiff, qdiff, rtrange, adductdiff){
 
-    nlogScore = A * abs(mzdiff) + B * abs(rtdiff) / rtrange + C * abs(qdiff)
+    nlogScore <- A * abs(mzdiff) + B * abs(rtdiff) / rtrange + C * abs(qdiff)
 
-    score = base::exp(-nlogScore) / adductdiff
+    score <- base::exp(-nlogScore) / adductdiff
 
     return(score)
 }
@@ -91,9 +92,9 @@ scorePairs <- function(A, B, C, mzdiff, rtdiff, qdiff, rtrange, adductdiff){
 #' @noRd
 calculateRanks <- function(cTable, rows){
     ##bug fix for duplicated column names
-    cT = cTable[, c("mzx", "mzy", "rtx", "rty", "score", "rankX", "rankY")]
+    cT <- cTable[, c("mzx", "mzy", "rtx", "rty", "score", "rankX", "rankY")]
 
-    cT[rows,] = cT[rows,] %>%
+    cT[rows,] <- cT[rows,] %>%
         dplyr::group_by(.data$mzx, .data$rtx) %>%
         dplyr::mutate(rankX = dplyr::dense_rank(desc(.data$score))) %>%
         dplyr::ungroup() %>%
@@ -102,7 +103,7 @@ calculateRanks <- function(cTable, rows){
         dplyr::ungroup()
 
     cTable[c("rankX", "rankY")] = cT[c("rankX", "rankY")]
-    cTable = cTable[with(cTable,order(`group`, desc(`score`))),]
+    cTable <- cTable[with(cTable,order(`group`, desc(`score`))),]
 
     return(cTable)
 }
@@ -180,30 +181,30 @@ calculateRanks <- function(cTable, rows){
 #'
 #' p30 <- metabData(plasma30, samples = "CHEAR")
 #' p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
-#' p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+#' p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
 #'
-#' p.comb = selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
-#' p.comb = fit_gam(p.comb, k = 20, iterFilter = 1)
+#' p.comb <- selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
+#' p.comb <- fit_gam(p.comb, k = 20, iterFilter = 1)
 #'
 #' #example: moderate m/z deviation, accurate rt fit, high sample similarity
-#' p.comb = calcScores(p.comb, A = 90, B = 14, C = 0.8, useAdduct = FALSE,
+#' p.comb <- calcScores(p.comb, A = 90, B = 14, C = 0.8, useAdduct = FALSE,
 #'          groups = NULL, fit = "gam", usePPM = FALSE)
 #' cTable = combinedTable(p.comb)  #to view results
 #'
 #' #example 2: high m/z deviation, moderate rt fit, low sample similarity
-#' p.comb = calcScores(p.comb, A = 50, B = 8, C = 0.2)
+#' p.comb <- calcScores(p.comb, A = 50, B = 8, C = 0.2)
 #'
 #' #example 3: low m/z deviation, poor rt fit, moderate sample similarity
-#' p.comb = calcScores(p.comb, A = 120, B = 5, C = 0.5)
+#' p.comb <- calcScores(p.comb, A = 120, B = 5, C = 0.5)
 #'
 #' #example 4: using ppm for mass deviation; note different A value
-#' p.comb = calcScores(p.comb, A = 0.05, B = 14, C = 0.5, usePPM = TRUE)
+#' p.comb <- calcScores(p.comb, A = 0.05, B = 14, C = 0.5, usePPM = TRUE)
 #'
 #' #example 5: limiting to specific m/z groups 1-1000
-#' p.comb = calcScores(p.comb, A = 90, B = 14, C = 0.5, groups = seq(1,1000))
+#' p.comb <- calcScores(p.comb, A = 90, B = 14, C = 0.5, groups = seq(1,1000))
 #'
 #' #example 6: using adduct information
-#' p.comb = calcScores(p.comb, A = 90, B = 14, C = 0.5, useAdduct = TRUE,
+#' p.comb <- calcScores(p.comb, A = 90, B = 14, C = 0.5, useAdduct = TRUE,
 #'                      adduct = 1.25)
 #'
 #' @export
@@ -213,47 +214,45 @@ calcScores <- function(object, A, B, C, fit = c("gam", "loess"), groups = NULL,
                         brackets_ignore = c("(", "[", "{"))
 {
     combinerCheck(isMetabCombiner(object), "metabCombiner")
-    cTable = combinedTable(object)
-    fit = match.arg(fit)
-    model = getModel(object, fit = fit)
+    cTable <- combinedTable(object)
+    fit <- match.arg(fit)
+    model <- getModel(object, fit = fit)
     if(is.null(groups))
-        groups = seq(1,max(cTable[["group"]]))
+        groups <- seq(1,max(cTable[["group"]]))
 
     check_score_pars(cTable, A, B, C, fit, model, groups, adduct = adduct)
 
     if(length(A) > 1 | length(B) > 1 | length(C) > 1){
         warning("only the first element used for arguments 'A', 'B', 'C'")
-        A = A[1];   B = B[1];   C = C[1]
+        A <- A[1];   B <- B[1];   C <- C[1]
     }
 
-    rtrange = max(cTable[["rty"]]) - min(cTable[["rty"]])
-    rows = which(cTable[["group"]] %in% groups)
-    cTable$rtProj[rows] = stats::predict(model, newdata = cTable[rows,])
+    rtrange <- max(cTable[["rty"]]) - min(cTable[["rty"]])
+    rows <-  which(cTable[["group"]] %in% groups)
+    cTable$rtProj[rows] <- stats::predict(model, newdata = cTable[rows,])
 
     if(useAdduct){
         if(!is.numeric(adduct) | adduct < 1){
-            warning("'adduct' argument must be a numeric value ",
+            stop("'adduct' argument must be a numeric value ",
                     "greater than or equal to 1")
-            adduct = 1
         }
-        adductdiff = compare_strings(cTable$adductx[rows],cTable$adducty[rows],
+        adductdiff <- compare_strings(cTable$adductx[rows],cTable$adducty[rows],
                                     1, adduct, brackets_ignore, type = "mm")
     }
     else
         adductdiff = 1
 
-    massdiff =  mzdiff(cTable$mzx[rows], cTable$mzy[rows], usePPM)
-    rtdiff = abs(cTable$rty[rows] - cTable$rtProj[rows])
-    qdiff = abs(cTable$Qx[rows] - cTable$Qy[rows])
+    massdiff <-  mzdiff(cTable$mzx[rows], cTable$mzy[rows], usePPM)
+    rtdiff <- abs(cTable$rty[rows] - cTable$rtProj[rows])
+    qdiff <- abs(cTable$Qx[rows] - cTable$Qy[rows])
 
-    cTable$score[rows] = scorePairs(A = A, B = B, C = C, mzdiff = massdiff,
+    cTable$score[rows] <- scorePairs(A = A, B = B, C = C, mzdiff = massdiff,
                                     rtdiff = rtdiff, qdiff = qdiff,
                                     rtrange = rtrange, adductdiff = adductdiff)
 
-    cTable[c("rtProj", "score")] = round(cTable[c("rtProj", "score")], 4)
-
-    object@combinedTable = calculateRanks(cTable, rows)
-    object@coefficients = list(`A` = A, `B` = B, `C` = C)
+    cTable[c("rtProj", "score")] <- round(cTable[c("rtProj", "score")], 4)
+    object <- update_mc(object, combinedTable = calculateRanks(cTable, rows),
+                    coefficients = list(`A` = A, `B` = B, `C` = C))
     return(object)
 }
 

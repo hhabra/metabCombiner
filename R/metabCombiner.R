@@ -48,30 +48,26 @@ metabCombiner <- function(xdata, ydata, binGap = 0.005){
         warning("large 'binGap' argument value; binGap < 0.01 is recommended")
 
     object <- new("metabCombiner")
-    object@stats[["binGap"]] = binGap
-    xset = getData(xdata)
-    yset = getData(ydata)
-    xygroups = mzGroup(xset = xset, yset = yset, binGap = binGap)
+    xset <- getData(xdata)
+    yset <- getData(ydata)
+    xygroups <- mzGroup(xset = xset, yset = yset, binGap = binGap)
 
-    object@stats[["input_size_X"]] = nrow(xset)
-    object@nonmatched[["x"]] = dplyr::filter(xygroups[["x"]], .data$group == 0)
-    xset = dplyr::filter(xygroups[["x"]], .data$group > 0) %>%
+    object <- update_mc(object, data = "x", samples = getSamples(xdata),
+                    extra = getExtra(xdata),
+                    stats = c("binGap","input_size_X", "input_size_Y"),
+                    values = c(binGap, nrow(xset),nrow(yset)),
+                    nonmatched = dplyr::filter(xygroups$x,.data$group == 0))
+    xset <- dplyr::filter(xygroups[["x"]], .data$group > 0) %>%
             dplyr::arrange(.data$group)
-    object@stats[["grouped_size_X"]] = nrow(xset)
-    object@stats[["input_size_Y"]] = nrow(yset)
-    object@nonmatched[["y"]] = dplyr::filter(xygroups[["y"]], .data$group == 0)
-    yset =  dplyr::filter(xygroups[["y"]], .data$group > 0) %>%
+    yset <- dplyr::filter(xygroups[["y"]], .data$group > 0) %>%
             dplyr::arrange(.data$group)
-    object@stats[["grouped_size_Y"]] = nrow(yset)
-    nGroups = max(xset[["group"]])
-    object@stats[["nGroups"]] = nGroups
-    object@samples[["x"]] = xdata@samples
-    object@samples[["y"]] = ydata@samples
-    object@extra[["x"]] = xdata@extra
-    object@extra[["y"]] = ydata@extra
+    nGroups <- max(xset[["group"]])
+    object <- update_mc(object, data = "y", samples = getSamples(ydata),
+                    extra = getExtra(ydata),
+                    stats = c("grouped_size_X", "grouped_size_Y", "nGroups"),
+                    values = c(nrow(xset), nrow(yset), nGroups))
 
-    object = formCombinedTable(object, xset, yset, nGroups)
-
+    object <- formCombinedTable(object, xset, yset, nGroups)
     return(object)
 }
 

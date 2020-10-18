@@ -12,12 +12,12 @@
 formatAnchors <- function(object, anchors, weights, useID){
     if(!useID | is.null(anchors[["labels"]]))
         anchors[["labels"]] = "A"
-    cTable = combinedTable(object)
+    cTable <- combinedTable(object)
     rtx <- c(min(cTable[["rtx"]]), anchors[["rtx"]], max(cTable[["rtx"]]))
     rty <- c(min(cTable[["rty"]]), anchors[["rty"]], max(cTable[["rty"]]))
     labels <- c("I", anchors[["labels"]], "I")
     if(length(weights) == nrow(anchors))
-        weights = c(1, weights, 1)
+        weights <- c(1, weights, 1)
 
     rts <- data.frame(rtx, rty, labels, weights, stringsAsFactors = FALSE)
     return(rts)
@@ -64,9 +64,9 @@ formatAnchors <- function(object, anchors, weights, useID){
 filterAnchors <- function(rts, fit, vals, iterFilter, ratio, frac, bs, m,
                             family, method, optimizer, loess.pars, ...)
 {
-    iteration = 0
-    while(iteration < iterFilter){
-        cat("Performing filtering iteration: ", iteration + 1, "\n", sep = "")
+    iter <- 0
+    while(iter < iterFilter){
+        cat("Performing filtering iteration: ", iter + 1, "\n", sep = "")
         if(fit == "gam")
             residuals <- suppressWarnings(vapply(vals, function(v){
                 model <- mgcv::gam(rty ~ s(rtx, k = v, bs = bs, m = m,...),
@@ -74,7 +74,7 @@ filterAnchors <- function(rts, fit, vals, iterFilter, ratio, frac, bs, m,
                                 weights = rts[["weights"]],
                                 optimizer = c("outer", optimizer), ...)
 
-                res = abs(model[["fitted.values"]] - model[["y"]])
+                res <- abs(model[["fitted.values"]] - model[["y"]])
                 return(res)
             }, numeric(nrow(rts))))
         else if(fit == "loess")
@@ -83,11 +83,11 @@ filterAnchors <- function(rts, fit, vals, iterFilter, ratio, frac, bs, m,
                                     degree = 1, weights = rts$weights,
                                     control = loess.pars, family = "s")
 
-                res = abs(model[["residuals"]])
+                res <- abs(model[["residuals"]])
                 return(res)
             }, numeric(nrow(rts))))
 
-        include = which(rts[["weights"]] == 1)
+        include <- which(rts[["weights"]] == 1)
         thresholds <- ratio * colMeans(residuals[include,] %>% as.matrix())
 
         flags <- vapply(seq(1,length(vals)), function(i){
@@ -95,15 +95,15 @@ filterAnchors <- function(rts, fit, vals, iterFilter, ratio, frac, bs, m,
             return(fl)
         },logical(nrow(residuals)))
 
-        fracs = rowSums(flags)/ncol(flags)
-        remove = fracs > frac
-        remove[rts[["labels"]] == "I"] = FALSE
+        fracs <- rowSums(flags)/ncol(flags)
+        remove <- fracs > frac
+        remove[rts[["labels"]] == "I"] <- FALSE
 
         if(sum(!remove) > 22 & sum(!remove) < length(remove))
-            rts$weights[remove] = 0
+            rts$weights[remove] <- 0
         else
             break
-        iteration = iteration+1
+        iter <- iter+1
     }
 
     return(rts)
@@ -145,12 +145,12 @@ crossValFit <- function(rts, fit, vals, bs, family, m, method, optimizer,
                         loess.pars,...)
 {
     cat("Performing 10-fold cross validation\n")
-    rts = dplyr::filter(rts, .data$weights != 0)
-    N = nrow(rts) - 1
+    rts <- dplyr::filter(rts, .data$weights != 0)
+    N <- nrow(rts) - 1
     folds <- caret::createFolds(seq(2,N), k = 10, returnTrain = FALSE)
 
     cv_errors <- vapply(folds, function(f){
-        f = f + 1
+        f <- f + 1
         rts_train <- rts[-f,]
         rts_test <- rts[f,]
 
@@ -167,7 +167,7 @@ crossValFit <- function(rts, fit, vals, bs, family, m, method, optimizer,
                                     control = loess.pars,  family = "s")
 
             preds <- stats::predict(model, newdata = rts_test)
-            MSE = sum((preds - rts_test[["rty"]])^2)/ length(preds)
+            MSE <- sum((preds - rts_test[["rty"]])^2)/ length(preds)
 
             return(MSE)
         }, numeric(1)))
@@ -175,8 +175,8 @@ crossValFit <- function(rts, fit, vals, bs, family, m, method, optimizer,
         return(errors)
     }, numeric(length(vals)))
 
-    mean_cv_errors = rowMeans(matrix(cv_errors, nrow = length(vals)))
-    best_val = vals[which.min(mean_cv_errors)]
+    mean_cv_errors <- matrixStats::rowMeans2(as.matrix(cv_errors))
+    best_val <- vals[which.min(mean_cv_errors)]
     return(best_val)
 }
 
@@ -271,7 +271,7 @@ crossValFit <- function(rts, fit, vals, bs, family, m, method, optimizer,
 #' p.comb = fit_gam(p.comb, k = c(10,12,15,17,20), frac = 0.5,
 #'     family = "gaussian")
 #'
-#' \dontrun{
+#' \donttest{
 #' #version 2: using slower, but more robust, scat family
 #' p.comb = fit_gam(p.comb, k = seq(12,20,2), family = "scat",
 #'                      iterFilter = 1, ratio = 3, method = "GCV.Cp")
@@ -303,16 +303,15 @@ fit_gam <- function(object, useID = FALSE, k = seq(10,20, by = 2),
                     method = "REML", optimizer = "newton", ...)
 {
     combinerCheck(isMetabCombiner(object), "metabCombiner")
-    anchors = object@anchors
+    anchors <- getAnchors(object)
     check_fit_pars(anchors = anchors, fit = "gam", useID = useID, k = k,
                     iterFilter = iterFilter, ratio = ratio, frac = frac)
 
-    ##gam parameters
-    bs = match.arg(bs)
-    family = match.arg(family)
+    bs <- match.arg(bs)
+    family <- match.arg(family)
 
-    rts = formatAnchors(object, anchors, weights, useID)
-    rts = filterAnchors(rts = rts, fit = "gam", vals = k, ratio = ratio,
+    rts <- formatAnchors(object, anchors, weights, useID)
+    rts <- filterAnchors(rts = rts, fit = "gam", vals = k, ratio = ratio,
                         frac = frac, iterFilter = iterFilter, bs = bs, m = m,
                         family = family,method = method, optimizer = optimizer,
                         ...)
@@ -322,7 +321,7 @@ fit_gam <- function(object, useID = FALSE, k = seq(10,20, by = 2),
                                 family = family, method = method,
                                 optimizer = optimizer,...)
     else
-        best_k = k
+        best_k <- k
 
     cat("Fitting Model with k =", best_k, "\n")
     best_model <- mgcv::gam(rty ~ s(rtx, k = best_k, bs = bs, m = m, ...),
@@ -330,10 +329,9 @@ fit_gam <- function(object, useID = FALSE, k = seq(10,20, by = 2),
                             optimizer = c("outer", optimizer),
                             weights = rts[["weights"]], ...)
 
-    anchors[["rtProj"]] = stats::predict(best_model, anchors)
-    object@anchors = anchors
-    object@model[["gam"]] = best_model
-    object@stats[["best_k"]] = best_k
+    anchors[["rtProj"]] <- stats::predict(best_model, newdata = anchors)
+    object <- update_mc(object, anchors = anchors, fit = "gam",
+                        model = best_model,stats = "best_k", values = best_k)
     return(object)
 }
 
@@ -341,7 +339,7 @@ fit_gam <- function(object, useID = FALSE, k = seq(10,20, by = 2),
 #' @title Fit RT Projection Model With LOESS
 #'
 #' @description
-#' Fits a local regression smoothing spline curve through a set of ordered pair
+#' Fits a local regression smoothing spline through a set of ordered pair
 #' retention times. modeling one set of retention times (rty) as a function
 #' on the other set (rtx). Filtering iterations of high residual points are
 #' performed first. Multiple acceptable values of \code{span} can be used, with
@@ -405,16 +403,16 @@ fit_loess <- function(object, useID = FALSE, spans = seq(0.2, 0.3, by = 0.02),
                         weights = 1)
 {
     combinerCheck(isMetabCombiner(object), "metabCombiner")
-    anchors = object@anchors
+    anchors <- object@anchors
 
     check_fit_pars(anchors = anchors, fit = "loess", useID = useID,
                     iterFilter = iterFilter, ratio = ratio, frac = frac,
                     iterLoess = iterLoess, spans = spans)
 
-    loess.pars = loess.control(iterations = iterLoess, surface = "direct")
-    rts = formatAnchors(object, anchors, weights, useID)
+    loess.pars <- loess.control(iters = iterLoess, surface = "direct")
+    rts <- formatAnchors(object, anchors, weights, useID)
 
-    rts = filterAnchors(rts = rts, fit = "loess", iterFilter = iterFilter,
+    rts <- filterAnchors(rts = rts, fit = "loess", iterFilter = iterFilter,
                         ratio = ratio, frac = frac, vals = spans,
                         loess.pars = loess.pars)
 
@@ -422,7 +420,7 @@ fit_loess <- function(object, useID = FALSE, spans = seq(0.2, 0.3, by = 0.02),
         best_span <- crossValFit(rts = rts, fit = "loess", vals = spans,
                                 loess.pars = loess.pars)
     else
-        best_span = spans
+        best_span <- spans
 
     cat("Fitting Model with span =", best_span,"\n")
 
@@ -430,10 +428,10 @@ fit_loess <- function(object, useID = FALSE, spans = seq(0.2, 0.3, by = 0.02),
                         family = "symmetric", control = loess.pars,
                         weights = rts[["weights"]])
 
-    anchors[["rtProj"]] = stats::predict(best_model, anchors)
-    object@anchors = anchors
-    object@model[["loess"]] = best_model
-    object@stats[["best_span"]] = best_span
+    anchors[["rtProj"]] <- stats::predict(best_model, anchors)
+    object <- update_mc(object, anchors = anchors, fit = "loess",
+                        model = best_model, stats = "best_span",
+                        values = best_span)
     return(object)
 }
 

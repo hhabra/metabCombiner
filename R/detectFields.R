@@ -13,7 +13,7 @@
 #'
 #' @noRd
 readData <- function(file){
-    type = substr(file , start = (nchar(file)-3), stop = nchar(file))
+    type <- substr(file , start = (nchar(file)-3), stop = nchar(file))
 
     if(type == ".csv")
         data <- read.csv(file, stringsAsFactors = FALSE, check.names = FALSE)
@@ -47,8 +47,8 @@ detect <- function(keywords, names, type){
     if(is.null(keywords))
         return(NULL)
 
-    keywords = paste(keywords, collapse = "|")
-    indices = grep(keywords, names)
+    keywords <- paste(keywords, collapse = "|")
+    indices <- grep(keywords, names)
     if(length(indices) == 0)
         return(NULL)
 
@@ -70,7 +70,7 @@ detect <- function(keywords, names, type){
 #'
 #' @noRd
 detectSamples <- function(colnames, coltypes){
-    coltypes = base::gsub("integer", "numeric", coltypes)
+    coltypes <- base::gsub("integer", "numeric", coltypes)
 
     if(all(coltypes == "numeric"))
         return(colnames)
@@ -78,16 +78,16 @@ detectSamples <- function(colnames, coltypes){
     if (base::all(coltypes != "numeric"))
         stop("no numeric sample columns could be detected")
 
-    consec = base::rle(coltypes)    #looks for consecutive column types
+    consec <- base::rle(coltypes)    #looks for consecutive column types
 
-    consec.numeric = (consec[["values"]] == "numeric")
-    longest.numeric = base::max(consec$lengths[consec.numeric])
+    consec.numeric <- (consec[["values"]] == "numeric")
+    longest.numeric <- base::max(consec$lengths[consec.numeric])
 
-    index = which.max(consec.numeric & consec[["lengths"]] == longest.numeric)
-    firstSample = cumsum(consec[["lengths"]])[index] - longest.numeric + 1
-    lastSample = cumsum(consec[["lengths"]])[index]
+    index <- which.max(consec.numeric & consec[["lengths"]] == longest.numeric)
+    firstSample <- cumsum(consec[["lengths"]])[index] - longest.numeric + 1
+    lastSample <- cumsum(consec[["lengths"]])[index]
 
-    samples = colnames[seq(firstSample, lastSample)]
+    samples <- colnames[seq(firstSample, lastSample)]
 
     return(samples)
 }
@@ -168,7 +168,7 @@ selectRT <- function(table, col){
 #' @noRd
 selectQ <- function(table, col){
     if(is.null(col)){
-        Q = rep(0, nrow(table))
+        Q <- rep(0, nrow(table))
         return(Q)
     }
 
@@ -197,7 +197,7 @@ selectQ <- function(table, col){
 #' @noRd
 selectColumn <- function(table, col = NULL){
     if (is.null(col)){
-        column <-  rep("", nrow(table))
+        column <- rep("", nrow(table))
         return(column)
     }
 
@@ -247,52 +247,51 @@ selectColumn <- function(table, col = NULL){
 #' @return  an initialized and formatted \code{metabData} object.
 #'
 detectFields <- function(Data, table, mz, rt, id, adduct, samples, extra, Q){
-    mzCol = detect(mz, names(table), type = "single")
+    mzCol <- detect(mz, names(table), type = "single")
     new_mz <- selectMZ(table = table, col = mzCol)
-    table = table[-mzCol]
+    table <- table[-mzCol]
 
-    rtCol = detect(rt, names(table), type = "single")
+    rtCol <- detect(rt, names(table), type = "single")
     new_rt <- selectRT(table, col = rtCol)
     table = table[-rtCol]
 
-    idCol = detect(id, names(table), type = "single")
+    idCol <- detect(id, names(table), type = "single")
     new_id <- selectColumn(table, col = idCol)
     if(!is.null(idCol)) table = table[-idCol]
 
-    adductCol = detect(adduct, names(table), type = "single")
+    adductCol <- detect(adduct, names(table), type = "single")
     new_adduct <- selectColumn(table, col = adductCol)
     if(!is.null(adductCol)) table = table[-adductCol]
 
-    QCol = detect(Q, names(table), type = "single")
+    QCol <- detect(Q, names(table), type = "single")
     new_Q <- selectQ(table, col = QCol)
     if(!is.null(QCol)) table = table[-Q]
 
-    sampleCols = detect(samples, names(table), type = "multiple")
+    sampleCols <- detect(samples, names(table), type = "multiple")
     if(is.null(sampleCols)){
         warning("no column(s) found for argument 'samples'; ",
                 "samples column detection may be inaccurate.")
         coltypes <- base::as.character(vapply(table, class, character(1)))
-        samples = detectSamples(names(table), coltypes)
+        samples <- detectSamples(names(table), coltypes)
     } else{
         coltypes <- vapply(table, class, character(1))[sampleCols]
-        sampleCols = sampleCols[which(coltypes %in% c("numeric", "integer"))]
+        sampleCols <- sampleCols[which(coltypes %in% c("numeric", "integer"))]
         if(length(sampleCols) == 0)
             stop("no numeric columns found using 'samples' argument")
-        samples = names(table)[sampleCols]
+        samples <- names(table)[sampleCols]
     }
-    new_values = table[samples]
-    Data@samples = samples
-    Data@data = data.frame(id = new_id, mz = new_mz, rt = new_rt,
-                            adduct = new_adduct, Q = new_Q, new_values,
-                            check.names = FALSE, stringsAsFactors = FALSE)
+    new_values <- table[samples]
+    data <- data.frame(id = new_id, mz = new_mz, rt = new_rt,
+                        adduct = new_adduct, Q = new_Q, new_values,
+                        check.names = FALSE, stringsAsFactors = FALSE)
+    table <- dplyr::select(table, -dplyr::all_of(samples))
 
-    table = dplyr::select(table, -dplyr::all_of(samples))
-    extraCols = detect(extra, names(table), type = "multiple")
-    if(!is.null(extraCols)){
-        Data@extra = names(table)[extraCols]
-        Data@data[Data@extra] = table[extraCols]
-    }
+    extraCols <- detect(extra, names(table), type = "multiple")
+    extra <- names(table)[extraCols]
+    if(!is.null(extraCols))
+        data[extra] <- table[extraCols]
 
+    Data = update_md(Data, data = data, samples = samples, extra = extra)
     return(Data)
 }
 

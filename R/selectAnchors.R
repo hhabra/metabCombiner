@@ -43,18 +43,18 @@ identityAnchorSelection <- function(cTable, windx, windy, useID, brackets)
     if(any(cTable[["labels"]] == "I"))
     {
         #retain most abundant representation, remove duplicates
-        xTable = dplyr::mutate(cTable,
+        xTable <- dplyr::mutate(cTable,
                                 `row` = seq(1,nrow(cTable)),
                                 `idx` = tolower(.data$idx)) %>%
                 dplyr::filter(.data$labels == "I") %>%
                 dplyr::arrange(dplyr::desc(.data$Qx+ .data$Qy)) %>%
                 dplyr::filter(duplicated(.data$idx))
 
-        cTable$labels[xTable[["row"]]] = "N"
+        cTable$labels[xTable[["row"]]] <- "N"
 
-        ids = which(cTable[["labels"]] == "I")
+        ids <- which(cTable[["labels"]] == "I")
 
-        cTable[["labels"]] = .Call("selectAnchorsByID",
+        cTable[["labels"]] <- .Call("selectAnchorsByID",
                                     labels = cTable[["labels"]],
                                     ids = ids,
                                     rtx = cTable[["rtx"]],
@@ -92,7 +92,7 @@ identityAnchorSelection <- function(cTable, windx, windy, useID, brackets)
 ##
 iterativeAnchorSelection <- function(cTable, windx, windy, swap = FALSE){
     if(swap)
-        cTable[["labels"]] = .Call("selectIterativeAnchors",
+        cTable[["labels"]] <- .Call("selectIterativeAnchors",
                                     labels = cTable[["labels"]],
                                     rtx = cTable[["rty"]],
                                     rty = cTable[["rtx"]],
@@ -102,7 +102,7 @@ iterativeAnchorSelection <- function(cTable, windx, windy, swap = FALSE){
                                     windy = windx,
                                     PACKAGE = "metabCombiner")
     else
-        cTable[["labels"]] = .Call("selectIterativeAnchors",
+        cTable[["labels"]] <- .Call("selectIterativeAnchors",
                                     labels = cTable[["labels"]],
                                     rtx = cTable[["rtx"]],
                                     rty = cTable[["rty"]],
@@ -188,14 +188,14 @@ iterativeAnchorSelection <- function(cTable, windx, windy, swap = FALSE){
 #'
 #' p30 <- metabData(plasma30, samples = "CHEAR")
 #' p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
-#' p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
+#' p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
 #'
 #' ##example 1 (no known IDs used)
-#' p.comb = selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windx = 0.03,
+#' p.comb <- selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windx = 0.03,
 #'     windy = 0.02, tolrtq = 0.3)
 #'
 #' ##example 2 (known IDs used)
-#' p.comb = selectAnchors(p.comb, useID = TRUE, tolmz = 0.003, tolQ = 0.3)
+#' p.comb <- selectAnchors(p.comb, useID = TRUE, tolmz = 0.003, tolQ = 0.3)
 #'
 #' ##To View Plot of Ordered Pairs
 #' anchors = getAnchors(p.comb)
@@ -211,7 +211,7 @@ selectAnchors <- function(object, useID = FALSE, tolmz = 0.003, tolQ = 0.3,
     brackets_ignore = c("(", "[", "{")) {
     combinerCheck(isMetabCombiner(object), "metabCombiner")
 
-    pars = list(tolmz, tolQ, tolrtq, windx, windy)
+    pars <- list(tolmz, tolQ, tolrtq, windx, windy)
     if(any(vapply(pars, function(p) !is.numeric(p), logical(1))))
         stop("arguments tolmz, tolQ, tolrtq, windx & windy must be numeric")
 
@@ -222,18 +222,17 @@ selectAnchors <- function(object, useID = FALSE, tolmz = 0.003, tolQ = 0.3,
 
     cTable <- combinedTable(object)[,seq(1,15)]
 
-    #retention time extrema
-    rte = c(min(cTable$rtx), min(cTable$rty), max(cTable$rtx), max(cTable$rty))
+    rte <- c(min(cTable$rtx), min(cTable$rty), max(cTable$rtx), max(cTable$rty))
 
-    cTable = dplyr::select(cTable, -.data$score, -.data$rankX,-.data$rankY) %>%
+    cTable <- dplyr::select(cTable, -.data$score, -.data$rankX,-.data$rankY) %>%
             dplyr::mutate(`rtqx` = (.data$rtx - rte[1])/ (rte[3] - rte[1]),
                         `rtqy` = (.data$rty - rte[2])/ (rte[4] - rte[2]),
                         `labels` = rep("P", nrow(cTable)))
 
-    cTable = identityAnchorSelection(cTable, windx = windx, windy = windy,
+    cTable <- identityAnchorSelection(cTable, windx = windx, windy = windy,
                                     useID = useID, brackets = brackets_ignore)
 
-    cTable = dplyr::filter(cTable, (abs(.data$mzx - .data$mzy) < tolmz &
+    cTable <- dplyr::filter(cTable, (abs(.data$mzx - .data$mzy) < tolmz &
                                     abs(.data$Qx - .data$Qy) < tolQ &
                                     abs(.data$rtqx - .data$rtqy) < tolrtq &
                                     .data$labels != "N") |.data$labels == "I")
@@ -249,7 +248,7 @@ selectAnchors <- function(object, useID = FALSE, tolmz = 0.003, tolQ = 0.3,
         warning("number of anchors less than 20; ",
                 "consider alternative parameters or using identities.")
 
-    object@anchors = anchorlist
+    object <- update_mc(object, anchors = anchorlist)
     return(object)
 }
 

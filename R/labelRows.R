@@ -14,22 +14,22 @@ formLabeledTable <- function(fields, values, remove)
 {
     #option to eliminate rows labeled as removables
     if(remove == TRUE){
-        keepRows = which(fields[["labels"]] != "REMOVE")
-        fields = fields[keepRows,]
-        values = values[keepRows,]
+        keepRows <- which(fields[["labels"]] != "REMOVE")
+        fields <- fields[keepRows,]
+        values <- values[keepRows,]
     }
 
     #when there are existing columns named "labels", "subgroup", "alt"
-    labnames = c("labels", "subgroup", "alt")
-    N = 1
+    labnames <- c("labels", "subgroup", "alt")
+    N <- 1
 
     while(any(names(values) %in% labnames)){
-        labnames = paste(c("labels", "subgroup", "alt"), N, sep = ".")
-        names(fields)[seq(16,18)] = labnames
-        N = N+1
+        labnames <- paste(c("labels", "subgroup", "alt"), N, sep = ".")
+        names(fields)[seq(16,18)] <- labnames
+        N <- N+1
     }
 
-    cTable = data.frame(fields, values, stringsAsFactors = FALSE,
+    cTable <- data.frame(fields, values, stringsAsFactors = FALSE,
                         check.names = FALSE)
 
     return(cTable)
@@ -133,31 +133,31 @@ labelRows <- function(object, maxRankX = 3, maxRankY = 3, minScore = 0.3,
                         conflict, method = c("score", "mzrt"), balanced = TRUE,
                         remove = FALSE, brackets_ignore = c("(", "[", "{"))
 {
-    if(isCombinedTable(object) == 0) cTable = object
-    else if(isMetabCombiner(object) == 0) cTable = combinedTable(object)
+    if(isCombinedTable(object) == 0) cTable <- object
+    else if(isMetabCombiner(object) == 0) cTable <- combinedTable(object)
     else{
         combinerCheck(isMetabCombiner(object), "metabCombiner", "warning")
         combinerCheck(isCombinedTable(object), "combinedTable", "warning")
         stop("input object is not a valid metabCombiner or combinedTable")
     }
-    method = match.arg(method)
+    method <- match.arg(method)
     check_lblrows_pars(maxRankX, maxRankY, minScore,balanced, method, conflict)
-    maxRankX = as.integer(maxRankX[1])
-    maxRankY = as.integer(maxRankY[1])
-    minScore = as.numeric(minScore[1])
+    maxRankX <- as.integer(maxRankX[1])
+    maxRankY <- as.integer(maxRankY[1])
+    minScore <- as.numeric(minScore[1])
 
-    cTable = cTable[with(cTable, order(`group`, desc(`score`))), ]
-    values = cTable[,-seq(1,15)]
-    fields = cTable[,seq(1,15)]
+    cTable <- cTable[with(cTable, order(`group`, desc(`score`))), ]
+    values <- cTable[,-seq(1,15)]
+    fields <- cTable[,seq(1,15)]
     rm(cTable)
 
-    fields[["labels"]] = compare_strings(fields[["idx"]], fields[["idy"]],
+    fields[["labels"]] <- compare_strings(fields[["idx"]], fields[["idy"]],
                                         "IDENTITY", "", brackets_ignore)
-    fields[["subgroup"]] = integer(nrow(fields))
-    fields[["alt"]] = integer(nrow(fields))
-    method = as.integer(ifelse(method == "score", 1, 2)) #score: 1,  mzrt: 2
+    fields[["subgroup"]] <- integer(nrow(fields))
+    fields[["alt"]] <- integer(nrow(fields))
+    method <- as.integer(ifelse(method == "score", 1, 2)) #score: 1,  mzrt: 2
 
-    fields[["labels"]] = .Call("labelRows",
+    fields[["labels"]] <- .Call("labelRows",
                             labels = fields$labels,
                             subgroup = fields$subgroup,
                             alt = fields$alt, mzx = fields$mzx,
@@ -169,12 +169,12 @@ labelRows <- function(object, maxRankX = 3, maxRankY = 3, minScore = 0.3,
                             maxRankX = maxRankX, maxRankY = maxRankY,
                             method = method, PACKAGE = "metabCombiner")
 
-    cTable = formLabeledTable(fields, values, remove)
+    cTable <- formLabeledTable(fields, values, remove)
 
     if(methods::is(object, "metabCombiner"))
-        object@combinedTable = cTable
+        object <- update_mc(object, combinedTable = cTable)
     else
-        object = cTable
+        object <- cTable
 
     return(object)
 }

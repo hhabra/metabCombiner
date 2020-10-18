@@ -19,18 +19,18 @@ formCombinedTable <- function(object, xset, yset, nGroups){
     if(!methods::is(object, "metabCombiner"))
         stop(paste(object, "is not a metabCombiner object"))
 
-    groupCountX = as.integer(table(xset[["group"]]))
-    groupCountY = as.integer(table(yset[["group"]]))
+    groupCountX <- as.integer(table(xset[["group"]]))
+    groupCountY <- as.integer(table(yset[["group"]]))
 
     if(any(groupCountX * groupCountY >= 10000))
         stop("irregular group size detected (n > 10000); check m/z values")
 
-    totalRows = sum(groupCountX * groupCountY)
+    totalRows <- sum(groupCountX * groupCountY)
 
-    xreps = rep(groupCountY, times = groupCountX)
-    xCombine = dplyr::slice(xset, rep(seq(1,n()), times = xreps))
+    xreps <- rep(groupCountY, times = groupCountX)
+    xCombine <- dplyr::slice(xset, rep(seq(1,n()), times = xreps))
 
-    yreps = lapply(seq(1,nGroups), function(number){
+    yreps <- lapply(seq(1,nGroups), function(number){
         counts = base::rep(x = which(yset[["group"]] == number),
                             times = groupCountX[number])
         return(counts)
@@ -38,7 +38,7 @@ formCombinedTable <- function(object, xset, yset, nGroups){
     yCombine = yset[yreps,]
 
     #combine groups into data frame
-    cTable = data.frame(idx = xCombine[["id"]], idy = yCombine[["id"]],
+    cTable <- data.frame(idx = xCombine[["id"]], idy = yCombine[["id"]],
                         mzx = xCombine[["mz"]], mzy = yCombine[["mz"]],
                         rtx = xCombine[["rt"]], rty = yCombine[["rt"]],
                         rtProj = numeric(totalRows),
@@ -56,6 +56,6 @@ formCombinedTable <- function(object, xset, yset, nGroups){
                         stringsAsFactors = FALSE, check.names = FALSE
     )
 
-    object@combinedTable = cTable
+    object <- update_mc(object, combinedTable = cTable)
     return(object)
 }
