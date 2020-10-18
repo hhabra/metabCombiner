@@ -14,20 +14,20 @@ test_that("anchor selection", {
     p = metabCombiner(p30,p20, binGap = 0.0075)
     p = selectAnchors(p, windx = 0.03, windy = 0.02)
     anchors = getAnchors(p)
-    expect_false(any(abs(anchors[["mzx"]] - anchors[["mzy"]]) > 0.003))
-    expect_false(any(abs(anchors[["mzx"]] - anchors[["mzy"]]) > 0.3))
+    testthat::expect_false(any(abs(anchors[["mzx"]]-anchors[["mzy"]]) > 0.003))
+    testthat::expect_false(any(abs(anchors[["Qx"]]-anchors[["Qy"]]) > 0.3))
 
     rts = sort(anchors[["rtx"]])
     rtdiffs = rts[seq(2,length(rts))] - rts[seq(1,length(rts)-1)]
-    expect_true(min(rtdiffs) > 0.03)
+    testthat::expect_true(min(rtdiffs) > 0.03)
 
     rts = sort(anchors[["rty"]])
     rtdiffs = rts[seq(2,length(rts))] - rts[seq(1,length(rts)-1)]
-    expect_true(min(rtdiffs) > 0.02)
+    testthat::expect_true(min(rtdiffs) > 0.02)
 
     p = selectAnchors(p, useID = TRUE)
     anchors = getAnchors(p)
-    expect_equal(sum(anchors[["labels"]] == "I"), 136)
+    testthat::expect_equal(sum(anchors[["labels"]] == "I"), 136)
 })
 
 

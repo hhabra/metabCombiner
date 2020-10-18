@@ -4,7 +4,7 @@
 
 context("labelRows + full-workflow")
 
-test_that("full workflow + row labeling", {
+test_that("row annotation tests", {
     data("plasma20")
     data("plasma30")
 
@@ -29,18 +29,18 @@ test_that("full workflow + row labeling", {
     p.output = combinedTable(p)
 
     labels = c("", "CONFLICT", "IDENTITY")
-    expect_equal(sort(unique(p.output[["labels"]])), labels)
-    expect_equal(sum(p.output[["labels"]] == "IDENTITY"), 527)
+    testthat::expect_equal(sort(unique(p.output[["labels"]])), labels)
+    testthat::expect_equal(sum(p.output[["labels"]] == "IDENTITY"), 527)
 
     p.output.2 = dplyr::filter(p.output, .data$labels != "IDENTITY")
-    expect_equal(max(p.output.2[["rankX"]]), 2)
-    expect_equal(max(p.output.2[["rankY"]]), 2)
+    testthat::expect_equal(max(p.output.2[["rankX"]]), 2)
+    testthat::expect_equal(max(p.output.2[["rankY"]]), 2)
 
-    expect_false(any(p.output.2[["score"]] < 0.5))
+    testthat::expect_false(any(p.output.2[["score"]] < 0.5))
 
-    expect_error(labelRows(p, method = "mzrt", conflict = 0.1))
-    expect_error(labelRows(p, minScore = 1, conflict = 0.1))
-    expect_error(labelRows(p, maxRankX = 0, conflict = 0.1))
+    testthat::expect_error(labelRows(p, method = "mzrt", conflict = 0.1))
+    testthat::expect_error(labelRows(p, minScore = 1, conflict = 0.1))
+    testthat::expect_error(labelRows(p, maxRankX = 0, conflict = 0.1))
 })
 
 
