@@ -28,30 +28,25 @@
 ##
 filterRT <- function(data, rtmin, rtmax)
 {
-    rts = data[["rt"]]
+    rts <- data[["rt"]]
 
     if(rtmin == "min")
-        rtmin = min(rts)
+        rtmin <- min(rts)
 
     if(rtmax == "max")
-        rtmax = max(rts)
+        rtmax <- max(rts)
 
     if(!is.numeric(rtmin) | rtmin > rtmax | rtmin < 0 |
         rtmin > max(rts) | rtmin < min(rts))
-    {
-        warning("value supplied for 'rtmin' argument is invalid; ",
-                "setting 'rtmin' to minimum observed retention time.")
-        rtmin = min(rts)
-    }
+        stop("invalid value supplied for 'rtmin' argument")
 
     if(!is.numeric(rtmax) | rtmin > rtmax | rtmax < 0 | rtmax > max(rts))
-    {
-        warning("value supplied for 'rtmax' argument is invalid; ",
-                "setting 'rtmax' to maximum observed retention time.")
-        rtmax = max(rts)
-    }
+        stop("invalid value supplied for 'rtmax' argument")
 
-    data = dplyr::filter(data, .data$rt >= rtmin & .data$rt <= rtmax)
+    data <- dplyr::filter(data, .data$rt >= rtmin & .data$rt <= rtmax)
+
+    if(nrow(data) == 0)
+        stop("empty dataset following retention time filter")
 
     return(data)
 }
@@ -87,8 +82,8 @@ findDuplicates <- function(data, missing, counts, duplicate)
     if(length(duplicate)!= 2)
         stop("'duplicate' argument must be a numeric, positive ordered pair")
 
-    tolMZ = duplicate[1]
-    tolRT = duplicate[2]
+    tolMZ <- duplicate[1]
+    tolRT <- duplicate[2]
 
     if(!is.numeric(tolMZ) | !is.numeric(tolRT) | tolMZ < 0 | tolRT < 0)
         stop("'duplicate' argument must be a numeric, positive ordered pair")
@@ -96,13 +91,13 @@ findDuplicates <- function(data, missing, counts, duplicate)
     if(tolMZ == 0 | tolRT == 0 | nrow(data) == 0)
         return(numeric(0))
 
-    datMatrix = dplyr::select(data, .data$mz,.data$rt) %>%
+    datMatrix <- dplyr::select(data, .data$mz,.data$rt) %>%
                 dplyr::mutate(counts = counts,
                             missing = missing,
                             index = seq(1,nrow(data))) %>%
                 dplyr::arrange(.data$mz)
 
-    datMatrix[["labels"]] = .Call("findDuplicates",
+    datMatrix[["labels"]] <- .Call("findDuplicates",
                                 mz = datMatrix[["mz"]],
                                 rt = datMatrix[["rt"]],
                                 tolMZ = as.numeric(tolMZ),
@@ -111,7 +106,7 @@ findDuplicates <- function(data, missing, counts, duplicate)
                                 counts = as.numeric(datMatrix[["counts"]]),
                                 PACKAGE = "metabCombiner")
 
-    duplicates = datMatrix[["index"]][datMatrix[["labels"]] == 1]
+    duplicates <- datMatrix[["index"]][datMatrix[["labels"]] == 1]
 
     return(duplicates)
 }
@@ -162,45 +157,43 @@ findDuplicates <- function(data, missing, counts, duplicate)
 ##
 adjustData <- function(Data, misspc, measure, rtmin, rtmax, zero,duplicate)
 {
-    data = getData(Data)
-    samples = getSamples(Data)
-    stats = list()
-    stats[["input_size"]] = nrow(data)
+    data <- getData(Data)
+    samples <- getSamples(Data)
+    stats <- list()
+    stats[["input_size"]] <- nrow(data)
 
-    data = filterRT(data, rtmin = rtmin, rtmax = rtmax)
+    data <- filterRT(data, rtmin = rtmin, rtmax = rtmax)
     stats[["filtered_by_rt"]] = stats[["input_size"]] - nrow(data)
 
-    mpc <- apply(data[samples], 1,function(row){
-        if(zero == TRUE)
-            row[row <= 0] <- NA
-        sum(is.na(row)) / length(row) * 100
-    })
-
-    keepIndices = which(mpc <= misspc)
-    stats[["filtered_by_missingness"]] = nrow(data) - length(keepIndices)
-    data = data[keepIndices,]
-    mpc = mpc[keepIndices]
+    mpc <- matrixStats::rowCounts(as.matrix(data[samples]), value = NA)
+    if(zero == TRUE)
+        mpc <- mpc + matrixStats::rowCounts(as.matrix(data[samples]),
+                                            value = 0, na.rm = TRUE)
+    keepIndices <- which((mpc / length(samples) * 100) <= misspc)
+    stats[["filtered_by_missingness"]] <- nrow(data) - length(keepIndices)
+    data <- data[keepIndices,]
+    if(nrow(data) == 0)
+        stop("empty dataset following missingness filter")
+    mpc <- mpc[keepIndices] / length(samples) * 100
 
     if(measure == "median")
-        counts <- apply(data[samples], 1, stats::median, na.rm = TRUE)
+        counts <- matrixStats::rowMedians(as.matrix(data[samples]),na.rm = TRUE)
     else if(measure == "mean")
-        counts <- apply(data[samples], 1, mean, na.rm = TRUE)
+        counts <- matrixStats::rowMeans2(as.matrix(data[samples]),na.rm = TRUE)
 
-    duplicates = findDuplicates(data = data, counts = counts,missing = mpc,
+    duplicates <- findDuplicates(data = data, counts = counts, missing = mpc,
                                 duplicate = duplicate)
-
     if(length(duplicates) > 0){
-        data = data[-duplicates,]
-        counts = counts[-duplicates]
+        data <- data[-duplicates,]
+        counts <- counts[-duplicates]
     }
 
-    stats[["filtered_as_duplicates"]] = length(duplicates)
-    stats[["final_count"]] = nrow(data)
+    stats[["filtered_as_duplicates"]] <- length(duplicates)
+    stats[["final_count"]] <- nrow(data)
 
     if(identical(data[["Q"]], rep(0, nrow(data))))
         data["Q"] <- round((rank(counts) - 0.5) / length(counts),4)
 
-    Data@data = data
-    Data@stats = stats
+    Data <- update_md(Data, data = data, stats = stats)
     return(Data)
 }
