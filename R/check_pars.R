@@ -53,7 +53,7 @@ check_fit_pars <- function(anchors, fit, useID, iterFilter, ratio, frac,
 check_score_pars <- function(cTable, A, B, C, model, fit, groups,
                             minScore = 0.5, penalty = 5, adduct = 1)
 {
-    coefs = list(`A` = A, `B` = `B`, `C` = C)
+    coefs <- list(`A` = A, `B` = `B`, `C` = C)
 
     g = vapply(coefs, function(c) !is.numeric(c) & !is.integer(c), logical(1))
     if(any(g))
