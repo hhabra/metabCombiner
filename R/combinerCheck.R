@@ -66,7 +66,7 @@ isCombinedTable <- function(object){
     if(!is.data.frame(object))
         return(1)
 
-    expected = c("idx","idy","mzx","mzy","rtx","rty","rtProj","Qx","Qy",
+    expected <- c("idx","idy","mzx","mzy","rtx","rty","rtProj","Qx","Qy",
                 "group","score","rankX","rankY","adductx","adducty")
 
     if(ncol(object) <= length(expected))
@@ -79,7 +79,7 @@ isCombinedTable <- function(object){
         return(4)
 
     coltypes <- as.character(lapply(object, class))
-    correct_types = c("character","character", "numeric","numeric","numeric",
+    correct_types <- c("character","character", "numeric","numeric","numeric",
                         "numeric", "numeric","numeric","numeric","integer",
                         "numeric", "integer", "integer","character","character")
 
@@ -106,7 +106,7 @@ isMetabCombiner <- function(object){
     if(!methods::is(object,"metabCombiner"))
         return(1)
 
-    combiner_table_code = isCombinedTable(combinedTable(object))
+    combiner_table_code <- isCombinedTable(combinedTable(object))
 
     if(combiner_table_code){
         combinerCheck(combiner_table_code, "combinedTable", "warning")
@@ -130,9 +130,9 @@ isMetabData <- function(object){
     if(!methods::is(object, "metabData"))
         return(1)
 
-    data = getData(object)
+    data <- getData(object)
 
-    expected = c("id", "mz", "rt", "adduct", "Q")
+    expected <- c("id", "mz", "rt", "adduct", "Q")
 
     if(ncol(data) <= length(expected))
         return(2)
@@ -144,7 +144,7 @@ isMetabData <- function(object){
         return(4)
 
     coltypes <- as.character(lapply(data, class))
-    expected_types = c("character","numeric","numeric","character","numeric")
+    expected_types <- c("character","numeric","numeric","character","numeric")
 
     if(!identical(coltypes[seq(1,length(expected))], expected_types))
         return(5)
