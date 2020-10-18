@@ -36,7 +36,7 @@ data(plasma20)
 p30 <- metabData(plasma30, samples = "CHEAR")
 p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
 
-p.comb = metabCombiner(xdata = p30, ydata = p20)
+p.comb <- metabCombiner(xdata = p30, ydata = p20)
 
 getSamples(p30)
 getSamples(p.comb, data = "x")  #equivalent to previous

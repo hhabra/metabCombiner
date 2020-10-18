@@ -36,9 +36,9 @@ p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
 
 getStats(p30) #metabData stats
 
-p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
-p.comb = selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
-p.comb = fit_gam(p.comb, iterFilter = 1, k = 20)
+p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
+p.comb <- selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
+p.comb <- fit_gam(p.comb, iterFilter = 1, k = 20)
 
 getStats(p.comb) #metabCombiner stats
 

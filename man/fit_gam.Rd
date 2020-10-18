@@ -108,7 +108,7 @@ anchors = getAnchors(p.comb)
 p.comb = fit_gam(p.comb, k = c(10,12,15,17,20), frac = 0.5,
     family = "gaussian")
 
-\dontrun{
+\donttest{
 #version 2: using slower, but more robust, scat family
 p.comb = fit_gam(p.comb, k = seq(12,20,2), family = "scat",
                      iterFilter = 1, ratio = 3, method = "GCV.Cp")

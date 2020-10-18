@@ -26,12 +26,12 @@ data(plasma30)
 data(plasma20)
 p30 <- metabData(plasma30, samples = "CHEAR")
 p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
-p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
-p.comb = selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
-p.comb = fit_gam(p.comb, iterFilter = 1, k = 20)
-p.comb = fit_loess(p.comb, iterFilter = 1, spans = 0.2)
-model.gam = getModel(p.comb, fit = "gam")
-model.loess = getModel(p.comb, fit = "loess")
+p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
+p.comb <- selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
+p.comb <- fit_gam(p.comb, iterFilter = 1, k = 20)
+p.comb <- fit_loess(p.comb, iterFilter = 1, spans = 0.2)
+model.gam <- getModel(p.comb, fit = "gam")
+model.loess <- getModel(p.comb, fit = "loess")
 
 }
 \seealso{

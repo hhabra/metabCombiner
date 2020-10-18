@@ -29,9 +29,9 @@ data(plasma20)
 
 p30 <- metabData(plasma30, samples = "CHEAR")
 p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
-p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
+p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
 
-nnmx = nonmatched(p.comb, data = "x")
-nnmy = nonmatched(p.comb, data = "y")
+nnmx <- nonmatched(p.comb, data = "x")
+nnmy <- nonmatched(p.comb, data = "y")
 
 }

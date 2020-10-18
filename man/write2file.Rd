@@ -28,18 +28,18 @@ data(plasma20)
 
 p30 <- metabData(plasma30, samples = "CHEAR")
 p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
-p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
 
-p.comb = selectAnchors(p.comb, tolmz = 0.003, tolrtq = 0.3, windy = 0.02)
-p.comb = fit_gam(p.comb, k = 20, iterFilter = 1)
-p.comb = calcScores(p.comb, A = 90, B = 14, C = 0.5)
+p.comb <- selectAnchors(p.comb, tolmz = 0.003, tolrtq = 0.3, windy = 0.02)
+p.comb <- fit_gam(p.comb, k = 20, iterFilter = 1)
+p.comb <- calcScores(p.comb, A = 90, B = 14, C = 0.5)
 
-\dontrun{
+\donttest{
 ###using metabCombiner object as input
 write2file(p.comb, file = "plasma-combined.csv", sep = ",")
 
 ###using combinedTable report as input
-cTable = combinedTable(p.comb)
+cTable <- combinedTable(p.comb)
 write2file(cTable, file = "plasma-combined.txt", sep = "\t")
 }
 }

@@ -88,14 +88,14 @@ data(plasma20)
 
 p30 <- metabData(plasma30, samples = "CHEAR")
 p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
-p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
+p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
 
 ##example 1 (no known IDs used)
-p.comb = selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windx = 0.03,
+p.comb <- selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windx = 0.03,
     windy = 0.02, tolrtq = 0.3)
 
 ##example 2 (known IDs used)
-p.comb = selectAnchors(p.comb, useID = TRUE, tolmz = 0.003, tolQ = 0.3)
+p.comb <- selectAnchors(p.comb, useID = TRUE, tolmz = 0.003, tolQ = 0.3)
 
 ##To View Plot of Ordered Pairs
 anchors = getAnchors(p.comb)

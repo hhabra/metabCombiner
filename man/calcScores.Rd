@@ -86,30 +86,30 @@ data(plasma20)
 
 p30 <- metabData(plasma30, samples = "CHEAR")
 p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
-p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
 
-p.comb = selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
-p.comb = fit_gam(p.comb, k = 20, iterFilter = 1)
+p.comb <- selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
+p.comb <- fit_gam(p.comb, k = 20, iterFilter = 1)
 
 #example: moderate m/z deviation, accurate rt fit, high sample similarity
-p.comb = calcScores(p.comb, A = 90, B = 14, C = 0.8, useAdduct = FALSE,
+p.comb <- calcScores(p.comb, A = 90, B = 14, C = 0.8, useAdduct = FALSE,
          groups = NULL, fit = "gam", usePPM = FALSE)
 cTable = combinedTable(p.comb)  #to view results
 
 #example 2: high m/z deviation, moderate rt fit, low sample similarity
-p.comb = calcScores(p.comb, A = 50, B = 8, C = 0.2)
+p.comb <- calcScores(p.comb, A = 50, B = 8, C = 0.2)
 
 #example 3: low m/z deviation, poor rt fit, moderate sample similarity
-p.comb = calcScores(p.comb, A = 120, B = 5, C = 0.5)
+p.comb <- calcScores(p.comb, A = 120, B = 5, C = 0.5)
 
 #example 4: using ppm for mass deviation; note different A value
-p.comb = calcScores(p.comb, A = 0.05, B = 14, C = 0.5, usePPM = TRUE)
+p.comb <- calcScores(p.comb, A = 0.05, B = 14, C = 0.5, usePPM = TRUE)
 
 #example 5: limiting to specific m/z groups 1-1000
-p.comb = calcScores(p.comb, A = 90, B = 14, C = 0.5, groups = seq(1,1000))
+p.comb <- calcScores(p.comb, A = 90, B = 14, C = 0.5, groups = seq(1,1000))
 
 #example 6: using adduct information
-p.comb = calcScores(p.comb, A = 90, B = 14, C = 0.5, useAdduct = TRUE,
+p.comb <- calcScores(p.comb, A = 90, B = 14, C = 0.5, useAdduct = TRUE,
                      adduct = 1.25)
 
 }

@@ -21,7 +21,7 @@ Get Processed Dataset
 \examples{
 data(plasma30)
 
-p30 = metabData(plasma30, samples = "CHEAR")
-data = getData(p30)
+p30 <- metabData(plasma30, samples = "CHEAR")
+data <- getData(p30)
 
 }

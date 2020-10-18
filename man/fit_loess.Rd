@@ -41,7 +41,7 @@ of length equal to number of anchors (n) or a divisor of (n + 2).}
 contain the fitted loess model
 }
 \description{
-Fits a local regression smoothing spline curve through a set of ordered pair
+Fits a local regression smoothing spline through a set of ordered pair
 retention times. modeling one set of retention times (rty) as a function
 on the other set (rtx). Filtering iterations of high residual points are
 performed first. Multiple acceptable values of \code{span} can be used, with

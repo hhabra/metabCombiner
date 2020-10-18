@@ -23,13 +23,13 @@ time projection model, constructed by \code{\link{selectAnchors}}.
 data(plasma30)
 data(plasma20)
 
-p30 = metabData(plasma30, samples = "CHEAR")
-p20 = metabData(plasma20, samples = "Red")
+p30 <- metabData(plasma30, samples = "CHEAR")
+p20 <- metabData(plasma20, samples = "Red")
 
-p.comb = metabCombiner(p30, p20)
-p.comb = selectAnchors(p.comb, windx = 0.05, windy = 0.03)
+p.comb <- metabCombiner(p30, p20)
+p.comb <- selectAnchors(p.comb, windx = 0.05, windy = 0.03)
 
-anchors = getAnchors(p.comb)
+anchors <- getAnchors(p.comb)
 
 }
 \seealso{

@@ -41,10 +41,10 @@ Obtain constructed table reporting every possible metabolomics
 data(plasma30)
 data(plasma20)
 
-p30 = metabData(plasma30, samples = "CHEAR")
-p20 = metabData(plasma20, samples = "Red")
+p30 <- metabData(plasma30, samples = "CHEAR")
+p20 <- metabData(plasma20, samples = "Red")
 
-p.comb = metabCombiner(p30, p20)
-p.comb.table = combinedTable(p.comb)
+p.comb <- metabCombiner(p30, p20)
+p.comb.table <- combinedTable(p.comb)
 
 }

@@ -22,7 +22,7 @@ Get Extra Data Column Names
 }
 \examples{
 data(plasma30)
-p30 = metabData(plasma30, samples = "CHEAR", extra = "Red")
+p30 <- metabData(plasma30, samples = "CHEAR", extra = "Red")
 getExtra(p30)
 
 }
