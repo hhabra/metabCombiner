@@ -110,11 +110,11 @@ metabData <- function(table, mz = "mz", rt = "rt", id = "id",
     if(!is.null(samples) & !is.character(samples))
         stop("non-character argument for variable 'samples'")
     if(!is.character(id))
-        id = NULL
+        id <- NULL
     if(!is.character(adduct))
-        adduct = NULL
+        adduct <- NULL
     if(!is.character(extra))
-        extra = NULL
+        extra <- NULL
     if (misspc >= 100 | misspc < 0 | !is.numeric(misspc))
         stop("Parameter 'misspc' must be a numeric value from [0,100)")
 
@@ -128,15 +128,15 @@ metabData <- function(table, mz = "mz", rt = "rt", id = "id",
     if(!is.logical(zero)){
         warning("non-logical value for argument 'zero'; ",
                 "setting to default (FALSE)")
-        zero = FALSE
+        zero <- FALSE
     }
 
-    measure = match.arg(measure)
+    measure <- match.arg(measure)
     newData <- new("metabData")
-    newData = detectFields(Data = newData, table = table,
-                            mz = mz, rt = rt, id, adduct = adduct,
-                            samples = samples, extra = extra, Q = Q)
-    newData = adjustData(Data = newData, misspc = misspc, measure = measure,
+    newData <- detectFields(Data = newData, table = table, mz = mz, rt = rt,
+                            id = id, adduct = adduct, samples = samples,
+                            extra = extra, Q = Q)
+    newData <- adjustData(Data = newData, misspc = misspc, measure = measure,
                             rtmin = rtmin, rtmax = rtmax, zero = zero,
                             duplicate = duplicate)
     return(newData)
