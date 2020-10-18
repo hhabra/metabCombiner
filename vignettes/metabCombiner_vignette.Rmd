@@ -136,17 +136,13 @@ Once feature-filtering is performed, the central measure of feature intensities 
 Here is the full `metabData` function call for our "plasma20" dataset.
 
 ```{r}
-p20 <- metabData(table = plasma20, mz = "mz", rt = "rt", id = "identity", 
-                adduct = "adduct", samples = "Red", extra = c("CHEAR", "POOL"), 
-                rtmin = "min", rtmax = 17.25, measure = "median", zero = FALSE, 
-                duplicate = c(0.0025, 0.05))
+p20 <- metabData(table = plasma20, mz = "mz", rt = "rt", id = "identity", adduct = "adduct", samples = "CHEAR", extra = c("Red", "POOL"), rtmin = "min", rtmax = 17.25, measure = "median", zero = FALSE, duplicate = c(0.0025, 0.05))
 ```
 
 For the above call, the program defaults are used except for the arguments table, samples, extra, rtmax which needed specification. We must also use `metabData` for the other dataset we wish to align.
 
 ```{r}
 p30 <- metabData(table = plasma30, samples = "Red", extra = c("CHEAR", "POOL", "Blank"))
-
 getSamples(p30) ##should print out red cross sample names
 getExtra(p30) ##should print out extra sample names
 ```
@@ -180,8 +176,7 @@ A central step of the workflow is retention time mapping, and we break it into t
 The method of selecting anchors relies on mutually abundant pairs of features. This is performed using the `selectAnchors` function. The results of this function can be viewed using the `getAnchors` method.
 
 ```{r, fig.width= 5, fig.height=4, fig.align='center'}
-p.combined.2 = selectAnchors(p.combined, windx = 0.03,windy = 0.02, tolQ = 0.3,
-                            tolmz = 0.003, useID = FALSE)
+p.combined.2 = selectAnchors(p.combined, windx = 0.03,windy = 0.02, tolQ = 0.3, tolmz = 0.003, useID = FALSE)
 a = getAnchors(p.combined.2)
 plot(a$rtx, a$rty, main = "Fit Template", xlab = "rtx", ylab = "rty")
 ```
@@ -198,9 +193,7 @@ Other important parameters are *useID*, which if set to TRUE prevents identity-b
 
 ```{r}
 set.seed(100) #controls cross validation pseudo-randomness
-p.combined.3 = fit_gam(p.combined.2, useID = FALSE, k = seq(12,20,2), 
-                        iterFilter = 2, ratio = 2, frac = 0.5, bs = "bs",
-                        family = "gaussian", m = c(3,2))
+p.combined.3 = fit_gam(p.combined.2, useID = FALSE, k = seq(12,20,2), iterFilter = 2, ratio = 2, frac = 0.5, bs = "bs", family = "gaussian", m = c(3,2))
 ```
 
 ##plotting
@@ -208,8 +201,7 @@ p.combined.3 = fit_gam(p.combined.2, useID = FALSE, k = seq(12,20,2),
 *metabCombiner* contains a built-in plotting method for model fits that is based on R's base plotting graphics. These plots can modified like a normal R plot (e.g. with titles, axis labels, legends, etc...). We highly recommend inspecting plots to tune parameters from the RT mapping steps. Note that if you're `fit_loess` as opposed to `fit_gam`, be sure to set *fit* to "loess" instead of the default "gam".
 
 ```{r,fig.width= 5, fig.height=4, fig.align='center'}
-plot(p.combined.3, main = "Example metabCombiner Plot", xlab = "P30 RTs",
-    ylab = "P20 RTs", lcol = "blue", pcol = "black", lwd = 3, pch = 19)
+plot(p.combined.3, main = "Example metabCombiner Plot", xlab = "P30 RTs", ylab = "P20 RTs", lcol = "blue", pcol = "black", lwd = 3, pch = 19)
 
 grid(lty = 2, lwd = 1)
 ```
@@ -219,16 +211,13 @@ grid(lty = 2, lwd = 1)
 We assign to all feature pair alignments (FPAs) a score between 0 & 1, based on an expression penalizing differences in observed m/z, relative abundance (Q), and relative predicted RT error. A score close to 1 implies a high degree of observed similarity, implying a potentially matching compounds, whereas a score near 0 implies a discardable misalignment. See `help(scorePairs)` for more details on the expression used to score features.
 
 ```{r}
-p.combined.4 = calcScores(p.combined.3, A = 70, B = 15, C = 0.5, 
-                        usePPM = FALSE, useAdduct = FALSE, groups = NULL)
+p.combined.4 = calcScores(p.combined.3, A = 70, B = 15, C = 0.5, usePPM = FALSE, useAdduct = FALSE, groups = NULL)
 ```
 
 The arguments *A*,*B*,*C* are positive numeric weights penalizing m/z, RT fit, and Q deviations, respectively. The values of these parameters should generally be between 50-120 for *A*, 5-15 for *B*, and 0-1 for *C*, depending on factors such as mass accuracy, fit quality, and biological sample similarity. An in-package function called `evaluateParams` can help provide a general region of values that can be used, based on matching identity strings (case-insensitive). This is the only package method in which shared identified compounds are required, and we recommend that these be sufficiently representative.
 
 ```{r}
-scores = evaluateParams(p.combined.3, A = seq(50, 120, 10), B = 5:15, 
-                        C = seq(0,1,0.1), usePPM = FALSE, minScore = 0.5,
-                        penalty = 10)
+scores = evaluateParams(p.combined.3, A = seq(50, 120, 10), B = 5:15, C = seq(0,1,0.1), usePPM = FALSE, minScore = 0.5, penalty = 10)
 
 head(scores)
 ```
@@ -237,7 +226,7 @@ The function is similar to `calcScores`, only multiple values are accepted for t
 
 This function applies retention-time mapping using the previously computed model. Both functions can be limited to a subset of groups using the *groups* argument. Relative parts-per-million (PPM) mass error may be used instead of absolute error; if doing this, the recommend values for *A* no longer apply. The best values are between 0.01 and 0.05, but this has not been extensively tested. Finally, *useAdduct* allows for penalizing mismatched (non-empty and non-bracketed) adduct annotations by dividing the score by a constant specified by *adduct* argument. Be sure that adduct labels are correct before using this feature.
 
-#Combined Table Reduction
+#combinedTable Reduction
 
 In the final step of this pipeline, we use all information gathered from this analysis to discern true and false Feature Pair Alignments (FPAs) in the constructed combined table. Here are some guidelines for performing this challenging task effectively using the `labelRows` function. `labelRows` processes all FPAs and makes automated judgments based on calculated score and rank values. 
 
@@ -245,14 +234,10 @@ In the final step of this pipeline, we use all information gathered from this an
 combined.table = combinedTable(p.combined.4)
 
 ##version 1: score-based conflict detection
-combined.table.2 = labelRows(combined.table, minScore = 0.5, maxRankX = 3, 
-                            maxRankY = 3, method = "score", conflict = 0.2,
-                            remove = FALSE, balanced = TRUE)
+combined.table.2 = labelRows(combined.table, minScore = 0.5, maxRankX = 3, maxRankY = 3, method = "score", conflict = 0.2, remove = FALSE, balanced = TRUE)
 
 ##version 2: mzrt-based conflict detection
-combined.table.3 = labelRows(combined.table, minScore = 0.5, maxRankX = 3, 
-                            maxRankY = 3, method = "mzrt", balanced = TRUE,
-                            conflict = c(0.003,0.5,0.003,0.2))
+combined.table.3 = labelRows(combined.table, minScore = 0.5, maxRankX = 3, maxRankY = 3, method = "mzrt", balanced = TRUE,conflict = c(0.003,0.5,0.003,0.2))
 ```
 
 Some arguments that must be specified are the *minScore*, *maxRankX* & *maxRankY* threshold values, as well as the *conflict* value. Conflicts occur between pairs of FPAs that share one feature in common and may require inspection to discern the correct match. There are two methods for detecting conflicts: 1) "score" and 2) "mzrt". In both, the top-scoring FPAs (rankX = 1 & rankY = 1) are used as a benchmark; if the difference in scores of the conflicting FPAs is small (first method), or the unshared feature is within a set m/z & rt tolerance (second method), then both FPAs are flagged. Otherwise, the lower-ranked FPA is deemed removable.
