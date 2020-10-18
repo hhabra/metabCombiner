@@ -26,7 +26,7 @@ setMethod("getCoefficients", signature = "metabCombiner", function(object){
 #'
 #' @export
 setMethod("getModel", function(object, fit = c("gam", "loess")){
-    fit = match.arg(fit)
+    fit <- match.arg(fit)
     if(fit == "loess")
         return(object@model[["loess"]])
 
@@ -39,7 +39,7 @@ setMethod("getModel", function(object, fit = c("gam", "loess")){
 #'
 #' @export
 setMethod("getSamples", function(object, data = c("x", "y")){
-    data = match.arg(data)
+    data <- match.arg(data)
 
     if(data == "x")
         return(object@samples[["x"]])
@@ -89,11 +89,11 @@ setMethod("show", signature = "metabCombiner", function(object){
     anchors = getAnchors(object)
 
     coefficients = getCoefficients(object)
-    A = coefficients[["A"]]
-    B = coefficients[["B"]]
-    C = coefficients[["C"]]
-    model_gam = getModel(object)
-    model_loess = getModel(object, fit = "loess")
+    A <- coefficients[["A"]]
+    B <- coefficients[["B"]]
+    C <- coefficients[["C"]]
+    model_gam <- getModel(object)
+    model_loess <- getModel(object, fit = "loess")
     if(is.null(stats[["nGroups"]]))
         stats[["nGroups"]] = 0
 
@@ -120,5 +120,52 @@ setMethod("show", signature = "metabCombiner", function(object){
     if(!is.null(A) & !is.null(B) & !is.null(C))
         cat("Last Scoring Weights Used:\nm/z weight = ", A, ", rt weight = ",
             B,  ", quantile weight = ", C, sep = "")
-    return(invisible())
 })
+
+#update method
+setMethod("update_mc", signature = "metabCombiner",
+          function(object, data, combinedTable, nonmatched, samples, extra,
+                    anchors, fit, model, coefficients, stats, values)
+{
+    if(!missing(combinedTable))
+        object@combinedTable <- combinedTable
+
+    if(!missing(data)){
+        if(!missing(nonmatched) & data == "x")
+            object@nonmatched[["x"]] <- nonmatched
+        else if(!missing(nonmatched) & data == "y")
+            object@nonmatched[["y"]] <- nonmatched
+        if(!missing(samples) & data == "x")
+            object@samples[["x"]] <- samples
+        else if(!missing(samples) & data == "y")
+            object@samples[["y"]] <- samples
+        if(!missing(extra) & data == "x")
+            object@extra[["x"]] <- extra
+        else if(!missing(extra) & data == "y")
+            object@extra[["y"]] <- extra
+    }
+
+    if(!missing(anchors))
+        object@anchors <- anchors
+
+    if(!missing(model) & !missing(fit))
+        if(fit == "gam")
+            object@model[["gam"]] <- model
+        else if(fit == "loess")
+            object@model[["loess"]] <- model
+
+    if(!missing(coefficients))
+        object@coefficients <- coefficients
+
+    if(!missing(stats) & !missing(values)){
+        stats = c(getStats(object), stats::setNames(as.list(values), stats))
+        stats = stats[!duplicated(names(stats), fromLast = TRUE)]
+        object@stats <- stats
+    }
+
+    return(object)
+})
+
+
+
+

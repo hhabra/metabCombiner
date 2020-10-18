@@ -31,11 +31,11 @@
 #' data(plasma30)
 #' data(plasma20)
 #'
-#' p30 = metabData(plasma30, samples = "CHEAR")
-#' p20 = metabData(plasma20, samples = "Red")
+#' p30 <- metabData(plasma30, samples = "CHEAR")
+#' p20 <- metabData(plasma20, samples = "Red")
 #'
-#' p.comb = metabCombiner(p30, p20)
-#' p.comb.table = combinedTable(p.comb)
+#' p.comb <- metabCombiner(p30, p20)
+#' p.comb.table <- combinedTable(p.comb)
 #'
 #' @export
 setGeneric("combinedTable", function(object) standardGeneric("combinedTable"))
@@ -58,13 +58,13 @@ setGeneric("combinedTable", function(object) standardGeneric("combinedTable"))
 #' data(plasma30)
 #' data(plasma20)
 #'
-#' p30 = metabData(plasma30, samples = "CHEAR")
-#' p20 = metabData(plasma20, samples = "Red")
+#' p30 <- metabData(plasma30, samples = "CHEAR")
+#' p20 <- metabData(plasma20, samples = "Red")
 #'
-#' p.comb = metabCombiner(p30, p20)
-#' p.comb = selectAnchors(p.comb, windx = 0.05, windy = 0.03)
+#' p.comb <- metabCombiner(p30, p20)
+#' p.comb <- selectAnchors(p.comb, windx = 0.05, windy = 0.03)
 #'
-#' anchors = getAnchors(p.comb)
+#' anchors <- getAnchors(p.comb)
 #'
 #' @export
 setGeneric("getAnchors", function(object) standardGeneric("getAnchors"))
@@ -87,13 +87,13 @@ setGeneric("getAnchors", function(object) standardGeneric("getAnchors"))
 #' data(plasma30)
 #' data(plasma20)
 #'
-#' p30 = metabData(plasma30, samples = "CHEAR")
-#' p20 = metabData(plasma20, samples = "Red")
+#' p30 <- metabData(plasma30, samples = "CHEAR")
+#' p20 <- metabData(plasma20, samples = "Red")
 #'
-#' p.comb = metabCombiner(p30, p20)
-#' p.comb = selectAnchors(p.comb, windx = 0.05, windy = 0.03)
-#' p.comb = fit_gam(p.comb, k = 20, iterFilter = 1)
-#' p.comb = calcScores(p.comb, A = 90, B = 14, C = 0.5)
+#' p.comb <- metabCombiner(p30, p20)
+#' p.comb <- selectAnchors(p.comb, windx = 0.05, windy = 0.03)
+#' p.comb <- fit_gam(p.comb, k = 20, iterFilter = 1)
+#' p.comb <- calcScores(p.comb, A = 90, B = 14, C = 0.5)
 #'
 #' getCoefficients(p.comb)
 #'
@@ -121,12 +121,12 @@ setGeneric("getCoefficients", function(object)
 #' data(plasma20)
 #' p30 <- metabData(plasma30, samples = "CHEAR")
 #' p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
-#' p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
-#' p.comb = selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
-#' p.comb = fit_gam(p.comb, iterFilter = 1, k = 20)
-#' p.comb = fit_loess(p.comb, iterFilter = 1, spans = 0.2)
-#' model.gam = getModel(p.comb, fit = "gam")
-#' model.loess = getModel(p.comb, fit = "loess")
+#' p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
+#' p.comb <- selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
+#' p.comb <- fit_gam(p.comb, iterFilter = 1, k = 20)
+#' p.comb <- fit_loess(p.comb, iterFilter = 1, spans = 0.2)
+#' model.gam <- getModel(p.comb, fit = "gam")
+#' model.loess <- getModel(p.comb, fit = "loess")
 #'
 #' @export
 setGeneric("getModel", function(object, fit = c("gam", "loess"))
@@ -141,8 +141,8 @@ setGeneric("getModel", function(object, fit = c("gam", "loess"))
 #' @examples
 #' data(plasma30)
 #'
-#' p30 = metabData(plasma30, samples = "CHEAR")
-#' data = getData(p30)
+#' p30 <- metabData(plasma30, samples = "CHEAR")
+#' data <- getData(p30)
 #'
 #' @export
 setGeneric("getData", function(object) standardGeneric("getData"))
@@ -158,7 +158,7 @@ setGeneric("getData", function(object) standardGeneric("getData"))
 #'
 #' @examples
 #' data(plasma30)
-#' p30 = metabData(plasma30, samples = "CHEAR", extra = "Red")
+#' p30 <- metabData(plasma30, samples = "CHEAR", extra = "Red")
 #' getExtra(p30)
 #'
 #' @export
@@ -186,7 +186,7 @@ setGeneric("getExtra", function(object, data = c("x", "y"))
 #' p30 <- metabData(plasma30, samples = "CHEAR")
 #' p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
 #'
-#' p.comb = metabCombiner(xdata = p30, ydata = p20)
+#' p.comb <- metabCombiner(xdata = p30, ydata = p20)
 #'
 #' getSamples(p30)
 #' getSamples(p.comb, data = "x")  #equivalent to previous
@@ -215,9 +215,9 @@ setGeneric("getSamples", function(object, data = c("x", "y"))
 #'
 #' getStats(p30) #metabData stats
 #'
-#' p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
-#' p.comb = selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
-#' p.comb = fit_gam(p.comb, iterFilter = 1, k = 20)
+#' p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
+#' p.comb <- selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
+#' p.comb <- fit_gam(p.comb, iterFilter = 1, k = 20)
 #'
 #' getStats(p.comb) #metabCombiner stats
 #'
@@ -245,11 +245,21 @@ setGeneric("getStats", function(object) standardGeneric("getStats"))
 #'
 #' p30 <- metabData(plasma30, samples = "CHEAR")
 #' p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
-#' p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
+#' p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
 #'
-#' nnmx = nonmatched(p.comb, data = "x")
-#' nnmy = nonmatched(p.comb, data = "y")
+#' nnmx <- nonmatched(p.comb, data = "x")
+#' nnmy <- nonmatched(p.comb, data = "y")
 #'
 #' @export
 setGeneric("nonmatched", function(object, data = c("x", "y"))
             standardGeneric("nonmatched"))
+
+##updater methods
+setGeneric("update_mc",function(object, data, combinedTable, nonmatched,
+            samples,extra,anchors, fit, model, coefficients, stats, values)
+            standardGeneric("update_mc"))
+
+setGeneric("update_md", function(object, data, samples, extra, stats)
+            standardGeneric("update_md"))
+
+

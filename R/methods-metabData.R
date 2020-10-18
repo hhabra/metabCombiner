@@ -6,7 +6,7 @@
 #' @export
 ##
 setMethod("getData", signature = "metabData", function(object){
-    data = object@data
+    data <- object@data
     return(data)
 })
 
@@ -15,7 +15,7 @@ setMethod("getData", signature = "metabData", function(object){
 #' @export
 ##
 setMethod("getExtra", signature = "metabData", function(object){
-    extra = object@extra
+    extra <- object@extra
     return(extra)
 })
 
@@ -27,7 +27,7 @@ setMethod("getExtra", signature = "metabData", function(object){
 #'
 #' @export
 setMethod("getSamples", signature = "metabData", function(object){
-    samples = object@samples
+    samples <- object@samples
 
     return(samples)
 })
@@ -37,7 +37,7 @@ setMethod("getSamples", signature = "metabData", function(object){
 #' @export
 ##
 setMethod("getStats", signature = "metabData", function(object){
-    extra = object@stats
+    extra <- object@stats
     return(extra)
 })
 
@@ -45,11 +45,11 @@ setMethod("getStats", signature = "metabData", function(object){
 
 ##show method
 setMethod("show", signature = "metabData", function(object){
-    data = getData(object)
-    samples = getSamples(object)
-    stats = getStats(object)
+    data <- getData(object)
+    samples <- getSamples(object)
+    stats <- getStats(object)
 
-    unit = ifelse(max(data[["rt"]]) < 180, "minutes", "seconds")
+    unit <- ifelse(max(data[["rt"]]) < 180, "minutes", "seconds")
 
     cat("A metabData object\n")
     cat("-------------------------\n")
@@ -65,3 +65,21 @@ setMethod("show", signature = "metabData", function(object){
 })
 
 
+setMethod("update_md", signature = "metabData",
+        function(object, data, samples, extra, stats)
+{
+    if(!missing(data))
+        object@data <- data
+
+    if(!missing(samples))
+        object@samples <- samples
+
+    if(!missing(extra))
+        object@extra <- extra
+
+    if(!missing(stats)){
+        object@stats <- stats
+    }
+
+    return(object)
+})
