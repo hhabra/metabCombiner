@@ -31,7 +31,7 @@ combinerCheck <- function(errNo, type, error = "stop"){
             "combinedTable is empty",
             "combinedTable column names different from expected column names",
             "combinedTable column classes different from expected classes",
-            "at least one invalid group number in combinedTable"),
+            "at least one missing or invalid group number in combinedTable"),
 
         "metabCombiner" =
             c("input object is not of class 'metabCombiner'",
@@ -86,7 +86,7 @@ isCombinedTable <- function(object){
     if(!identical(coltypes[seq(1,length(expected))], correct_types))
         return(5)
 
-    if(any(object[["group"]] <= 0))
+    if(any(is.na(object[["group"]])) | any(object[["group"]] <= 0))
         return(6)
 
     return(0)
