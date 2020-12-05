@@ -218,7 +218,7 @@ calcScores <- function(object, A, B, C, fit = c("gam", "loess"), groups = NULL,
     fit <- match.arg(fit)
     model <- getModel(object, fit = fit)
     if(is.null(groups))
-        groups <- seq(1,max(cTable[["group"]]))
+        groups <- unique(cTable[["group"]])
 
     check_score_pars(cTable, A, B, C, fit, model, groups, adduct = adduct)
 
