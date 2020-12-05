@@ -1,6 +1,6 @@
 Package: metabCombiner
-Version: 1.1.0
-Date: 2020-10-17
+Version: 1.1.1
+Date: 2020-12-05
 Title: Method for Combining LC-MS Metabolomics Feature Measurements
 Authors@R: c(
 	   person("Hani", "Habra", email = "hhabra1@gmail.com",role = c("aut","cre")),

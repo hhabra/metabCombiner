@@ -1,3 +1,29 @@
+
+Version 1.1.1 (2020-12-02)
+
+Bug Fixes:
+  + combinedTable check for missing group values (Issue #7)
+  + calcScores / evaluateParams groups bug (Issue #8)
+  + Warning for column names with bracket characters "{ ( [ ] ) }" (Issue #9)
+  + QCol bug (Issue #10)
+
+New Functionality
+  + getExtra method added to metabCombiner objects (Issue #11)
+
+
+Version 1.0.0 (2020-10-20)
+ Accepted to Bioconductor
+
+  Functionality changes:
++ matrixStats function implementations for matrix calculations replace base
+  implementations where appropriate, with notable improvements in adjustData()
+  function within metabData()
++ filterRT() now gives an error rather than a warning if rtmin or rtmax are out
+  of the bounds of the dataset RTs
+
+
+
+
 Changes in version 0.99.0 (2020-09-11)
 + Submitted to Bioconductor
 
