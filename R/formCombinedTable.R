@@ -1,5 +1,5 @@
 
-#' @title Form Combiner Report Table
+#' @title Form metabCombiner Report Table
 #'
 #' @description  Takes previously computed m/z groups using \code{mzGroup()}
 #' and creates merged \code{combinedTable} consisting of all possible feature
@@ -49,10 +49,10 @@ formCombinedTable <- function(object, xset, yset, nGroups){
                         rankY = as.integer(1),
                         adductx = xCombine[["adduct"]],
                         adducty = yCombine[["adduct"]],
-                        xCombine[object@samples[["x"]]],
-                        xCombine[object@extra[["x"]]],
-                        yCombine[object@samples[["y"]]],
-                        yCombine[object@extra[["y"]]],
+                        xCombine[getSamples(object, data = "x")],
+                        xCombine[getExtra(object, data = "x")],
+                        yCombine[getSamples(object, data = "y")],
+                        yCombine[getExtra(object, data = "y")],
                         stringsAsFactors = FALSE, check.names = FALSE
     )
 
