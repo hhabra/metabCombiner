@@ -22,6 +22,14 @@ setMethod("getCoefficients", signature = "metabCombiner", function(object){
     return(object@coefficients)
 })
 
+#' @rdname getExtra
+#'
+#' @export
+setMethod("getExtra", function(object, data = "x"){
+    return(object@extra[[data]])
+}, signature = "metabCombiner")
+
+
 #' @rdname getModel
 #'
 #' @export
@@ -38,14 +46,8 @@ setMethod("getModel", function(object, fit = c("gam", "loess")){
 #' @rdname getSamples
 #'
 #' @export
-setMethod("getSamples", function(object, data = c("x", "y")){
-    data <- match.arg(data)
-
-    if(data == "x")
-        return(object@samples[["x"]])
-
-    else if(data == "y")
-        return(object@samples[["y"]])
+setMethod("getSamples", function(object, data = "x"){
+    return(object@samples[[data]])
 }, signature = "metabCombiner")
 
 
@@ -61,14 +63,8 @@ setMethod("getStats", signature = "metabCombiner", function(object){
 #'
 #' @export
 setMethod("nonmatched", signature = "metabCombiner",
-            function(object, data = c("x", "y")){
-    data = match.arg(data)
-
-    if(data == "x")
-        return(object@nonmatched[["x"]])
-
-    if(data == "y")
-        return(object@nonmatched[["y"]])
+            function(object, data = "x"){
+    return(object@nonmatched[[data]])
 })
 
 #' @rdname plot_fit
