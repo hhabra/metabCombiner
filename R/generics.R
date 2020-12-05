@@ -152,7 +152,7 @@ setGeneric("getData", function(object) standardGeneric("getData"))
 #'
 #' @param object metabCombiner or metabData object
 #'
-#' @param data Choice of input dataset, 'x' or 'y'
+#' @param data Choice of input dataset, e.g. "x" or "y"
 #'
 #' @return character vector of extra column names
 #'
@@ -162,7 +162,7 @@ setGeneric("getData", function(object) standardGeneric("getData"))
 #' getExtra(p30)
 #'
 #' @export
-setGeneric("getExtra", function(object, data = c("x", "y"))
+setGeneric("getExtra", function(object, data = "x")
             standardGeneric("getExtra"))
 
 
@@ -194,7 +194,7 @@ setGeneric("getExtra", function(object, data = c("x", "y"))
 #' getSamples(p.comb, data = "y")  #equivalent to previous
 #'
 #' @export
-setGeneric("getSamples", function(object, data = c("x", "y"))
+setGeneric("getSamples", function(object, data = "x")
             standardGeneric("getSamples"))
 
 
@@ -251,13 +251,14 @@ setGeneric("getStats", function(object) standardGeneric("getStats"))
 #' nnmy <- nonmatched(p.comb, data = "y")
 #'
 #' @export
-setGeneric("nonmatched", function(object, data = c("x", "y"))
+setGeneric("nonmatched", function(object, data = "x")
             standardGeneric("nonmatched"))
 
 ##updater methods
 setGeneric("update_mc",function(object, data, combinedTable, nonmatched,
             samples,extra,anchors, fit, model, coefficients, stats, values)
             standardGeneric("update_mc"))
+
 
 setGeneric("update_md", function(object, data, samples, extra, stats)
             standardGeneric("update_md"))
