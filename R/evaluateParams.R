@@ -251,7 +251,7 @@ evaluateParams <- function(object, A = seq(60,150,by = 10), B = seq(6,15),
     cTable <- combinedTable(object)[,seq(1,15)]
     fit <- match.arg(fit)
     model <- getModel(object, fit = fit)
-    if(is.null(groups))  groups <- seq(1,max(cTable[["group"]]))
+    if(is.null(groups))  groups <- unique(cTable[["group"]])
     check_score_pars(cTable, A, B, C, model, fit, groups, minScore, penalty)
     rtrange <- max(cTable[["rty"]]) - min(cTable[["rty"]])
     rows <- which(cTable[["group"]] %in% groups)
