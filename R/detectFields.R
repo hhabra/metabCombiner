@@ -265,7 +265,7 @@ detectFields <- function(Data, table, mz, rt, id, adduct, samples, extra, Q){
 
     QCol <- detect(Q, names(table), type = "single")
     new_Q <- selectQ(table, col = QCol)
-    if(!is.null(QCol)) table = table[-Q]
+    if(!is.null(QCol)) table = table[-QCol]
 
     sampleCols <- detect(samples, names(table), type = "multiple")
     if(is.null(sampleCols)){
