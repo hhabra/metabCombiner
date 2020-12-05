@@ -118,18 +118,18 @@ metabData <- function(table, mz = "mz", rt = "rt", id = "id",
     if (misspc >= 100 | misspc < 0 | !is.numeric(misspc))
         stop("Parameter 'misspc' must be a numeric value from [0,100)")
 
-    if(typeof(table) == "character")
+    if(is(table, "character"))
         table <- readData(table)
     else if(dplyr::is.tbl(table))     #handling tbl error
         table <- as.data.frame(table)
     else if(!is.data.frame(table))
         stop("argument 'table' must be a data.frame or path to data file")
 
-    if(!is.logical(zero)){
-        warning("non-logical value for argument 'zero'; ",
-                "setting to default (FALSE)")
-        zero <- FALSE
-    }
+    if(!is.logical(zero))
+        stop("argument 'zero' must be a logical")
+    if(any(grepl("\\{|\\[|\\(|\\)|\\]|\\}", names(table))))
+        warning("bracket characters in data column names may affect column",
+                " detection accuracy")
 
     measure <- match.arg(measure)
     newData <- new("metabData")
