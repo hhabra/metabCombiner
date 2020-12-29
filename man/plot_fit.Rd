@@ -13,7 +13,9 @@ plot_fit(
   pcol,
   lcol,
   lwd,
-  remove.outliers = FALSE,
+  pch = 19,
+  outlier = "show",
+  ocol,
   ...
 )
 }
@@ -28,13 +30,19 @@ plot_fit(
 
 \item{fit}{choice of model (either "gam" or "loess").}
 
-\item{pcol}{color of the points (ordered pairs) in the plot.}
+\item{pcol}{color of the normal points (ordered RT pair) in the plot}
 
 \item{lcol}{color of the fitted line in the plot}
 
 \item{lwd}{line width of the curve fit between anchor points}
 
-\item{remove.outliers}{logical, option to exclude outlier anchors in plot}
+\item{outlier}{display option for outliers. If "show" or "s", treats
+outlier points like normal anchors; if "remove" or "r", removes outlier
+points from the plot; if "highlight" or "h", displays outliers with a
+different color and associated legend.}
+
+\item{ocol}{color of the outlier points; outlier argument must be set to
+"highlight" or "h"}
 }
 \value{
 no values returned
@@ -57,7 +65,7 @@ p.comb = fit_gam(p.comb, k = 20, iterFilter = 1)
 ##plot of GAM fit
 plot(p.comb, main = "Example GAM Fit Plot", xlab = "X Dataset RTs",
      ylab = "Y Dataset RTs", pcol = "red", lcol = "blue", lwd = 5,
-     fit = "gam", pch = 19, remove.outliers = TRUE)
+     fit = "gam", pch = 19, outliers = "remove")
 
 grid(lwd =  2, lty = 3 ) #adding gridlines
 
