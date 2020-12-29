@@ -8,15 +8,17 @@ filterAnchors(
   rts,
   fit,
   vals,
+  outlier,
+  coef,
   iterFilter,
-  ratio,
-  frac,
+  prop,
   bs,
   m,
   family,
   method,
   optimizer,
   loess.pars,
+  message,
   ...
 )
 }
@@ -27,13 +29,18 @@ filterAnchors(
 
 \item{vals}{numeric values: k values for GAM fits, spans for loess fits}
 
-\item{iterFilter}{integer number of residual filtering iterations}
+\item{outlier}{Thresholding method for outlier dection. If "MAD", the
+threshold is the mean absolute deviation (MAD) times \code{coef}; if
+"boxplot", the threshold is \code{coef} times IQR plus 3rd quartile of
+a model's absolute residual values.}
 
-\item{ratio}{numeric. A point is an outlier if the ratio of residual to
-mean residual of a fit exceeds this value. Must be greater than 1.}
+\item{coef}{numeric (> 1) multiplier for determining thresholds for outliers
+(see \code{outlier} argument)}
 
-\item{frac}{numeric. A point is excluded if deemed a residual in more than
-this fraction value times the number of fits. Must be between 0 & 1.}
+\item{iterFilter}{integer number of outlier filtering iterations}
+
+\item{prop}{numeric. A point is excluded if deemed a residual in more than
+this proportion of fits. Must be between 0 & 1.}
 
 \item{bs}{character. Choice of spline method from mgcv; either "bs" or "ps"}
 
@@ -48,6 +55,8 @@ this fraction value times the number of fits. Must be between 0 & 1.}
 ?mgcv::gam}
 
 \item{loess.pars}{parameters for LOESS fitting; see ?loess.control}
+
+\item{message}{Option to print message indicating function progress}
 
 \item{...}{other arguments passed to \code{mgcv::gam}.}
 }

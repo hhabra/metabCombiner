@@ -4,7 +4,19 @@
 \alias{crossValFit}
 \title{Cross Validation for Model Fits}
 \usage{
-crossValFit(rts, fit, vals, bs, family, m, method, optimizer, loess.pars, ...)
+crossValFit(
+  rts,
+  fit,
+  vals,
+  bs,
+  family,
+  m,
+  method,
+  optimizer,
+  loess.pars,
+  message,
+  ...
+)
 }
 \arguments{
 \item{rts}{data.frame of ordered pair retention times}
@@ -27,6 +39,8 @@ Best value chosen by 10-fold cross validation.}
 ?mgcv::gam}
 
 \item{loess.pars}{parameters for LOESS fitting; see ?loess.control}
+
+\item{message}{Option to print message indicating function progress}
 
 \item{...}{Other arguments passed to \code{mgcv::gam}.}
 }

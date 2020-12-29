@@ -23,6 +23,40 @@ formatAnchors <- function(object, anchors, weights, useID){
     return(rts)
 }
 
+
+#' Detect Outliers from Residuals
+#'
+#' @param residuals Matrix of numeric residuals
+#'
+#' @param include integer indices of non-outlier anchors
+#'
+#' @param vals numeric vector: k values for GAM fits, spans for loess fits
+#'
+#' @param outlier Thresholding method for outlier dection. If "MAD", the
+#' threshold is the mean absolute deviation (MAD) times \code{coef}; if
+#' "boxplot", the threshold is \code{coef} times IQR plus 3rd quartile of
+#' a model's absolute residual values.
+#'
+#' @param coef numeric (> 1) multiplier for determining thresholds for outliers
+#' (see \code{outlier} argument)
+#'
+#' @noRd
+flagOutliers <- function(residuals, include, vals, outlier, coef)
+{
+    if(outlier == "MAD")
+        thresholds <- coef * matrixStats::colMeans2(residuals, rows = include)
+    else if(outlier == "boxplot")
+        thresholds <- matrixStats::colIQRs(residuals, rows = include) * coef +
+            matrixStats::colQuantiles(residuals, probs = 0.75, rows = include)
+    flags <- vapply(seq(1,length(vals)), function(i){
+        fl <- residuals[,i] >  thresholds[i]
+        return(fl)
+    }, logical(nrow(residuals)))
+
+    return(flags)
+}
+
+
 #' @title Filter Outlier Ordered Pairs
 #'
 #' @description
@@ -36,13 +70,18 @@ formatAnchors <- function(object, anchors, weights, useID){
 #'
 #' @param vals numeric values: k values for GAM fits, spans for loess fits
 #'
-#' @param iterFilter integer number of residual filtering iterations
+#' @param outlier Thresholding method for outlier dection. If "MAD", the
+#' threshold is the mean absolute deviation (MAD) times \code{coef}; if
+#' "boxplot", the threshold is \code{coef} times IQR plus 3rd quartile of
+#' a model's absolute residual values.
 #'
-#' @param ratio numeric. A point is an outlier if the ratio of residual to
-#' mean residual of a fit exceeds this value. Must be greater than 1.
+#' @param coef numeric (> 1) multiplier for determining thresholds for outliers
+#' (see \code{outlier} argument)
 #'
-#' @param frac  numeric. A point is excluded if deemed a residual in more than
-#' this fraction value times the number of fits. Must be between 0 & 1.
+#' @param iterFilter integer number of outlier filtering iterations
+#'
+#' @param prop  numeric. A point is excluded if deemed a residual in more than
+#' this proportion of fits. Must be between 0 & 1.
 #'
 #' @param bs character. Choice of spline method from mgcv; either "bs" or "ps"
 #'
@@ -58,15 +97,19 @@ formatAnchors <- function(object, anchors, weights, useID){
 #'
 #' @param loess.pars parameters for LOESS fitting; see ?loess.control
 #'
+#' @param message Option to print message indicating function progress
+#'
 #' @param ... other arguments passed to \code{mgcv::gam}.
 #'
 #' @return anchor rts data frame with updated weights.
-filterAnchors <- function(rts, fit, vals, iterFilter, ratio, frac, bs, m,
-                            family, method, optimizer, loess.pars, ...)
+filterAnchors <- function(rts, fit, vals, outlier, coef, iterFilter,
+                          prop, bs, m, family, method, optimizer, loess.pars,
+                          message,...)
 {
     iter <- 0
     while(iter < iterFilter){
-        cat("Performing filtering iteration: ", iter + 1, "\n", sep = "")
+        if(message)
+            cat("Performing filtering iteration: ", iter + 1, "\n", sep = "")
         if(fit == "gam")
             residuals <- suppressWarnings(vapply(vals, function(v){
                 model <- mgcv::gam(rty ~ s(rtx, k = v, bs = bs, m = m,...),
@@ -87,16 +130,9 @@ filterAnchors <- function(rts, fit, vals, iterFilter, ratio, frac, bs, m,
                 return(res)
             }, numeric(nrow(rts))))
 
-        include <- which(rts[["weights"]] == 1)
-        thresholds <- ratio * colMeans(residuals[include,] %>% as.matrix())
-
-        flags <- vapply(seq(1,length(vals)), function(i){
-            fl <- (residuals[,i] > thresholds[i])
-            return(fl)
-        },logical(nrow(residuals)))
-
-        fracs <- rowSums(flags)/ncol(flags)
-        remove <- fracs > frac
+        include <- which(rts[["weights"]] != 0)
+        flags <- flagOutliers(residuals, include, vals, outlier, coef)
+        remove <- rowSums(flags)/ncol(flags) > prop
         remove[rts[["labels"]] == "I"] <- FALSE
 
         if(sum(!remove) > 22 & sum(!remove) < length(remove))
@@ -105,7 +141,6 @@ filterAnchors <- function(rts, fit, vals, iterFilter, ratio, frac, bs, m,
             break
         iter <- iter+1
     }
-
     return(rts)
 }
 
@@ -138,13 +173,15 @@ filterAnchors <- function(rts, fit, vals, iterFilter, ratio, frac, bs, m,
 #'
 #' @param loess.pars parameters for LOESS fitting; see ?loess.control
 #'
+#' @param message Option to print message indicating function progress
+#'
 #' @param ... Other arguments passed to \code{mgcv::gam}.
 #'
 #' @return Optimal parameter value as determined by 10-fold cross validation
 crossValFit <- function(rts, fit, vals, bs, family, m, method, optimizer,
-                        loess.pars,...)
+                        loess.pars, message, ...)
 {
-    cat("Performing 10-fold cross validation\n")
+    if(message) cat("Performing 10-fold cross validation\n")
     rts <- dplyr::filter(rts, .data$weights != 0)
     N <- nrow(rts) - 1
     folds <- caret::createFolds(seq(2,N), k = 10, returnTrain = FALSE)
@@ -185,24 +222,30 @@ crossValFit <- function(rts, fit, vals, bs, family, m, method, optimizer,
 #' @description
 #' Fits a (penalized) basis splines curve through a set of ordered pair
 #' retention times, modeling one set of retention times (rty) as a function
-#' on the other set (rtx).Filtering iterations of high residual points are
-#' performed first. Multiple acceptable values of \code{k} can be supplied
-#' used, with one value selected through 10-fold cross validation.
+#' on the other set (rtx). Outlier filtering iterations are performed first,
+#' then with the remaining points, the best value of parameter \code{k} is
+#' selected through 10-fold cross validation.
 #'
-#' @param object  a metabCombiner object.
+#' @param object  a \code{metabCombiner} object.
 #'
-#' @param useID  logical. Option to use matched IDs to inform fit
+#' @param useID  logical. If set to TRUE, matched ID anchors detected from
+#' previous step will never be flagged as outliers.
 #'
-#' @param k  integer vector values controling the number of basis functions for
-#' GAM construction. Best value chosen by 10-fold cross validation.
+#' @param k  integer k values controlling the dimension of the basis of the
+#' GAM fit (see: ?mgcv::s). Best value chosen by 10-fold cross validation.
 #'
-#' @param ratio numeric. A point is an outlier if the ratio of residual to
-#' mean residual of a fit exceeds this value. Must be greater than 1.
+#' @param iterFilter integer number of outlier filtering iterations to perform
 #'
-#' @param frac  numeric. A point is excluded if deemed a residual in more than
-#' this fraction value times the number of fits. Must be between 0 & 1.
+#' @param outlier Thresholding method for outlier dection. If "MAD", the
+#' threshold is the mean absolute deviation (MAD) times \code{coef}; if
+#' "boxplot", the threshold is \code{coef} times IQR plus 3rd quartile of
+#' a model's absolute residual values.
 #'
-#' @param iterFilter integer number of residual filtering iterations to perform
+#' @param coef numeric (> 1) multiplier for determining thresholds for outliers
+#' (see \code{outlier} argument)
+#'
+#' @param prop  numeric. A point is excluded if deemed a residual in more than
+#' this proportion of fits. Must be between 0 & 1.
 #'
 #' @param bs   character. Choice of spline method from mgcv, either "bs" (basis
 #' splines) or "ps" (penalized basis splines)
@@ -214,11 +257,13 @@ crossValFit <- function(rts, fit, vals, bs, family, m, method, optimizer,
 #'
 #' @param m  integer. Basis and penalty order for GAM; see ?mgcv::s
 #'
-#' @param method  character. Smoothing parameter estimation method; see:
+#' @param method character smoothing parameter estimation method; see:
 #' ?mgcv::gam
 #'
 #' @param optimizer character. Method to optimize smoothing parameter; see:
 #' ?mgcv::gam
+#'
+#' @param message Option to print message indicating function progress
 #'
 #' @param ... Other arguments passed to \code{mgcv::gam}.
 #'
@@ -226,30 +271,29 @@ crossValFit <- function(rts, fit, vals, bs, family, m, method, optimizer,
 #' A set of ordered pair retention times must be previously computed using
 #' \code{selectAnchors()}. The minimum and maximum retention times from both
 #' input datasets are included in the set as ordered pairs (min_rtx, min_rty)
-#' & (max_rtx, max_rty).
-#'
-#' The \code{weights} argument initially determines the contribution of each
-#' point to the model fits; they are equally weighed by default, but can be
-#' changed using an \code{n+2} length vector, where n is the number of ordered
-#' pairs and the first and last of the weights determines the contribution of
-#' the min and max ordered pairs.
+#' & (max_rtx, max_rty). The \code{weights} argument initially determines the
+#' contribution of each point to the model fits; they are equally weighed by
+#' default, but can be changed using an \code{n+2} length vector, where n is
+#' the number of ordered pairs and the first and last of the weights determines
+#' the contribution of the min and max ordered pairs; by default, all weights
+#' are initially set to 1 for equal contribution of each point.
 #'
 #' The model complexity is determined by \code{k}. Multiple values of k are
 #' allowed, with the best value chosen by 10 fold cross validation. Before
 #' this happens, certain ordered pairs are removed based on the model errors.
-#' In each iteration, a GAM is fit using each selected value of k. A point is
-#' "removed" (its corresponding \code{weights} value set to 0) if its residual
-#' is \code{ratio} times average residual for a fraction of fitted models, as
-#' determined by \code{frac}. If an ordered pair is an "identity" (discovered
-#' in the \code{selectAnchors} by setting the \code{useID} to TRUE), then
-#' setting \code{useID} here will prevent its removal.
+#' In each iteration, a GAM is fit using each selected value of k. Depending on
+#' the \code{outlier} argument, a point is "removed" from the model (i.e. its
+#' corresponding weight set to 0) if its residual is above the threshold
+#' for a proportion of fitted models, as determined by \code{prop}. If an anchor
+#' is an "identity" (idx = idy, detected in the \code{selectAnchors} by setting
+#' \code{useID} to TRUE), then setting \code{useID} here prevents its removal.
 #'
 #' Other arguments, e.g. \code{family}, \code{m}, \code{optimizer}, \code{bs},
-#' and \code{method} are GAM specific parameters. The \code{family} option is
-#' currently limited to the "scat" (scaled t) and "gaussian" families; scat
-#' family model fits are more robust to outliers than gaussian fits, but
-#' compute much slower. Type of splines are currently limited to basis splines
-#' (\eqn{bs = "bs"}) or penalized basis splines (\eqn{bs = "ps"}).
+#' and \code{method} are GAM specific parameters from the \code{mgcv} R package.
+#' The \code{family} option is currently limited to the "scat" (scaled t) and
+#' "gaussian" families; scat family model fits are more robust to outliers than
+#' gaussian fits, but compute much slower. Type of splines are currently limited
+#' to basis splines ("bs" or "ps").
 #'
 #' @return metabCombiner with a fitted GAM model object
 #'
@@ -268,13 +312,13 @@ crossValFit <- function(rts, fit, vals, bs, family, m, method, optimizer,
 #' anchors = getAnchors(p.comb)
 #'
 #' #version 1: using faster, but less robust, gaussian family
-#' p.comb = fit_gam(p.comb, k = c(10,12,15,17,20), frac = 0.5,
-#'     family = "gaussian")
+#' p.comb = fit_gam(p.comb, k = c(10,12,15,17,20), prop = 0.5,
+#'     family = "gaussian", outlier = "MAD", coef = 2)
 #'
 #' \donttest{
 #' #version 2: using slower, but more robust, scat family
 #' p.comb = fit_gam(p.comb, k = seq(12,20,2), family = "scat",
-#'                      iterFilter = 1, ratio = 3, method = "GCV.Cp")
+#'                      iterFilter = 1, coef = 3, method = "GCV.Cp")
 #'
 #' #version 3 (with identities)
 #' p.comb = selectAnchors(p.comb, useID = TRUE)
@@ -286,44 +330,43 @@ crossValFit <- function(rts, fit, vals, bs, family, m, method, optimizer,
 #' p.comb = fit_gam(p.comb, useID = TRUE, k = seq(12,20,2),
 #'                      iterFilter = 1, weights = weights)
 #'
-#' #version 5 (assigning weights to the boundary points
-#' weights = c(2, rep(1, nrow(anchors)), 2)
-#' p.comb = fit_gam(p.comb, k = seq(12,20,2), weights = weights)
+#' #version 5 (using boxplot-based outlier detection
+#' p.comb = fit_gam(p.comb, k = seq(12,20,2), outlier = "boxplot", coef = 1.5)
 #'
 #' #to preview result of fit_gam
-#' plot(p.comb, xlab = "CHEAR Plasma (30 min)",
-#'      ylab = "Red-Cross Plasma (20 min)", pch = 19,
-#'      main = "Example fit_gam Result Fit")
+#' plot(p.comb, pch = 19, outlier = "h", xlab = "CHEAR Plasma (30 min)",
+#'      ylab = "Red-Cross Plasma (20 min)", main = "Example GAM Fit")
 #' }
 #'
 #' @export
 fit_gam <- function(object, useID = FALSE, k = seq(10,20, by = 2),
-                    iterFilter = 2, ratio = 2, frac = 0.5, bs = c("bs", "ps"),
-                    family = c("scat", "gaussian"), weights = 1, m = c(3,2),
-                    method = "REML", optimizer = "newton", ...)
+                    iterFilter = 2, outlier = c("MAD", "boxplot"), coef = 2,
+                    prop = 0.5, weights = 1, bs = c("bs", "ps"),
+                    family = c("scat", "gaussian"), m = c(3,2),
+                    method = "REML", optimizer = "newton", message = TRUE, ...)
 {
     combinerCheck(isMetabCombiner(object), "metabCombiner")
     anchors <- getAnchors(object)
     check_fit_pars(anchors = anchors, fit = "gam", useID = useID, k = k,
-                    iterFilter = iterFilter, ratio = ratio, frac = frac)
-
+                    iterFilter = iterFilter, coef = coef, prop = prop)
+    outlier <- match.arg(outlier)
     bs <- match.arg(bs)
     family <- match.arg(family)
 
     rts <- formatAnchors(object, anchors, weights, useID)
-    rts <- filterAnchors(rts = rts, fit = "gam", vals = k, ratio = ratio,
-                        frac = frac, iterFilter = iterFilter, bs = bs, m = m,
-                        family = family,method = method, optimizer = optimizer,
-                        ...)
+    rts <- filterAnchors(rts = rts, fit = "gam", vals = k, outlier = outlier,
+                         coef = coef, iterFilter = iterFilter, prop = prop,
+                         bs = bs, m = m, family = family, method = method,
+                         optimizer = optimizer, message = message, ...)
 
     if(length(k) > 1)
         best_k <- crossValFit(rts = rts, vals = k, fit = "gam", bs = bs, m = m,
                                 family = family, method = method,
-                                optimizer = optimizer,...)
+                                optimizer = optimizer, message = message,...)
     else
         best_k <- k
 
-    cat("Fitting Model with k =", best_k, "\n")
+    if(message) cat("Fitting Model with k =", best_k, "\n")
     best_model <- mgcv::gam(rty ~ s(rtx, k = best_k, bs = bs, m = m, ...),
                             data = rts, family = family, method = method,
                             optimizer = c("outer", optimizer),
@@ -345,25 +388,33 @@ fit_gam <- function(object, useID = FALSE, k = seq(10,20, by = 2),
 #' performed first. Multiple acceptable values of \code{span} can be used, with
 #' one value selected through 10-fold cross validation.
 #'
-#' @param object  metabCombiner object.
+#' @param object  a \code{metabCombiner} object.
 #'
-#' @param useID  logical. Option to use matched IDs to inform fit
+#' @param useID  logical. If set to TRUE, matched ID anchors detected from
+#' previous step will never be flagged outliers.
 #'
 #' @param spans numeric span values (between 0 & 1) used for loess fits
 #'
-#' @param ratio numeric. A point is an outlier if the ratio of residual to
-#' mean residual of a fit exceeds this value. Must be greater than 1.
+##' @param outlier Thresholding method for outlier dection. If "MAD", the
+#' threshold is the mean absolute deviation (MAD) times \code{coef}; if
+#' "boxplot", the threshold is \code{coef} times IQR plus 3rd quartile of
+#' a model's absolute residual values.
 #'
-#' @param frac  numeric. A point is excluded if deemed a residual in more than
-#' this fraction value times the number of fits. Must be between 0 & 1.
+#' @param coef numeric (> 1) multiplier for determining thresholds for outliers
+#' (see \code{outlier} argument)
 #'
-#' @param iterFilter integer number of residual filtering iterations to perform
+#' @param iterFilter integer number of outlier filtering iterations to perform
+#'
+#' @param prop  numeric. A point is excluded if deemed a residual in more than
+#' this proportion of fits. Must be between 0 & 1.
 #'
 #' @param iterLoess  integer. Number of robustness iterations to perform in
 #'                   \code{loess()}.See ?loess.control for more details.
 #'
 #' @param weights Optional user supplied weights for each ordered pair. Must be
-#' of length equal to number of anchors (n) or a divisor of (n + 2).
+#' of length equal to number of anchors (n) or a divisor of (n + 2)
+#'
+#' @param message Option to print message indicating function progress
 #'
 #' @return \code{metabCombiner} object with \code{model} slot updated to
 #' contain the fitted loess model
@@ -399,26 +450,28 @@ fit_gam <- function(object, useID = FALSE, k = seq(10,20, by = 2),
 #'
 #' @export
 fit_loess <- function(object, useID = FALSE, spans = seq(0.2, 0.3, by = 0.02),
-                        iterFilter = 2, ratio = 2, frac = 0.5, iterLoess = 10,
-                        weights = 1)
+                    outlier = c("MAD", "boxplot"), coef = 2, iterFilter = 2,
+                    prop = 0.5, iterLoess = 10, weights = 1, message = TRUE)
 {
     combinerCheck(isMetabCombiner(object), "metabCombiner")
     anchors <- object@anchors
 
     check_fit_pars(anchors = anchors, fit = "loess", useID = useID,
-                    iterFilter = iterFilter, ratio = ratio, frac = frac,
+                    iterFilter = iterFilter, coef = coef, prop = prop,
                     iterLoess = iterLoess, spans = spans)
 
+    outlier <- match.arg(outlier)
     loess.pars <- loess.control(iters = iterLoess, surface = "direct")
     rts <- formatAnchors(object, anchors, weights, useID)
 
     rts <- filterAnchors(rts = rts, fit = "loess", iterFilter = iterFilter,
-                        ratio = ratio, frac = frac, vals = spans,
-                        loess.pars = loess.pars)
+                        outlier = outlier, coef = coef, prop = prop,
+                        vals = spans, loess.pars = loess.pars,
+                        message = message)
 
     if(length(spans) > 1)
         best_span <- crossValFit(rts = rts, fit = "loess", vals = spans,
-                                loess.pars = loess.pars)
+                                loess.pars = loess.pars, message = message)
     else
         best_span <- spans
 

@@ -9,48 +9,58 @@ fit_gam(
   useID = FALSE,
   k = seq(10, 20, by = 2),
   iterFilter = 2,
-  ratio = 2,
-  frac = 0.5,
+  outlier = c("MAD", "boxplot"),
+  coef = 2,
+  prop = 0.5,
+  weights = 1,
   bs = c("bs", "ps"),
   family = c("scat", "gaussian"),
-  weights = 1,
   m = c(3, 2),
   method = "REML",
   optimizer = "newton",
+  message = TRUE,
   ...
 )
 }
 \arguments{
-\item{object}{a metabCombiner object.}
+\item{object}{a \code{metabCombiner} object.}
 
-\item{useID}{logical. Option to use matched IDs to inform fit}
+\item{useID}{logical. If set to TRUE, matched ID anchors detected from
+previous step will never be flagged as outliers.}
 
-\item{k}{integer vector values controling the number of basis functions for
-GAM construction. Best value chosen by 10-fold cross validation.}
+\item{k}{integer k values controlling the dimension of the basis of the
+GAM fit (see: ?mgcv::s). Best value chosen by 10-fold cross validation.}
 
-\item{iterFilter}{integer number of residual filtering iterations to perform}
+\item{iterFilter}{integer number of outlier filtering iterations to perform}
 
-\item{ratio}{numeric. A point is an outlier if the ratio of residual to
-mean residual of a fit exceeds this value. Must be greater than 1.}
+\item{outlier}{Thresholding method for outlier dection. If "MAD", the
+threshold is the mean absolute deviation (MAD) times \code{coef}; if
+"boxplot", the threshold is \code{coef} times IQR plus 3rd quartile of
+a model's absolute residual values.}
 
-\item{frac}{numeric. A point is excluded if deemed a residual in more than
-this fraction value times the number of fits. Must be between 0 & 1.}
+\item{coef}{numeric (> 1) multiplier for determining thresholds for outliers
+(see \code{outlier} argument)}
+
+\item{prop}{numeric. A point is excluded if deemed a residual in more than
+this proportion of fits. Must be between 0 & 1.}
+
+\item{weights}{Optional user supplied weights for each ordered pair. Must be
+of length equal to number of anchors (n) or a divisor of (n + 2).}
 
 \item{bs}{character. Choice of spline method from mgcv, either "bs" (basis
 splines) or "ps" (penalized basis splines)}
 
 \item{family}{character. Choice of mgcv family; see: ?mgcv::family.mgcv}
 
-\item{weights}{Optional user supplied weights for each ordered pair. Must be
-of length equal to number of anchors (n) or a divisor of (n + 2).}
-
 \item{m}{integer. Basis and penalty order for GAM; see ?mgcv::s}
 
-\item{method}{character. Smoothing parameter estimation method; see:
+\item{method}{character smoothing parameter estimation method; see:
 ?mgcv::gam}
 
 \item{optimizer}{character. Method to optimize smoothing parameter; see:
 ?mgcv::gam}
+
+\item{message}{Option to print message indicating function progress}
 
 \item{...}{Other arguments passed to \code{mgcv::gam}.}
 }
@@ -60,38 +70,37 @@ metabCombiner with a fitted GAM model object
 \description{
 Fits a (penalized) basis splines curve through a set of ordered pair
 retention times, modeling one set of retention times (rty) as a function
-on the other set (rtx).Filtering iterations of high residual points are
-performed first. Multiple acceptable values of \code{k} can be supplied
-used, with one value selected through 10-fold cross validation.
+on the other set (rtx). Outlier filtering iterations are performed first,
+then with the remaining points, the best value of parameter \code{k} is
+selected through 10-fold cross validation.
 }
 \details{
 A set of ordered pair retention times must be previously computed using
 \code{selectAnchors()}. The minimum and maximum retention times from both
 input datasets are included in the set as ordered pairs (min_rtx, min_rty)
-& (max_rtx, max_rty).
-
-The \code{weights} argument initially determines the contribution of each
-point to the model fits; they are equally weighed by default, but can be
-changed using an \code{n+2} length vector, where n is the number of ordered
-pairs and the first and last of the weights determines the contribution of
-the min and max ordered pairs.
+& (max_rtx, max_rty). The \code{weights} argument initially determines the
+contribution of each point to the model fits; they are equally weighed by
+default, but can be changed using an \code{n+2} length vector, where n is
+the number of ordered pairs and the first and last of the weights determines
+the contribution of the min and max ordered pairs; by default, all weights
+are initially set to 1 for equal contribution of each point.
 
 The model complexity is determined by \code{k}. Multiple values of k are
 allowed, with the best value chosen by 10 fold cross validation. Before
 this happens, certain ordered pairs are removed based on the model errors.
-In each iteration, a GAM is fit using each selected value of k. A point is
-"removed" (its corresponding \code{weights} value set to 0) if its residual
-is \code{ratio} times average residual for a fraction of fitted models, as
-determined by \code{frac}. If an ordered pair is an "identity" (discovered
-in the \code{selectAnchors} by setting the \code{useID} to TRUE), then
-setting \code{useID} here will prevent its removal.
+In each iteration, a GAM is fit using each selected value of k. Depending on
+the \code{outlier} argument, a point is "removed" from the model (i.e. its
+corresponding weight set to 0) if its residual is above the threshold
+for a proportion of fitted models, as determined by \code{prop}. If an anchor
+is an "identity" (idx = idy, detected in the \code{selectAnchors} by setting
+\code{useID} to TRUE), then setting \code{useID} here prevents its removal.
 
 Other arguments, e.g. \code{family}, \code{m}, \code{optimizer}, \code{bs},
-and \code{method} are GAM specific parameters. The \code{family} option is
-currently limited to the "scat" (scaled t) and "gaussian" families; scat
-family model fits are more robust to outliers than gaussian fits, but
-compute much slower. Type of splines are currently limited to basis splines
-(\eqn{bs = "bs"}) or penalized basis splines (\eqn{bs = "ps"}).
+and \code{method} are GAM specific parameters from the \code{mgcv} R package.
+The \code{family} option is currently limited to the "scat" (scaled t) and
+"gaussian" families; scat family model fits are more robust to outliers than
+gaussian fits, but compute much slower. Type of splines are currently limited
+to basis splines ("bs" or "ps").
 }
 \examples{
 data(plasma30)
@@ -105,13 +114,13 @@ p.comb = selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
 anchors = getAnchors(p.comb)
 
 #version 1: using faster, but less robust, gaussian family
-p.comb = fit_gam(p.comb, k = c(10,12,15,17,20), frac = 0.5,
-    family = "gaussian")
+p.comb = fit_gam(p.comb, k = c(10,12,15,17,20), prop = 0.5,
+    family = "gaussian", outlier = "MAD", coef = 2)
 
 \donttest{
 #version 2: using slower, but more robust, scat family
 p.comb = fit_gam(p.comb, k = seq(12,20,2), family = "scat",
-                     iterFilter = 1, ratio = 3, method = "GCV.Cp")
+                     iterFilter = 1, coef = 3, method = "GCV.Cp")
 
 #version 3 (with identities)
 p.comb = selectAnchors(p.comb, useID = TRUE)
@@ -123,14 +132,12 @@ weights = ifelse(anchors$labels == "I", 2, 1)
 p.comb = fit_gam(p.comb, useID = TRUE, k = seq(12,20,2),
                      iterFilter = 1, weights = weights)
 
-#version 5 (assigning weights to the boundary points
-weights = c(2, rep(1, nrow(anchors)), 2)
-p.comb = fit_gam(p.comb, k = seq(12,20,2), weights = weights)
+#version 5 (using boxplot-based outlier detection
+p.comb = fit_gam(p.comb, k = seq(12,20,2), outlier = "boxplot", coef = 1.5)
 
 #to preview result of fit_gam
-plot(p.comb, xlab = "CHEAR Plasma (30 min)",
-     ylab = "Red-Cross Plasma (20 min)", pch = 19,
-     main = "Example fit_gam Result Fit")
+plot(p.comb, pch = 19, outlier = "h", xlab = "CHEAR Plasma (30 min)",
+     ylab = "Red-Cross Plasma (20 min)", main = "Example GAM Fit")
 }
 
 }

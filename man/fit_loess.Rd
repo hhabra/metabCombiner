@@ -8,33 +8,43 @@ fit_loess(
   object,
   useID = FALSE,
   spans = seq(0.2, 0.3, by = 0.02),
+  outlier = c("MAD", "boxplot"),
+  coef = 2,
   iterFilter = 2,
-  ratio = 2,
-  frac = 0.5,
+  prop = 0.5,
   iterLoess = 10,
-  weights = 1
+  weights = 1,
+  message = TRUE
 )
 }
 \arguments{
-\item{object}{metabCombiner object.}
+\item{object}{a \code{metabCombiner} object.}
 
-\item{useID}{logical. Option to use matched IDs to inform fit}
+\item{useID}{logical. If set to TRUE, matched ID anchors detected from
+previous step will never be flagged outliers.}
 
 \item{spans}{numeric span values (between 0 & 1) used for loess fits}
 
-\item{iterFilter}{integer number of residual filtering iterations to perform}
+\item{outlier}{Thresholding method for outlier dection. If "MAD", the
+threshold is the mean absolute deviation (MAD) times \code{coef}; if
+"boxplot", the threshold is \code{coef} times IQR plus 3rd quartile of
+a model's absolute residual values.}
 
-\item{ratio}{numeric. A point is an outlier if the ratio of residual to
-mean residual of a fit exceeds this value. Must be greater than 1.}
+\item{coef}{numeric (> 1) multiplier for determining thresholds for outliers
+(see \code{outlier} argument)}
 
-\item{frac}{numeric. A point is excluded if deemed a residual in more than
-this fraction value times the number of fits. Must be between 0 & 1.}
+\item{iterFilter}{integer number of outlier filtering iterations to perform}
+
+\item{prop}{numeric. A point is excluded if deemed a residual in more than
+this proportion of fits. Must be between 0 & 1.}
 
 \item{iterLoess}{integer. Number of robustness iterations to perform in
 \code{loess()}.See ?loess.control for more details.}
 
 \item{weights}{Optional user supplied weights for each ordered pair. Must be
-of length equal to number of anchors (n) or a divisor of (n + 2).}
+of length equal to number of anchors (n) or a divisor of (n + 2)}
+
+\item{message}{Option to print message indicating function progress}
 }
 \value{
 \code{metabCombiner} object with \code{model} slot updated to

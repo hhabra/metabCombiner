@@ -1,6 +1,6 @@
 
 ##parameter checks for model fitting functions
-check_fit_pars <- function(anchors, fit, useID, iterFilter, ratio, frac,
+check_fit_pars <- function(anchors, fit, useID, iterFilter, coef, prop,
                             k, spans, iterLoess = 10)
 {
     if(nrow(anchors) == 0)
@@ -17,11 +17,11 @@ check_fit_pars <- function(anchors, fit, useID, iterFilter, ratio, frac,
     if((!is.numeric(iterFilter) & !is.integer(iterFilter)) | iterFilter < 0)
         stop("argument 'iterFilter' must be a positive integer")
 
-    if((!is.numeric(ratio) & !is.integer(ratio)) | ratio < 1)
-        stop("argument 'ratio' must be a numeric constant greater than 1")
+    if((!is.numeric(coef) & !is.integer(coef)) | coef < 1)
+        stop("argument 'coef' must be a numeric constant greater than 1")
 
-    if((!is.numeric(frac) & !is.integer(frac)) | frac <= 0 | frac > 1)
-        stop("argument 'frac' must be numeric between 0 & 1")
+    if((!is.numeric(prop) & !is.integer(prop)) | prop <= 0 | prop > 1)
+        stop("argument 'prop' must be numeric between 0 & 1")
 
     if(fit == "gam"){
         if(!is.numeric(k) & !is.integer(k))
