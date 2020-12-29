@@ -1,27 +1,46 @@
 Updates:
 
+Version 1.1.2 (2020-12-28)
+-------------------------------
+Changes to fit_gam()/ fit_loess():
+    + new outlier detection method based on boxplot / IQR added
+    + new argument: outlier, which accepts "MAD" or "boxplot" as a value
+    + altered argument names: "frac" to "prop", "ratio" to "coef"
+    + documentation and minor code changes to main and supporting functions
+
+Changes to plot_fit():
+    + new options for showing, hiding, or highlighting (with a legend) outliers
+    + new arguments: outlier, which accepts "show" / "s", "remove" / "r", or
+      "highlight" / "h" as arguments ; ocol, outlier point color if outlier
+      argument set to "highlight" / "h"
+    - remove.outliers argument removed
+
+Other changes:
+    + new test case for fit_gam()
+
+
 Version 1.1.1 (2020-12-02)
 -------------------------------
 Bug Fixes:
-  + combinedTable check for missing group values (Issue #7)
-  + calcScores / evaluateParams groups bug (Issue #8)
-  + Warning for column names with bracket characters "{ ( [ ] ) }" (Issue #9)
-  + QCol bug (Issue #10)
+    + combinedTable check for missing group values (Issue #7)
+    + calcScores / evaluateParams groups bug (Issue #8)
+    + Warning for column names with bracket characters "{ ( [ ] ) }" (Issue #9)
+    + QCol bug (Issue #10)
 
 New Functionality
-  + getExtra method added to metabCombiner objects (Issue #11)
+    + getExtra method added to metabCombiner objects (Issue #11)
 
 
 Version 1.0.0 (2020-10-20)
 ------------------------------
- +Accepted to Bioconductor
+   +Accepted to Bioconductor
 
-  Functionality changes:
-+ matrixStats function implementations for matrix calculations replace base
-  implementations where appropriate, with notable improvements in adjustData()
-  function within metabData()
-+ filterRT() now gives an error rather than a warning if rtmin or rtmax are out
-  of the bounds of the dataset RTs
+    Functionality changes:
+    + matrixStats function implementations for matrix calculations replace base
+      implementations where appropriate, with notable improvements in adjustData()
+      function within metabData()
+    + filterRT() now gives an error rather than a warning if rtmin or rtmax are out
+      of the bounds of the dataset RTs
 
 
 Changes in version 0.99.0 (2020-09-11)
