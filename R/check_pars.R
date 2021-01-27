@@ -1,7 +1,20 @@
 
+#parameter checks for anchor selection
+check_anchors_pars <- function(useID, tolmz, tolQ, tolrtq, windx, windy)
+{
+    pars <- list(tolmz, tolQ, tolrtq, windx, windy)
+    if(any(vapply(pars, function(p) !is.numeric(p), logical(1))))
+        stop("arguments tolmz, tolQ, tolrtq, windx & windy must be numeric")
+
+    if(any(vapply(pars, function(p) p <= 0, logical(1))))
+        stop("arguments tolmz, tolQ, tolrtq, windx & windy must be positive")
+
+    if(!is.logical(useID)) stop("expected logical value for argument 'useID'")
+}
+
+
 ##parameter checks for model fitting functions
-check_fit_pars <- function(anchors, fit, useID, iterFilter, coef, prop,
-                            k, spans, iterLoess = 10)
+check_fit_pars <- function(anchors, fit, useID, iterFilter, coef, prop, k, spans)
 {
     if(nrow(anchors) == 0)
         stop("missing 'anchors' in metabCombiner object; ",
@@ -40,12 +53,7 @@ check_fit_pars <- function(anchors, fit, useID, iterFilter, coef, prop,
 
         if(length(spans) == 0)
             stop("argument 'spans' must have at least one element")
-
-        if((!is.numeric(iterLoess) & !is.integer(iterLoess)) | iterLoess < 1)
-            stop("argument 'iterLoess' must be a >1 integer")
     }
-
-    return(invisible())
 }
 
 
@@ -76,14 +84,12 @@ check_score_pars <- function(cTable, A, B, C, model, fit, groups,
 
     if((!is.numeric(penalty) & !is.numeric(penalty)) | penalty < 0)
         stop("argument 'penalty' must be a positive numeric constant")
-
-    return(invisible())
 }
 
 
 ##row labeling parameter checks
 check_lblrows_pars <- function(maxRankX, maxRankY, minScore, balanced,
-                                method, conflict)
+                                method, delta)
 {
     if((!is.numeric(maxRankX) & !is.integer(maxRankX)) |
         (!is.numeric(maxRankY) & !is.integer(maxRankY)))
@@ -99,22 +105,20 @@ check_lblrows_pars <- function(maxRankX, maxRankY, minScore, balanced,
         stop("expected a logical for argument 'balanced'")
 
     if(method == "score"){
-        if(!is.numeric(conflict) | conflict > 1 | conflict < 0)
-            stop("argument 'conflict' must be a numeric value between 0 & 1")
+        if(!is.numeric(delta) | delta > 1 | delta < 0)
+            stop("argument 'delta' must be a numeric value between 0 & 1")
 
-        if(length(conflict) > 1)
-            stop("constant value expected for conflict")
+        if(length(delta) > 1)
+            stop("constant value expected for argument 'delta'")
     }
 
     else if(method == "mzrt"){
-        if(length(conflict) != 4)
-            stop("with method = mzrt, length 4 vector expected for conflict)")
+        if(length(delta) != 4)
+            stop("with method = mzrt, length 4 vector expected for delta)")
 
-        if(any(conflict < 0))
-            stop("values in 'conflict' argument must be non-negative")
+        if(any(delta < 0))
+            stop("values in 'delta' argument must be non-negative")
     }
-
-    return(invisible())
 }
 
 

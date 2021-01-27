@@ -8,9 +8,9 @@ labelRows(
   object,
   maxRankX = 3,
   maxRankY = 3,
-  minScore = 0.3,
-  conflict,
+  minScore = 0.5,
   method = c("score", "mzrt"),
+  delta = 0.1,
   balanced = TRUE,
   remove = FALSE,
   brackets_ignore = c("(", "[", "{")
@@ -26,17 +26,17 @@ labelRows(
 \item{minScore}{Numeric. Minimum allowable score (between 0 & 1) for
 metabolomics FPAs.}
 
-\item{conflict}{numeric used to determine subgroups. If method = "score", a
-constant (between 0 & 1) score difference between a pair of
-conflicting FPAs. If method = "mzrt", a length 4 numeric:
-(m/z, rt, m/z, rt) tolerances, the first pair for X dataset
-features and the second pair for Y dataset features.}
-
 \item{method}{Conflict detection method. If equal to "score" (default),
 assigns a conflict subgroup if score of lower-ranking FPA is
 within some tolerance of higher-ranking FPA. If set to "mzrt",
 assigns a conflicting subgroup if within a small m/z & rt
 distance of the top-ranked FPA.}
+
+\item{delta}{numeric. Score or mz/rt distances used to define subgroups. If
+method = "score", a value (between 0 & 1) score difference
+between a pair of conflicting FPAs. If method = "mzrt", a length
+4 numeric: (m/z, rt, m/z, rt) tolerances, the first pair for X
+dataset features and the second pair for Y dataset features.}
 
 \item{balanced}{Logical. Optional processing of "balanced" groups, defined
 as groups with an equal number of features from input
@@ -80,13 +80,13 @@ The labeling rules are as follows:
 1) Rows with matching idx & idy strings are labeled "IDENTITY". These rows
    are not labeled "REMOVE", irrespective of subsequent criteria.
 2) Groups determined to be 'balanced': label rows with rankX > 1 & rankY > 1
-   "REMOVE" irrespective of \code{conflict} criteria
+   "REMOVE" irrespective of \code{delta} criteria
 3) Rows with a score < \code{minScore}: label "REMOVE"
 4) Rows with rankX > \code{maxRankX} and/or rankY > \code{maxRankY}:
    label "REMOVE"
 5) Conflicting subgroup assignment as determined  by \code{method} &
-   \code{conflict} arguments. Conflicting alignments following outside
-   \code{conflict} thresholds: labeled "REMOVE". Otherwise,
+   \code{delta} arguments. Conflicting alignments following outside
+   \code{delta} thresholds: labeled "REMOVE". Otherwise,
 }
 \examples{
 data(plasma30)
@@ -102,10 +102,10 @@ cTable = combinedTable(p.comb)
 
 ##example using score-based conflict detection method
 lTable = labelRows(cTable, maxRankX = 3, maxRankY = 2, minScore = 0.5,
-    method = "score", conflict = 0.2)
+    method = "score", delta = 0.2)
 
 ##example using mzrt-based conflict detection method
 lTable = labelRows(cTable, method = "mzrt", maxRankX = 3, maxRankY = 2,
-                     conflict = c(0.005, 1, 0.005,0.5))
+                     delta = c(0.005, 1, 0.005,0.5))
 
 }

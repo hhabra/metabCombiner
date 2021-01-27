@@ -7,7 +7,7 @@
 /*
  * File Description:
  * ------------------
- * This file contains a function for determining whether alignment rows in the 
+ * This file contains a function for determining whether alignment rows in the
  * metabCombiner report table are removable or in conflict with other rows.
  *
 */
@@ -114,7 +114,7 @@ int balancedGroups(SEXP labels, int *start, int *end, int* rankX, int* rankY)
  * ---------------------
  *
  * Finds rows with score less than minScore and rankX & rankY in excess of
- * maxRankX & maxRankY, respectively. Updates and returns 'end' index pointer to 
+ * maxRankX & maxRankY, respectively. Updates and returns 'end' index pointer to
  * lowest non-removed row (all other rows need not be considered).
  *
 */
@@ -150,37 +150,37 @@ int filterScoreAndRank(SEXP labels, int *start, int *end, double* score, int* ra
  * meet this threshold are deemed removable.
  *
 */
-void detect_con_score(SEXP labels, int* sub, int* alt, int ri, int rj, double* conflict, 
+void detect_con_score(SEXP labels, int* sub, int* alt, int ri, int rj, double* delta,
                      double* mz, double* rt, double* score, int* head, int type, int* max)
 {
-	double scoreGap = conflict[0];
-	
+	double scoreGap = delta[0];
+
 	if(head[ri] == 0)
 		head[ri] = ri;
-	
-	double scoreHead = score[head[ri]]; 
-	
+
+	double scoreHead = score[head[ri]];
+
 	if(fabs(score[rj] - scoreHead) > scoreGap){
 		if(strcmp("", CHAR(STRING_ELT(labels,rj))) == 0)
 		    SET_STRING_ELT(labels, rj, mkChar("REMOVE"));
-		
+
 		return;
 	}
-	
+
 	if(sub[ri] == 0){
 		if(strcmp("", CHAR(STRING_ELT(labels,ri))) == 0)
 			SET_STRING_ELT(labels, ri, mkChar("CONFLICT"));
-        
+
         sub[ri] = ++*max;
 	}
-	
+
 	if(sub[rj] == 0){
 		if(strcmp("", CHAR(STRING_ELT(labels,rj))) == 0)
-		    SET_STRING_ELT(labels, rj, mkChar("CONFLICT"));		
+		    SET_STRING_ELT(labels, rj, mkChar("CONFLICT"));
 		sub[rj] = sub[ri];
 		head[rj] = head[ri];
 	}
-	
+
 	else if(sub[rj] != sub[ri])
 		alt[rj] = sub[ri];
 }
@@ -193,21 +193,21 @@ void detect_con_score(SEXP labels, int* sub, int* alt, int ri, int rj, double* c
  *
  * mzrt-based conflict detection. A pair of alignment rows are deemed in conflict if the
  * lower-scoring alignment matches with one dataset feature while the other is within
- * some deviation in m/z & rt (as determined by conflict argument) of the higher-scoring 
- * alignment. If they fall outside of this threshold, then the lower-scoring row is 
+ * some deviation in m/z & rt (as determined by conflict argument) of the higher-scoring
+ * alignment. If they fall outside of this threshold, then the lower-scoring row is
  * deemed removable.
  *
 */
-void detect_con_mzrt(SEXP labels, int* sub, int* alt, int ri, int rj, double* conflict, 
+void detect_con_mzrt(SEXP labels, int* sub, int* alt, int ri, int rj, double* delta,
                      double* mz, double* rt, double* score, int* head, int type, int* max)
 {
-	double mzTol = (type == 1) ? conflict[0] : conflict[2];
-	double rtTol = (type == 1) ? conflict[1] : conflict[3]; 
+	double mzTol = (type == 1) ? delta[0] : delta[2];
+	double rtTol = (type == 1) ? delta[1] : delta[3];
 
 	if(fabs(mz[rj] - mz[ri]) > mzTol || fabs(rt[rj] - rt[ri]) > rtTol){
 		if(strcmp("", CHAR(STRING_ELT(labels,rj))) == 0)
 		    SET_STRING_ELT(labels, rj, mkChar("REMOVE"));
-		
+
 		return;
 	}
 
@@ -215,17 +215,17 @@ void detect_con_mzrt(SEXP labels, int* sub, int* alt, int ri, int rj, double* co
 	if(sub[ri] == 0){
 		if(strcmp("", CHAR(STRING_ELT(labels,ri))) == 0)
 			SET_STRING_ELT(labels, ri, mkChar("CONFLICT"));
-        
+
         sub[ri] = ++*max;
 	}
 
 
 	if(sub[rj] == 0){
 		if(strcmp("", CHAR(STRING_ELT(labels,rj))) == 0)
-		    SET_STRING_ELT(labels, rj, mkChar("CONFLICT"));		
+		    SET_STRING_ELT(labels, rj, mkChar("CONFLICT"));
 		sub[rj] = sub[ri];
 	}
-	
+
 	else if(sub[rj] != sub[ri])
 		alt[rj] = sub[ri];
 }
@@ -233,17 +233,17 @@ void detect_con_mzrt(SEXP labels, int* sub, int* alt, int ri, int rj, double* co
 /*
  * Function: findCons
  * ------------------------
- * This function loops through the features of a group that remain after score and rank 
+ * This function loops through the features of a group that remain after score and rank
  * filtering, finding pairs of alignments which may be in conflict over a single feature.
- * 
+ *
  * PARAMETERS:
  *
- * 
+ *
 */
-void findCons(SEXP labels, int* sub, int* alt, int* max, int *start, 
-              int *end, double* conflict, double *mzx, double *mzy, 
-              double *rtx, double *rty, double* score, int* head, 
-			  void (*detect)(SEXP, int*, int*, int, int, double*, double*, double*, 
+void findCons(SEXP labels, int* sub, int* alt, int* max, int *start,
+              int *end, double* delta, double *mzx, double *mzy,
+              double *rtx, double *rty, double* score, int* head,
+			  void (*detect)(SEXP, int*, int*, int, int, double*, double*, double*,
 			                 double*, int*, int, int*))
 {
 	for(int ri = *start; ri <= *end; ri++){
@@ -253,17 +253,17 @@ void findCons(SEXP labels, int* sub, int* alt, int* max, int *start,
 		for(int rj = ri+1; rj <= *end; rj++){
 			if(strcmp("REMOVE", CHAR(STRING_ELT(labels,rj))) == 0)
 				continue;
-			
-			if(sub[rj] > 0 && alt[rj] > 0)       
+
+			if(sub[rj] > 0 && alt[rj] > 0)
 				continue;
 
 			//determine if a pair of alignments are conflicting
-			if(fabs(mzx[rj] - mzx[ri]) < EPS && fabs(rtx[rj] - rtx[ri]) < EPS) 
-				detect(labels, sub, alt, ri, rj, conflict, mzy, rty, score, head, 2, max);
-			
+			if(fabs(mzx[rj] - mzx[ri]) < EPS && fabs(rtx[rj] - rtx[ri]) < EPS)
+				detect(labels, sub, alt, ri, rj, delta, mzy, rty, score, head, 2, max);
+
 			if(fabs(mzy[rj] - mzy[ri]) < EPS && fabs(rty[rj] - rty[ri]) < EPS)
-				detect(labels, sub, alt, ri, rj, conflict, mzx, rtx, score, head, 1, max);
-			
+				detect(labels, sub, alt, ri, rj, delta, mzx, rtx, score, head, 1, max);
+
 		}
 	}
 }
@@ -316,8 +316,8 @@ void findCons(SEXP labels, int* sub, int* alt, int* max, int *start,
  *
  * balanced: Boolean option to process "balanced" groups (see: balancedGroups()).
  *
- * conflict: Length 4 vector specifying m/z and rt tolerances for determining
- * if pairs of rows have a conflicting alignment.
+ * delta: either a numeric constant score difference or a length 4 vector specifying m/z
+ * and rt tolerances for determining if pairs of rows have a conflicting alignment.
  *
  * minScore: Minimum allowable feature similarity scores.
  *
@@ -330,7 +330,7 @@ void findCons(SEXP labels, int* sub, int* alt, int* max, int *start,
 */
 SEXP labelRows(SEXP labels, SEXP subgroup, SEXP alt, SEXP mzx, SEXP mzy, SEXP rtx,
                SEXP rty, SEXP score, SEXP rankX, SEXP rankY, SEXP group, SEXP balanced,
-			   SEXP conflict, SEXP minScore, SEXP maxRankX, SEXP maxRankY, SEXP method)
+			   SEXP delta, SEXP minScore, SEXP maxRankX, SEXP maxRankY, SEXP method)
 {
 	SEXP labels_c = PROTECT(duplicate(labels));
 
@@ -348,34 +348,34 @@ SEXP labelRows(SEXP labels, SEXP subgroup, SEXP alt, SEXP mzx, SEXP mzy, SEXP rt
 	int* rankY_c = INTEGER(rankY);
 	bool balanced_c = LOGICAL(balanced);
 
-	double* conflict_c = REAL(conflict);
+	double* delta_c = REAL(delta);
 	double minScore_c = REAL(minScore)[0];
 	int maxRankX_c = INTEGER(maxRankX)[0];
 	int maxRankY_c = INTEGER(maxRankY)[0];
-	
+
 	//choosing conflict detection method
 	int method_c = INTEGER(method)[0];
 	void (*detect_fun)(SEXP, int*, int*, int, int, double*, double*, double*, double*,
 	                   int*, int, int*);
-	                   
+
 	int* head;   //head index of subgroup; special variable for score-conflict method
-	
+
 	if (method_c == 2){
 	    detect_fun = detect_con_mzrt;
 		head = calloc(1, sizeof(int));
 	}
-	
+
 	else{
         detect_fun = detect_con_score;
         head = calloc(LENGTH(group), sizeof(int));
 	}
-	
+
 	//loop variables
 	int cursor = 0;
 	int* start = calloc(1,sizeof(int));
 	int* end = calloc(1,sizeof(int));
 	int* maxSub = calloc(1, sizeof(int));    //current subgroup number
-	
+
 	//Main loop
 	while(cursor < LENGTH(group)){
 		cursor = detectGroup(cursor, group_c, start, end, LENGTH(group));
@@ -388,7 +388,7 @@ SEXP labelRows(SEXP labels, SEXP subgroup, SEXP alt, SEXP mzx, SEXP mzy, SEXP rt
 						          rankY_c, minScore_c, maxRankX_c, maxRankY_c);
 
 
-		findCons(labels_c, subgroup_c, alt_c, maxSub, start, end, conflict_c, mzx_c, 
+		findCons(labels_c, subgroup_c, alt_c, maxSub, start, end, delta_c, mzx_c,
 		         mzy_c, rtx_c, rty_c, score_c, head, detect_fun);
 	}
 

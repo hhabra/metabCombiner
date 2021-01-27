@@ -24,7 +24,7 @@ test_that("row annotation tests", {
     p = calcScores(p, A = scores$A[1], B = scores$B[1], C = scores$C[1])
 
     p = labelRows(p, minScore = 0.5, maxRankX = 2, maxRankY = 2,
-                    method = "score", conflict = 0.15, remove = TRUE)
+                    method = "score", delta = 0.15, remove = TRUE)
 
     p.output = combinedTable(p)
 
@@ -38,9 +38,9 @@ test_that("row annotation tests", {
 
     testthat::expect_false(any(p.output.2[["score"]] < 0.5))
 
-    testthat::expect_error(labelRows(p, method = "mzrt", conflict = 0.1))
-    testthat::expect_error(labelRows(p, minScore = 1, conflict = 0.1))
-    testthat::expect_error(labelRows(p, maxRankX = 0, conflict = 0.1))
+    testthat::expect_error(labelRows(p, method = "mzrt", delta = 0.1))
+    testthat::expect_error(labelRows(p, minScore = 1, delta = 0.1))
+    testthat::expect_error(labelRows(p, maxRankX = 0, delta = 0.1))
 })
 
 
