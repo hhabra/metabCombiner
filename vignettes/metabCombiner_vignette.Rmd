@@ -1,8 +1,10 @@
 ---
 title: Combine LC-MS Metabolomics Datasets with metabCombiner
 author: "Hani Habra"
-output: rmarkdown::html_vignette
 date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+    BiocStyle::html_document:
+        toc: true
 vignette: >
     %\VignetteIndexEntry{Combine LC-MS Metabolomics Datasets with metabCombiner}
     %\VignetteEngine{knitr::rmarkdown}
@@ -16,11 +18,11 @@ knitr::opts_chunk$set(
 )
 ```
 
-#Introduction
+# Introduction
 
 In the computational analysis of LC-MS metabolomics data, a key step is to align the measurements of identical compounds commonly represented as <mass-to-charge ratio (m/z), retention time (RT)> features. Feature alignment between datasets acquired under non-identical conditions presents many underexplored opportunities in untargeted metabolomics. The key challenge to address is achieving a correspondence between identical features, given that most are not easily identified . `metabCombiner` provides a list of all possible feature pair alignments (FPAs) and determines their validity through a pairwise similarity score. We will show here how to use `metabCombiner` to perform this cross-dataset alignment analysis.
 
-#Input Requirements
+## Input Requirements
 
 The inputs for this workflow are two peak-picked and aligned LC-MS metabolomics data frames, with columns for m/z, RT, and individual sample abundance values. It is recommended, but not required, to have columns for feature identity and adduct type. As we will discuss, `metabCombiner` is flexible on what these columns may be named. Other input dataset columns are included in the final output, though these will not have any role in any of the outlined steps.
 
@@ -37,7 +39,7 @@ There are three major assumptions that these datasets must conform to:
 2) The samples in both datasets are biologically similar: they possess a strong overlap in terms of their metabolomic composition
 3) The elution order of metabolites is mostly preserved. Datasets acquired from excessively disparate chromatographic techniques (such as between RPLC and HILIC methods) are not suitable for this workflow.
 
-#Workflow Overview
+## Workflow Overview
 
 The workflow we outline here is composed of five major steps:
 
@@ -65,11 +67,11 @@ names(plasma20)
 ```
 They consist of generic feature labels, compound identities and adduct variants (where known or guessed), followed by the required m/z, rt, and sample abundance columns. Sample names consist of "CHEAR", "RedCross", "POOL", and "Blank". The column names of `plasma30` are nearly identical to those of `plasma20`. 
 
-# Data Formatting and Filtering
+## Data Formatting and Filtering
 
 A `metabData` object is a specifically-formatted metabolomics dataset object used to stage`metabCombiner` analyses. The constructor function `metabData()` consists of two parts: a) detecting the specific sample columns and b) filtering features.
 
-##Data Formatting
+### Data Formatting
 
 The `metabData()` function will look for feature information in the following order:
 
@@ -116,7 +118,7 @@ getSamples(p20)   #should return column names containing "CHEAR"
 getExtra(p20)   #should return column containing "Red Cross", "POOL", "Blank"
 ```
 
-##Filtering Features
+### Filtering Features
 
 The second half consists of three specific filters: 1) retention time range, 2) missingness, 3) duplicates. 
 
@@ -149,7 +151,7 @@ getExtra(p30) ##should print out extra sample names
 
 Printing a metabData object gives a useful dataset summary and using `getStats` gives information on filtered features.
 
-# Feature m/z Grouping and Pairwise Alignment Detection
+## Feature m/z Grouping and Pairwise Alignment Detection
 
 With our two *metabData* objects, we proceed with our dataset combining. First we group features from the datasets by m/z and construct a *metabCombiner* object, the main construct for this program. This is done using the `metabCombiner` constructor function.
 
@@ -167,11 +169,11 @@ names(p.results)[1:15]
 ```
 The first 15 column names are printed above, consisting of input from the x dataset (idx, mzx, rtx, ...), input from the y dataset (idy, mzy, rty, ...), and some columns (rtProj, score, rankx, ranky) which serve as placeholders for downstream computations. Samples and "extra" columns are arrayed following these 15 fields. 
 
-#Anchor Selection and RT Mapping Spline
+## Anchor Selection and RT Mapping Spline
 
 A central step of the workflow is retention time mapping, and we break it into two parts: anchor selection and Spline fitting.
 
-##Anchor Selection
+### Anchor Selection
 
 The method of selecting anchors relies on mutually abundant pairs of features. This is performed using the `selectAnchors` function. The results of this function can be viewed using the `getAnchors` method.
 
@@ -183,17 +185,17 @@ plot(a$rtx, a$rty, main = "Fit Template", xlab = "rtx", ylab = "rty")
 
 Shown above is a rough outline of the path through which we may fit a nonlinear curve. The arguments *windx* and *windy* are retention time windows drawn in the X and Y direction around the anchor points; in general, smaller values for these window arguments increases the number of anchors (including outliers). *tolmz* and *tolQ* restrict the m/z and Q differences of selected anchors. *useID* modifies the anchor selection algorithm by first searching for shared identities (i.e. feature pairs where idx is the same as idy, case-insensitive) before searching for the remaining abundant feature pairs. *useID* is set to FALSE by default, but prior or acquired knowledge of matching features may be useful for enhancing this process.
 
-##Model-fitting
+## Model-fitting
 
 The next step is to fit a non-linear smooth curve through retention times of the anchors computed in the previous step, with *rty* values modeled on *rtx*. There are two methods for spline-fitting in the package: `fit_loess` for loess and `fit_gam` for Generalized Additive Models (GAM). Both methods function similarly by first doing iterations of outlier filtering, followed by 10-fold cross validation to optimize a hyperparameter (*span* for loess or *k* for GAM). This guide will mostly cover `fit_gam`, a modified form of the `gam` function implemented in the *mgcv* R package.
 
-The most important parameters here are *k* and *iterFilter*. *k* represents the basis dimension (and thus the flexibility of the smooth curve) and accepts multiple integer choices, whereas *iterFilter* controls the number of outlier filtering iterations. In each iteration, GAM fits with different values of *k* are fit to the data and if a point's absolute error : mean absolute model error ratio exceeds the *ratio* argument in over *frac* of the model fits, that point is deemed an outlier. Outliers will still be part of the output, but they are assigned a weight of 0. By default, *ratio* and *frac* are set to 2 and 0.5, respectively. 10-fold cross-validation follows to select the best k value.
+The most important parameters here are *k* and *iterFilter*. *k* represents the basis dimension (and thus the flexibility of the smooth curve) and accepts multiple integer choices, whereas *iterFilter* controls the number of outlier filtering iterations. In each iteration, GAM fits with different values of *k* are fit to the data and if a point's absolute error : mean absolute model error ratio exceeds the *coef* argument in over *prop* of the model fits, that point is deemed an outlier. Outliers will still be part of the output, but they are assigned a weight of 0. By default, *coef* and *frac* are set to 2 and 0.5, respectively. 10-fold cross-validation follows to select the best k value.
 
 Other important parameters are *useID*, which if set to TRUE prevents identity-based outliers marked from the previous step from being excluded; *bs* gives the choice of smoother (currently only "bs" for B-splines and "ps" for P-splines supported); and *family*, which accepts either "scat" (default) or "gaussian." Choosing the "scat" option makes the model less susceptible to outliers, but is more computationally intensive, whereas "gaussian" computes faster but is typically more susceptible to outliers. Other parameters are part of the gam function in the mgcv package.
 
 ```{r}
 set.seed(100) #controls cross validation pseudo-randomness
-p.combined.3 = fit_gam(p.combined.2, useID = FALSE, k = seq(12,20,2), iterFilter = 2, ratio = 2, frac = 0.5, bs = "bs", family = "gaussian", m = c(3,2))
+p.combined.3 = fit_gam(p.combined.2, useID = FALSE, k = seq(12,20,2), iterFilter = 2, coef = 2, prop = 0.5, bs = "bs", family = "gaussian", m = c(3,2))
 ```
 
 ##plotting
@@ -234,13 +236,13 @@ In the final step of this pipeline, we use all information gathered from this an
 combined.table = combinedTable(p.combined.4)
 
 ##version 1: score-based conflict detection
-combined.table.2 = labelRows(combined.table, minScore = 0.5, maxRankX = 3, maxRankY = 3, method = "score", conflict = 0.2, remove = FALSE, balanced = TRUE)
+combined.table.2 = labelRows(combined.table, minScore = 0.5, maxRankX = 3, maxRankY = 3, method = "score", delta = 0.2, remove = FALSE, balanced = TRUE)
 
 ##version 2: mzrt-based conflict detection
-combined.table.3 = labelRows(combined.table, minScore = 0.5, maxRankX = 3, maxRankY = 3, method = "mzrt", balanced = TRUE,conflict = c(0.003,0.5,0.003,0.2))
+combined.table.3 = labelRows(combined.table, minScore = 0.5, maxRankX = 3, maxRankY = 3, method = "mzrt", balanced = TRUE, delta = c(0.003,0.5,0.003,0.2))
 ```
 
-Some arguments that must be specified are the *minScore*, *maxRankX* & *maxRankY* threshold values, as well as the *conflict* value. Conflicts occur between pairs of FPAs that share one feature in common and may require inspection to discern the correct match. There are two methods for detecting conflicts: 1) "score" and 2) "mzrt". In both, the top-scoring FPAs (rankX = 1 & rankY = 1) are used as a benchmark; if the difference in scores of the conflicting FPAs is small (first method), or the unshared feature is within a set m/z & rt tolerance (second method), then both FPAs are flagged. Otherwise, the lower-ranked FPA is deemed removable.
+Some arguments that must be specified are the *minScore*, *maxRankX* & *maxRankY* threshold values, as well as the *delta* value. Conflicts occur between pairs of FPAs that share one feature in common and may require inspection to discern the correct match. There are two methods for detecting conflicts: 1) "score" and 2) "mzrt". In both, the top-scoring FPAs (rankX = 1 & rankY = 1) are used as a benchmark; if the difference in scores of the conflicting FPAs is small (first method), or the unshared feature is within a set m/z & rt tolerance (second method), then both FPAs are flagged. Otherwise, the lower-ranked FPA is deemed removable.
 
 The function adds three new columns that follow the first fifteen fields. The column called "labels" contains program- annotated assignments: "IDENTITY" for feature pairs with matching identity strings, "REMOVE" if they meet at least one of several removal criteria, or "CONFLICT" if two or more conflicting FPAs (i.e. sharing a feature in common) require closer inspection to discern the correct match. Rows labeled "CONFLICT" are assigned a "subgroup" number; features conflicting with multiple subgroups are assigned an "alt" (alternative subgroup) number. Selecting the best match among a conflicting pair or leaving multiple possibilities until further validation is an option we leave to the user. Additional information, such as chromatographic region-specific retention time fit tolerance, retention order, spectral quality, and adduct/fragment annotations may resolve these conflicts or find mismatches FPAs that do not have a conflicting match. 
 
