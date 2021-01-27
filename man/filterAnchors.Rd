@@ -17,7 +17,7 @@ filterAnchors(
   family,
   method,
   optimizer,
-  loess.pars,
+  control,
   message,
   ...
 )
@@ -54,7 +54,7 @@ this proportion of fits. Must be between 0 & 1.}
 \item{optimizer}{character. Method to optimize smoothing parameter; see:
 ?mgcv::gam}
 
-\item{loess.pars}{parameters for LOESS fitting; see ?loess.control}
+\item{control}{control parameters for loess fits; see: ?loess.control}
 
 \item{message}{Option to print message indicating function progress}
 

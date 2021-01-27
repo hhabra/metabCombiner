@@ -12,9 +12,9 @@ fit_loess(
   coef = 2,
   iterFilter = 2,
   prop = 0.5,
-  iterLoess = 10,
   weights = 1,
-  message = TRUE
+  message = TRUE,
+  control = loess.control(surface = "direct", iterations = 10)
 )
 }
 \arguments{
@@ -38,17 +38,16 @@ a model's absolute residual values.}
 \item{prop}{numeric. A point is excluded if deemed a residual in more than
 this proportion of fits. Must be between 0 & 1.}
 
-\item{iterLoess}{integer. Number of robustness iterations to perform in
-\code{loess()}.See ?loess.control for more details.}
-
 \item{weights}{Optional user supplied weights for each ordered pair. Must be
 of length equal to number of anchors (n) or a divisor of (n + 2)}
 
 \item{message}{Option to print message indicating function progress}
+
+\item{control}{control parameters for loess fits; see: ?loess.control}
 }
 \value{
 \code{metabCombiner} object with \code{model} slot updated to
-contain the fitted loess model
+contain a fitted loess model
 }
 \description{
 Fits a local regression smoothing spline through a set of ordered pair
@@ -58,6 +57,7 @@ performed first. Multiple acceptable values of \code{span} can be used, with
 one value selected through 10-fold cross validation.
 }
 \examples{
+
 data(plasma30)
 data(plasma20)
 
@@ -68,7 +68,7 @@ p.comb = selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
 
 #version 1
 p.comb = fit_loess(p.comb, spans = seq(0.2,0.3,0.02), iterFilter = 1)
-
+\donttest{
 #version 2 (using weights)
 anchors = getAnchors(p.comb)
 weights = c(2, rep(1, nrow(anchors)), 2)  #weight = 2 to boundary points
@@ -82,7 +82,7 @@ p.comb = fit_loess(p.comb, spans = seq(0.2,0.3,0.02), useID = TRUE)
 plot(p.comb, fit = "loess", xlab = "CHEAR Plasma (30 min)",
      ylab = "Red-Cross Plasma (20 min)", pch = 19,
      main = "Example fit_loess Result Fit")
-
+}
 }
 \seealso{
 \code{\link{selectAnchors}},\code{\link{fit_gam}}

@@ -13,7 +13,7 @@ crossValFit(
   m,
   method,
   optimizer,
-  loess.pars,
+  control,
   message,
   ...
 )
@@ -38,7 +38,7 @@ Best value chosen by 10-fold cross validation.}
 \item{optimizer}{character. Method to optimize smoothing parameter; see:
 ?mgcv::gam}
 
-\item{loess.pars}{parameters for LOESS fitting; see ?loess.control}
+\item{control}{control parameters for loess fits; see: ?loess.control}
 
 \item{message}{Option to print message indicating function progress}
 

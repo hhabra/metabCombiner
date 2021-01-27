@@ -95,7 +95,7 @@ flagOutliers <- function(residuals, include, vals, outlier, coef)
 #' @param optimizer character. Method to optimize smoothing parameter; see:
 #' ?mgcv::gam
 #'
-#' @param loess.pars parameters for LOESS fitting; see ?loess.control
+#' @param control control parameters for loess fits; see: ?loess.control
 #'
 #' @param message Option to print message indicating function progress
 #'
@@ -103,7 +103,7 @@ flagOutliers <- function(residuals, include, vals, outlier, coef)
 #'
 #' @return anchor rts data frame with updated weights.
 filterAnchors <- function(rts, fit, vals, outlier, coef, iterFilter,
-                          prop, bs, m, family, method, optimizer, loess.pars,
+                          prop, bs, m, family, method, optimizer, control,
                           message,...)
 {
     iter <- 0
@@ -124,7 +124,7 @@ filterAnchors <- function(rts, fit, vals, outlier, coef, iterFilter,
             residuals <- suppressWarnings(vapply(vals, function(v){
                 model <- stats::loess(rty ~ rtx, data = rts, span = v,
                                     degree = 1, weights = rts$weights,
-                                    control = loess.pars, family = "s")
+                                    control = control, family = "s")
 
                 res <- abs(model[["residuals"]])
                 return(res)
@@ -171,7 +171,7 @@ filterAnchors <- function(rts, fit, vals, outlier, coef, iterFilter,
 #' @param optimizer  character. Method to optimize smoothing parameter; see:
 #' ?mgcv::gam
 #'
-#' @param loess.pars parameters for LOESS fitting; see ?loess.control
+#' @param control control parameters for loess fits; see: ?loess.control
 #'
 #' @param message Option to print message indicating function progress
 #'
@@ -179,7 +179,7 @@ filterAnchors <- function(rts, fit, vals, outlier, coef, iterFilter,
 #'
 #' @return Optimal parameter value as determined by 10-fold cross validation
 crossValFit <- function(rts, fit, vals, bs, family, m, method, optimizer,
-                        loess.pars, message, ...)
+                        control, message, ...)
 {
     if(message) cat("Performing 10-fold cross validation\n")
     rts <- dplyr::filter(rts, .data$weights != 0)
@@ -201,7 +201,7 @@ crossValFit <- function(rts, fit, vals, bs, family, m, method, optimizer,
             else if (fit == "loess")
                 model <- stats::loess(rty ~ rtx, data = rts_train, span = v,
                                     degree = 1, weights = rts_train$weights,
-                                    control = loess.pars,  family = "s")
+                                    control = control,  family = "s")
 
             preds <- stats::predict(model, newdata = rts_test)
             MSE <- sum((preds - rts_test[["rty"]])^2)/ length(preds)
@@ -339,11 +339,11 @@ crossValFit <- function(rts, fit, vals, bs, family, m, method, optimizer,
 #' }
 #'
 #' @export
-fit_gam <- function(object, useID = FALSE, k = seq(10,20, by = 2),
-                    iterFilter = 2, outlier = c("MAD", "boxplot"), coef = 2,
-                    prop = 0.5, weights = 1, bs = c("bs", "ps"),
-                    family = c("scat", "gaussian"), m = c(3,2),
-                    method = "REML", optimizer = "newton", message = TRUE, ...)
+fit_gam <- function(object, useID = FALSE, k = seq(10,20,2),iterFilter = 2,
+                    outlier = c("MAD", "boxplot"), coef = 2, prop = 0.5,
+                    weights = 1, bs = c("bs", "ps"), m = c(3,2),
+                    family = c("scat", "gaussian"), method = "REML",
+                    optimizer = "newton", message = TRUE, ...)
 {
     combinerCheck(isMetabCombiner(object), "metabCombiner")
     anchors <- getAnchors(object)
@@ -408,21 +408,21 @@ fit_gam <- function(object, useID = FALSE, k = seq(10,20, by = 2),
 #' @param prop  numeric. A point is excluded if deemed a residual in more than
 #' this proportion of fits. Must be between 0 & 1.
 #'
-#' @param iterLoess  integer. Number of robustness iterations to perform in
-#'                   \code{loess()}.See ?loess.control for more details.
-#'
 #' @param weights Optional user supplied weights for each ordered pair. Must be
 #' of length equal to number of anchors (n) or a divisor of (n + 2)
+#'
+#' @param control control parameters for loess fits; see: ?loess.control
 #'
 #' @param message Option to print message indicating function progress
 #'
 #' @return \code{metabCombiner} object with \code{model} slot updated to
-#' contain the fitted loess model
+#' contain a fitted loess model
 #'
 #' @seealso
 #' \code{\link{selectAnchors}},\code{\link{fit_gam}}
 #'
 #' @examples
+#'
 #' data(plasma30)
 #' data(plasma20)
 #'
@@ -433,7 +433,7 @@ fit_gam <- function(object, useID = FALSE, k = seq(10,20, by = 2),
 #'
 #' #version 1
 #' p.comb = fit_loess(p.comb, spans = seq(0.2,0.3,0.02), iterFilter = 1)
-#'
+#' \donttest{
 #' #version 2 (using weights)
 #' anchors = getAnchors(p.comb)
 #' weights = c(2, rep(1, nrow(anchors)), 2)  #weight = 2 to boundary points
@@ -447,38 +447,37 @@ fit_gam <- function(object, useID = FALSE, k = seq(10,20, by = 2),
 #' plot(p.comb, fit = "loess", xlab = "CHEAR Plasma (30 min)",
 #'      ylab = "Red-Cross Plasma (20 min)", pch = 19,
 #'      main = "Example fit_loess Result Fit")
-#'
+#' }
 #' @export
 fit_loess <- function(object, useID = FALSE, spans = seq(0.2, 0.3, by = 0.02),
                     outlier = c("MAD", "boxplot"), coef = 2, iterFilter = 2,
-                    prop = 0.5, iterLoess = 10, weights = 1, message = TRUE)
+                    prop = 0.5, weights = 1, message = TRUE,
+                    control = loess.control(surface = "direct",iterations = 10))
 {
     combinerCheck(isMetabCombiner(object), "metabCombiner")
-    anchors <- object@anchors
+    anchors <- getAnchors(object)
 
     check_fit_pars(anchors = anchors, fit = "loess", useID = useID,
                     iterFilter = iterFilter, coef = coef, prop = prop,
-                    iterLoess = iterLoess, spans = spans)
+                    spans = spans)
 
     outlier <- match.arg(outlier)
-    loess.pars <- loess.control(iters = iterLoess, surface = "direct")
     rts <- formatAnchors(object, anchors, weights, useID)
 
     rts <- filterAnchors(rts = rts, fit = "loess", iterFilter = iterFilter,
                         outlier = outlier, coef = coef, prop = prop,
-                        vals = spans, loess.pars = loess.pars,
-                        message = message)
+                        vals = spans, control = control, message = message)
 
     if(length(spans) > 1)
         best_span <- crossValFit(rts = rts, fit = "loess", vals = spans,
-                                loess.pars = loess.pars, message = message)
+                                control = control, message = message)
     else
         best_span <- spans
 
     cat("Fitting Model with span =", best_span,"\n")
 
     best_model <- loess(rty ~ rtx, data = rts, span = best_span, degree = 1,
-                        family = "symmetric", control = loess.pars,
+                        family = "symmetric", control = control,
                         weights = rts[["weights"]])
 
     anchors[["rtProj"]] <- stats::predict(best_model, anchors)
