@@ -1,4 +1,3 @@
-##
 #' @title Form a metabCombiner object.
 #'
 #' @description

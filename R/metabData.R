@@ -118,7 +118,7 @@ metabData <- function(table, mz = "mz", rt = "rt", id = "id",
     if (misspc >= 100 | misspc < 0 | !is.numeric(misspc))
         stop("Parameter 'misspc' must be a numeric value from [0,100)")
 
-    if(is(table, "character"))
+    if(is.character(table))
         table <- readData(table)
     else if(dplyr::is.tbl(table))     #handling tbl error
         table <- as.data.frame(table)
