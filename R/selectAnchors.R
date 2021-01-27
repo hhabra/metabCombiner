@@ -207,21 +207,14 @@ iterativeAnchorSelection <- function(cTable, windx, windy, swap = FALSE){
 #'
 #' @export
 selectAnchors <- function(object, useID = FALSE, tolmz = 0.003, tolQ = 0.3,
-    tolrtq = 0.5, windx = 0.03, windy = 0.03,
-    brackets_ignore = c("(", "[", "{")) {
+    tolrtq = 0.3, windx = 0.03, windy = 0.03,
+    brackets_ignore = c("(", "[", "{"))
+{
     combinerCheck(isMetabCombiner(object), "metabCombiner")
 
-    pars <- list(tolmz, tolQ, tolrtq, windx, windy)
-    if(any(vapply(pars, function(p) !is.numeric(p), logical(1))))
-        stop("arguments tolmz, tolQ, tolrtq, windx & windy must be numeric")
-
-    if(any(vapply(pars, function(p) p <= 0, logical(1))))
-        stop("arguments tolmz, tolQ, tolrtq, windx & windy must be positive")
-
-    if(!is.logical(useID)) stop("expected logical value for argument 'useID'")
+    check_anchors_pars(useID, tolmz, tolQ, tolrtq, windx, windy)
 
     cTable <- combinedTable(object)[,seq(1,15)]
-
     rte <- c(min(cTable$rtx), min(cTable$rty), max(cTable$rtx), max(cTable$rty))
 
     cTable <- dplyr::select(cTable, -.data$score, -.data$rankX,-.data$rankY) %>%

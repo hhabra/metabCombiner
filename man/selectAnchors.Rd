@@ -9,7 +9,7 @@ selectAnchors(
   useID = FALSE,
   tolmz = 0.003,
   tolQ = 0.3,
-  tolrtq = 0.5,
+  tolrtq = 0.3,
   windx = 0.03,
   windy = 0.03,
   brackets_ignore = c("(", "[", "{")

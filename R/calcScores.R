@@ -184,13 +184,14 @@ calculateRanks <- function(cTable, rows){
 #' p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
 #'
 #' p.comb <- selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
-#' p.comb <- fit_gam(p.comb, k = 20, iterFilter = 1)
+#' p.comb <- fit_gam(p.comb, k = 20, iterFilter = 1, family = "gaussian")
 #'
 #' #example: moderate m/z deviation, accurate rt fit, high sample similarity
 #' p.comb <- calcScores(p.comb, A = 90, B = 14, C = 0.8, useAdduct = FALSE,
 #'          groups = NULL, fit = "gam", usePPM = FALSE)
 #' cTable = combinedTable(p.comb)  #to view results
 #'
+#' \donttest{
 #' #example 2: high m/z deviation, moderate rt fit, low sample similarity
 #' p.comb <- calcScores(p.comb, A = 50, B = 8, C = 0.2)
 #'
@@ -206,12 +207,12 @@ calculateRanks <- function(cTable, rows){
 #' #example 6: using adduct information
 #' p.comb <- calcScores(p.comb, A = 90, B = 14, C = 0.5, useAdduct = TRUE,
 #'                      adduct = 1.25)
-#'
+#' }
 #' @export
 ##
-calcScores <- function(object, A, B, C, fit = c("gam", "loess"), groups = NULL,
-                        useAdduct = FALSE, adduct = 1.25, usePPM = FALSE,
-                        brackets_ignore = c("(", "[", "{"))
+calcScores <- function(object, A = 75, B = 10, C = 0.25, fit = c("gam", "loess"),
+                       groups = NULL, useAdduct = FALSE, adduct = 1.25,
+                       usePPM = FALSE, brackets_ignore = c("(", "[", "{"))
 {
     combinerCheck(isMetabCombiner(object), "metabCombiner")
     cTable <- combinedTable(object)

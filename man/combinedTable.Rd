@@ -35,7 +35,7 @@ are as follows:
 }
 \description{
 Obtain constructed table reporting every possible metabolomics
-    feature alignment.
+feature alignment.
 }
 \examples{
 data(plasma30)

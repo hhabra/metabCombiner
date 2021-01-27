@@ -7,15 +7,15 @@
 fit_gam(
   object,
   useID = FALSE,
-  k = seq(10, 20, by = 2),
+  k = seq(10, 20, 2),
   iterFilter = 2,
   outlier = c("MAD", "boxplot"),
   coef = 2,
   prop = 0.5,
   weights = 1,
   bs = c("bs", "ps"),
-  family = c("scat", "gaussian"),
   m = c(3, 2),
+  family = c("scat", "gaussian"),
   method = "REML",
   optimizer = "newton",
   message = TRUE,
@@ -50,9 +50,9 @@ of length equal to number of anchors (n) or a divisor of (n + 2).}
 \item{bs}{character. Choice of spline method from mgcv, either "bs" (basis
 splines) or "ps" (penalized basis splines)}
 
-\item{family}{character. Choice of mgcv family; see: ?mgcv::family.mgcv}
-
 \item{m}{integer. Basis and penalty order for GAM; see ?mgcv::s}
+
+\item{family}{character. Choice of mgcv family; see: ?mgcv::family.mgcv}
 
 \item{method}{character smoothing parameter estimation method; see:
 ?mgcv::gam}

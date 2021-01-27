@@ -2,7 +2,7 @@
 % Please edit documentation in R/formCombinedTable.R
 \name{formCombinedTable}
 \alias{formCombinedTable}
-\title{Form Combiner Report Table}
+\title{Form metabCombiner Report Table}
 \usage{
 formCombinedTable(object, xset, yset, nGroups)
 }
