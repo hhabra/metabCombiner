@@ -10,12 +10,12 @@
 plot_fit(
   object,
   fit = c("gam", "loess"),
-  pcol,
-  lcol,
-  lwd,
+  pcol = "black",
+  lcol = "red",
+  lwd = 3,
   pch = 19,
   outlier = "show",
-  ocol,
+  ocol = "springgreen4",
   ...
 )
 }
@@ -35,6 +35,8 @@ plot_fit(
 \item{lcol}{color of the fitted line in the plot}
 
 \item{lwd}{line width of the curve fit between anchor points}
+
+\item{pch}{plot character type; see ?graphics::par for details}
 
 \item{outlier}{display option for outliers. If "show" or "s", treats
 outlier points like normal anchors; if "remove" or "r", removes outlier
@@ -60,12 +62,12 @@ p30 <- metabData(plasma30, samples = "CHEAR")
 p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
 p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
 p.comb = selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
-p.comb = fit_gam(p.comb, k = 20, iterFilter = 1)
+p.comb = fit_gam(p.comb, k = 20, iterFilter = 1, family = "gaussian")
 
 ##plot of GAM fit
 plot(p.comb, main = "Example GAM Fit Plot", xlab = "X Dataset RTs",
      ylab = "Y Dataset RTs", pcol = "red", lcol = "blue", lwd = 5,
-     fit = "gam", pch = 19, outliers = "remove")
+     fit = "gam", outliers = "remove")
 
 grid(lwd =  2, lty = 3 ) #adding gridlines
 

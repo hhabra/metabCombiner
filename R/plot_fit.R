@@ -11,6 +11,8 @@
 #'
 #' @param pcol color of the normal points (ordered RT pair) in the plot
 #'
+#' @param pch plot character type; see ?graphics::par for details
+#'
 #' @param lcol color of the fitted line in the plot
 #'
 #' @param lwd line width of the curve fit between anchor points
@@ -45,8 +47,9 @@
 #' grid(lwd =  2, lty = 3 ) #adding gridlines
 #'
 #' @export
-plot_fit <- function(object, fit = c("gam","loess"), pcol, lcol, lwd, pch = 19,
-                    outlier = "show", ocol,...)
+plot_fit <- function(object, fit = c("gam","loess"), pcol = "black",
+                    lcol = "red", lwd = 3, pch = 19, outlier = "show",
+                    ocol = "springgreen4",...)
 {
     fit <- match.arg(fit)
     model <- getModel(object, fit = fit)
@@ -68,20 +71,15 @@ plot_fit <- function(object, fit = c("gam","loess"), pcol, lcol, lwd, pch = 19,
     if(outlier %in% c("remove", "r"))
         data <- dplyr::filter(data, .data$weights > 0)
 
-    if(missing(pcol))  pcol <- "black"
-    if(missing(lcol))  lcol <- "red"
-    if(missing(lwd))   lwd <- 3
-    if(missing(ocol))  ocol <- "springgreen4"
-
     rtx <- data[["rtx"]];  rty <- data[["rty"]]
 
-    graphics::plot(rtx, rty, type = "p", col = pcol, pch = pch,...)
+    graphics::plot(rtx, rty, type = "p", col = pcol, pch = pch, ...)
     graphics::lines(x = data[["rtx"]], y = data[["preds"]],
                     col = lcol, lwd = lwd,...)
 
     if(outlier %in% c("highlight", "h")){
         data <- dplyr::filter(data, .data$weights == 0)
-        graphics::points(data[["rtx"]],data[["rty"]], col = ocol, pch = pch,...)
+        graphics::points(data[["rtx"]],data[["rty"]], col = ocol,...)
         graphics::legend("topleft", legend = c("anchor", "outlier"),
                         col = c(pcol, ocol), pch = pch)
     }
