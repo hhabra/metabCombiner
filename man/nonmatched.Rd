@@ -5,9 +5,9 @@
 \alias{nonmatched,metabCombiner-method}
 \title{Get Nonmatched Features}
 \usage{
-nonmatched(object, data = c("x", "y"))
+nonmatched(object, data = "x")
 
-\S4method{nonmatched}{metabCombiner}(object, data = c("x", "y"))
+\S4method{nonmatched}{metabCombiner}(object, data = "x")
 }
 \arguments{
 \item{object}{metabCombiner object}

@@ -7,9 +7,9 @@
 \alias{getSamples,metabData-method}
 \title{Get Sample Names From metabCombiner or metabData Object}
 \usage{
-getSamples(object, data = c("x", "y"))
+getSamples(object, data = "x")
 
-\S4method{getSamples}{metabCombiner}(object, data = c("x", "y"))
+\S4method{getSamples}{metabCombiner}(object, data = "x")
 
 \S4method{getSamples}{metabData}(object)
 }

@@ -3,7 +3,7 @@
 #' @title Obtain metabCombiner Feature Alignment Report
 #'
 #' @description Obtain constructed table reporting every possible metabolomics
-#'     feature alignment.
+#' feature alignment.
 #'
 #' @param object metabCombiner object.
 #'
