@@ -19,5 +19,7 @@ including the formatted feature table, sample names, and feature statistics.
 \item{\code{extra}}{character vector of non-analyzed columns names}
 
 \item{\code{stats}}{A list of dataset statistics}
+
+\item{\code{filtered}}{A list of filtered dataset features}
 }}
 

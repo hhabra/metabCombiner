@@ -17,16 +17,20 @@
 #'
 #' @slot stats A list of dataset statistics
 #'
+#' @slot filtered A list of filtered dataset features
+#'
 #' @export
 setClass("metabData", slots = c(data = "data.frame",
                                 samples = "character",
                                 extra = "character",
-                                stats = "list"),
+                                stats = "list",
+                                filtered = "list"),
                     prototype = prototype(
                                 data = data.frame(),
                                 samples = character(),
                                 extra = character(),
-                                stats = list()
+                                stats = list(),
+                                filtered = list()
                     )
 )
 
