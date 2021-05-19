@@ -1,4 +1,19 @@
 
+check_combine_pars <- function(binGap, means, xid, yid)
+{
+    if(is.null(binGap) | length(binGap) == 0)
+        stop("argument 'binGap' must be defined")
+    if(binGap <= 0 | !is.numeric(binGap))
+        stop("argument 'binGap' must be a positive numeric constant")
+    if(binGap >= 0.1)
+        stop("argument 'binGap' is too large")
+    if(binGap > 0.05)
+        warning("large 'binGap' argument value; binGap < 0.01 is recommended")
+    if(!is.logical(unlist(means)))
+        stop("arguments means must contain only logicals")
+}
+
+
 #parameter checks for anchor selection
 check_anchors_pars <- function(useID, tolmz, tolQ, tolrtq, windx, windy)
 {
@@ -88,7 +103,7 @@ check_score_pars <- function(cTable, A, B, C, model, fit, groups,
 
 
 ##row labeling parameter checks
-check_lblrows_pars <- function(maxRankX, maxRankY, minScore, balanced,
+check_lblrows_pars <- function(maxRankX, maxRankY, minScore, maxRTerr, balanced,
                                 method, delta)
 {
     if((!is.numeric(maxRankX) & !is.integer(maxRankX)) |
@@ -100,6 +115,9 @@ check_lblrows_pars <- function(maxRankX, maxRankY, minScore, balanced,
 
     if(!is.numeric(minScore) | minScore >= 1 | minScore <= 0)
         stop("argument 'minScore' must be a numeric value between 0 and 1")
+
+    if(!is.numeric(maxRTerr) | maxRTerr <= 0)
+        stop("argument 'maxRTerr' must be a numeric value greater than 0")
 
     if(!is.logical(balanced))
         stop("expected a logical for argument 'balanced'")
@@ -116,7 +134,7 @@ check_lblrows_pars <- function(maxRankX, maxRankY, minScore, balanced,
         if(length(delta) != 4)
             stop("with method = mzrt, length 4 vector expected for delta)")
 
-        if(any(delta < 0))
+        if(!is.numeric(delta) | any(delta < 0))
             stop("values in 'delta' argument must be non-negative")
     }
 }

@@ -155,45 +155,58 @@ calcScoresParam <- function(A = 75, B = 10, C = 0.25, fit = "gam",
 
 }
 
-#' @title List labelRows Defaults
+#' @title List labelRows & reduceTable Defaults
 #'
 #' @description
-#' List of default parameters for combined table row annotation and removal.
-#' See help(labelRows) or ?labelRows for more details.
+#' List of default parameters for combinedTable row annotation and removal.
+#' See help(labelRows) or ?labelRows for more details. reduceTableParam loads
+#' parameters for the more automated \code{reduceTable} function
 #'
 #' @return list of labelRows parameters
 #'
-#' @param maxRankX  maximum rank allowable for X features; default: 3
-#' @param maxRankY  maximum rank allowable for Y features; default: 3
+#' @param maxRankX  maximum rank allowable for X features
+#' @param maxRankY  maximum rank allowable for Y features
 #' @param minScore  minimum score threshold; default: 0.5
 #' @param method thresholding method for subgroup detection ("score" or "mzrt");
 #'      default: "score"
 #' @param delta  score distance or mz/rt difference tolerances for subgrouping;
 #'      default: 0.1
+#' @param maxRTerr maximum allowable difference between predicted RT (rtProj) &
+#'     observed RT (rty); default: 10 minutes
 #' @param balanced option to reduce balanced groups; default: TRUE
 #' @param remove option to eliminate rows determined as removable;
 #'     default: FALSE
 #' @param brackets_ignore bracket types for ignoring string comparisons
 #'
 #' @examples
-#' lrParams <- labelRowsParam(maxRankX = 2, maxRankY = 2, delta = 0.1)
+#' lrParams <- labelRowsParam(maxRankX = 2, maxRankY = 2, delta = 0.1,
+#'                              maxRTerr = 0.5)
 #'
 #' @seealso \code{\link{labelRows}}, \code{\link{metabCombine}}
 #'
 #' @export
 labelRowsParam <- function(maxRankX = 3, maxRankY = 3, minScore = 0.5,
-                            delta = 0.1, method = "score", balanced = TRUE,
-                            remove = FALSE, brackets_ignore = c("(", "[", "{"))
+                            delta = 0.1, method = "score", maxRTerr = 10,
+                            balanced = TRUE, remove = FALSE,
+                            brackets_ignore = c("(", "[", "{"))
 {
     params <- list(maxRankX = maxRankX, maxRankY = maxRankY,
                   minScore = minScore, method = method, delta = delta,
-                  method = method, balanced = balanced, remove = remove,
+                  maxRTerr = maxRTerr, balanced = balanced, remove = remove,
                   brackets_ignore = brackets_ignore)
     return(params)
 }
 
-
-
-
-
+#' @rdname labelRowsParam
+#'
+#' @export
+reduceTableParam <- function(maxRankX = 2, maxRankY = 2, minScore = 0.5,
+                            maxRTerr = 10, brackets_ignore = c("(", "[", "{"))
+{
+    params <- list(maxRankX = maxRankX, maxRankY = maxRankY,
+                   minScore = minScore, method = "score", delta = 0,
+                   maxRTerr = maxRTerr, balanced = TRUE, remove = TRUE,
+                   brackets_ignore = brackets_ignore)
+    return(params)
+}
 
