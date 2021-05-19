@@ -16,17 +16,16 @@
 ignore_brackets = function(s, brackets)
 {
     if("(" %in% brackets | ")" %in% brackets | "()" %in% brackets)
-        s <- gsub("^\\([^&]*\\)$", "", s)
+        s <- gsub("^\\([^&]*\\)$", "", s, perl = TRUE)
 
     if("[" %in% brackets | "]" %in% brackets | "[]" %in% brackets)
-        s <- gsub("^\\[[^&]*\\]$", "", s)
+        s <- gsub("^\\[[^&]*\\]$", "", s, perl = TRUE)
 
     if("{" %in% brackets | "}" %in% brackets | "{}" %in% brackets)
-        s <- gsub("^\\{[^&]*\\}$", "", s)
+        s <- gsub("^\\{[^&]*\\}$", "", s, perl = TRUE)
 
     return(s)
 }
-
 
 #' Determine Matching Identity Strings
 #'
