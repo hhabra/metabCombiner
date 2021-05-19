@@ -233,10 +233,8 @@ calcScores <- function(object, A = 75, B = 10, C = 0.25, fit = c("gam", "loess")
     cTable$rtProj[rows] <- stats::predict(model, newdata = cTable[rows,])
 
     if(useAdduct){
-        if(!is.numeric(adduct) | adduct < 1){
-            stop("'adduct' argument must be a numeric value ",
-                    "greater than or equal to 1")
-        }
+        if(!is.numeric(adduct) | adduct < 1)
+            stop("'adduct' argument must be a (>=1) numeric value")
         adductdiff <- compare_strings(cTable$adductx[rows],cTable$adducty[rows],
                                     1, adduct, brackets_ignore, type = "mm")
     }
@@ -252,8 +250,10 @@ calcScores <- function(object, A = 75, B = 10, C = 0.25, fit = c("gam", "loess")
                                     rtrange = rtrange, adductdiff = adductdiff)
 
     cTable[c("rtProj", "score")] <- round(cTable[c("rtProj", "score")], 4)
-    object <- update_mc(object, combinedTable = calculateRanks(cTable, rows),
-                    coefficients = list(`A` = A, `B` = B, `C` = C))
+    cTable <- calculateRanks(cTable, rows)
+    fdata <- featdata(object)[row.names(cTable),]
+    object <- update_mc(object, combinedTable = cTable, featdata = fdata,
+                        coefficients = list(`A` = A, `B` = B, `C` = C))
     return(object)
 }
 
