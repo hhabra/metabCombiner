@@ -3,15 +3,15 @@
 \docType{data}
 \name{plasma20}
 \alias{plasma20}
-\title{20 minute Metabolomics Analysis of Human Plasma}
+\title{20 minute LC-MS Analysis of Human Plasma}
 \format{
-A data frame with 8910 rows and 22 columns:
+A data frame with 8910 rows and 22 columns.
 }
 \usage{
 data(plasma20)
 }
 \description{
-An example metabolomics dataset consisting of human plasma from
+An example metabolomics analysis of human plasma from
 Red Cross and CHEAR cohorts, plus pooled aliquots and blanks, acquired
 with a 20 minute total Reversed-Phase Liquid Chromatography &
 QTOF-MS instrument in the positive ionization mode.
