@@ -8,11 +8,14 @@ metabCombine(
   xdata,
   ydata,
   binGap = 0.005,
+  xid = NULL,
+  yid = NULL,
+  means = list(mz = FALSE, rt = FALSE, Q = FALSE),
   fitMethod = "gam",
-  anchors = selectAnchorsParam(),
-  fit = fitgamParam(),
-  scores = calcScoresParam(),
-  labels = labelRowsParam()
+  anchorParam = selectAnchorsParam(),
+  fitParam = fitgamParam(),
+  scoreParam = calcScoresParam(),
+  labelParam = labelRowsParam()
 )
 }
 \arguments{
@@ -20,18 +23,30 @@ metabCombine(
 
 \item{ydata}{metabData object. One of two datasets to be combined.}
 
-\item{binGap}{numeric. Parameter used for grouping features by m/z.
+\item{binGap}{numeric parameter used for grouping features by m/z.
 See ?mzGroup for more details.}
+
+\item{xid}{character identifier of xdata. If xdata is a metabData, assigns a
+new ID for this dataset; if xdata is a metabCombiner, must be assigned to one
+of the existing dataset IDs. See details for more information.}
+
+\item{yid}{character identifier of ydata. If ydata is a metabData, assigns a
+new ID for this dataset; if ydata is a metabCombiner, must be assigned to one
+of the existing dataset IDs. See details for more information.}
+
+\item{means}{logical. Option to take average m/z, rt, and/or Q from
+\code{metabComber}. May be a vector (length = 3), single value (TRUE/FALSE),
+or a list with names "mz", "rt", "Q" as names.}
 
 \item{fitMethod}{RT spline-fitting method, either "gam" or "loess"}
 
-\item{anchors}{list of parameters for selectAnchors() function}
+\item{anchorParam}{list of parameter values for selectAnchors() function}
 
-\item{fit}{list of parameters for fit_gam() or fit_loess()}
+\item{fitParam}{list of parameter values for fit_gam() or fit_loess()}
 
-\item{scores}{list of parameters for calcScores()}
+\item{scoreParam}{list of parameter values for calcScores()}
 
-\item{labels}{list of parameters for labelRows()}
+\item{labelParam}{list of parameter values for labelRows()}
 }
 \value{
 a \code{metabCombiner} object following complete analysis
@@ -81,8 +96,8 @@ labelParam <- labelRowsParam(maxRankX = 2, maxRankY = 2, delta = 0.1)
 
 #metabCombine wrapper
 p.combined <- metabCombine(xdata = p30, ydata = p20, binGap = 0.0075,
-                           anchors = saParam, fit = fitParam,
-                           scores = scoreParam, labels = labelParam)
+                           anchorParam = saParam, fitParam = fitParam,
+                           scoreParam = scoreParam, labelParam = labelParam)
 
 ##to view results
 p.combined.table <- combinedTable(p.combined)

@@ -8,18 +8,30 @@
 #'
 #' @param ydata metabData object. One of two datasets to be combined.
 #'
-#' @param binGap numeric. Parameter used for grouping features by m/z.
+#' @param binGap numeric parameter used for grouping features by m/z.
 #' See ?mzGroup for more details.
+#'
+#' @param xid character identifier of xdata. If xdata is a metabData, assigns a
+#' new ID for this dataset; if xdata is a metabCombiner, must be assigned to one
+#' of the existing dataset IDs. See details for more information.
+#'
+#' @param yid character identifier of ydata. If ydata is a metabData, assigns a
+#' new ID for this dataset; if ydata is a metabCombiner, must be assigned to one
+#' of the existing dataset IDs. See details for more information.
+#'
+#' @param means logical. Option to take average m/z, rt, and/or Q from
+#' \code{metabComber}. May be a vector (length = 3), single value (TRUE/FALSE),
+#' or a list with names "mz", "rt", "Q" as names.
 #'
 #' @param fitMethod RT spline-fitting method, either "gam" or "loess"
 #'
-#' @param anchors list of parameters for selectAnchors() function
+#' @param anchorParam list of parameter values for selectAnchors() function
 #'
-#' @param fit list of parameters for fit_gam() or fit_loess()
+#' @param fitParam list of parameter values for fit_gam() or fit_loess()
 #'
-#' @param scores list of parameters for calcScores()
+#' @param scoreParam list of parameter values for calcScores()
 #'
-#' @param labels list of parameters for labelRows()
+#' @param labelParam list of parameter values for labelRows()
 #'
 #' @details
 #' The five main steps in \code{metabCombine} are 1) m/z grouping & combined
@@ -67,8 +79,8 @@
 #'
 #' #metabCombine wrapper
 #' p.combined <- metabCombine(xdata = p30, ydata = p20, binGap = 0.0075,
-#'                            anchors = saParam, fit = fitParam,
-#'                            scores = scoreParam, labels = labelParam)
+#'                            anchorParam = saParam, fitParam = fitParam,
+#'                            scoreParam = scoreParam, labelParam = labelParam)
 #'
 #' ##to view results
 #' p.combined.table <- combinedTable(p.combined)
@@ -76,11 +88,16 @@
 #' }
 #'
 #' @export
-metabCombine <- function(xdata, ydata, binGap = 0.005, fitMethod = "gam",
-                        anchors = selectAnchorsParam(), fit = fitgamParam(),
-                        scores = calcScoresParam(), labels = labelRowsParam())
+metabCombine <- function(xdata, ydata, binGap = 0.005, xid = NULL, yid = NULL,
+                        means = list('mz' = FALSE, 'rt' = FALSE, 'Q' = FALSE),
+                        fitMethod = "gam",  anchorParam = selectAnchorsParam(),
+                        fitParam = fitgamParam(),scoreParam = calcScoresParam(),
+                        labelParam = labelRowsParam())
 {
-    object <- metabCombiner(xdata = xdata, ydata = ydata, binGap = binGap)
+    anchors <- anchorParam;    fit <- fitParam;
+    scores <- scoreParam;      labels <- labelParam;
+    object <- metabCombiner(xdata = xdata, ydata = ydata, binGap = binGap,
+                            xid = xid, yid = yid, means = means)
     object <- selectAnchors(object, useID = anchors$useID, tolQ = anchors$tolQ,
                             tolmz = anchors$tolmz, tolrtq = anchors$tolrtq,
                             windx = anchors$windx, windy = anchors$windy,
@@ -102,14 +119,15 @@ metabCombine <- function(xdata, ydata, binGap = 0.005, fitMethod = "gam",
         stop("'fitMethod' must be either 'gam' or 'loess'")
 
     object <- calcScores(object, A = scores$A, B = scores$B, C = scores$C,
-                        fit = scores$fit, groups = scores$groups,
+                        fit = fitMethod, groups = scores$groups,
                         usePPM = scores$usePPM, useAdduct = scores$useAdduct,
                         brackets_ignore = scores$brackets_ignore)
 
     object <- labelRows(object, minScore = labels$minScore,
                         maxRankX = labels$maxRankX, maxRankY = labels$maxRankY,
                         method = labels$method, balanced = labels$balanced,
-                        remove = labels$remove,
+                        remove = labels$remove, delta = labels$delta,
+                        maxRTerr = labels$maxRTerr,
                         brackets_ignore = labels$brackets_ignore)
     return(object)
 }
