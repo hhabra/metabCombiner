@@ -16,7 +16,8 @@ getData(object)
 Single Metabolomics Data Frame
 }
 \description{
-Get Processed Dataset
+The \code{\link{metabData}} constructor creates a formatted
+dataset from the input, which may be accessed using this method.
 }
 \examples{
 data(plasma30)

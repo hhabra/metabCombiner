@@ -1,13 +1,45 @@
 ############  Generics put in this file in alphabetical order #############
 
-#' @title Obtain metabCombiner Feature Alignment Report
+#' @title Retrieve Adduct Annotations
+#'
+#' @description  This retrieves user-assigned adduct annotations from one or
+#' all constituent datasets of a \code{metabCombiner} object
+#'
+#' @param object \code{metabCombiner} object
+#'
+#' @param data dataset identifier to extract information from; if NULL, extracts
+#' information from all datasets
+#'
+#' @return data frame of adduct annotations
+#'
+#' @examples
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 <- metabData(head(plasma30,500), samples = "CHEAR")
+#' p20 <- metabData(head(plasma20,500), samples = "Red")
+#'
+#' p.comb <- metabCombiner(p30, p20, xid = "p30", yid = "p20")
+#'
+#' ##retrieve all adduct data
+#' adducts <- adductdata(p.comb, data = NULL)
+#'
+#' ##retrieve adduct data from p30
+#' adducts <- adductdata(p.comb, data = "p30")
+#'
+#' @export
+setGeneric("adductdata", function(object, data = NULL)
+            standardGeneric("adductdata"))
+
+
+#' @title Obtain Feature Alignment Report
 #'
 #' @description Obtain constructed table reporting every possible metabolomics
-#' feature alignment.
+#' feature pair alignment.
 #'
-#' @param object metabCombiner object.
+#' @param object \code{metabCombiner} object.
 #'
-#' @return Feature Pair Alignment report data.frame. The columns of the report
+#' @return Feature Pair Alignment report data frame. The columns of the report
 #' are as follows:
 #'
 #' \item{idx}{Identities of features from dataset X}
@@ -31,14 +63,77 @@
 #' data(plasma30)
 #' data(plasma20)
 #'
-#' p30 <- metabData(plasma30, samples = "CHEAR")
-#' p20 <- metabData(plasma20, samples = "Red")
+#' p30 <- metabData(head(plasma30,500), samples = "CHEAR")
+#' p20 <- metabData(head(plasma20,500), samples = "Red")
 #'
 #' p.comb <- metabCombiner(p30, p20)
 #' p.comb.table <- combinedTable(p.comb)
 #'
 #' @export
 setGeneric("combinedTable", function(object) standardGeneric("combinedTable"))
+
+
+#' @title Obtain Dataset IDs
+#'
+#' @description Each dataset in a \code{metabCombiner} object is represented by
+#' a character identifier. The datasets slot contains all these ids in a single
+#' vector, which can be obtained in sequential order with this accessor method
+#'
+#' @param object metabCombiner object
+#'
+#' @param list logical, option to return in list format (TRUE) vs character
+#' vector format (FALSE)
+#'
+#' @return character vector of dataset identifiers
+#'
+#' @examples
+#' #' @examples
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 <- metabData(head(plasma30,500), samples = "CHEAR")
+#' p20 <- metabData(head(plasma20,500), samples = "Red")
+#'
+#' p.comb <- metabCombiner(p30, p20, xid = "p30", yid = "p20")
+#'
+#' ##datasets extraction: expect "p30", "p20"
+#' sets <- datasets(p.comb, list = FALSE)
+#'
+#' @export
+setGeneric("datasets", function(object, list = FALSE)
+    standardGeneric("datasets"))
+
+
+#' @title Obtain Feature Metadata
+#'
+#' @description \code{metabCombiner} objects organize metabolomics feature
+#' information in the "featdata" slot. This method retrieves all metadata
+#' or that of one dataset. The rows should identically correspond to the same
+#' rows from the combinedTable data frame.
+#'
+#' @param object a \code{metabCombiner} object
+#'
+#' @param data character dataset identifier
+#'
+#' @return data frame of feature metadata from one or all datasets
+#'
+#' @examples
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 <- metabData(head(plasma30,500), samples = "CHEAR")
+#' p20 <- metabData(head(plasma20,500), samples = "Red")
+#'
+#' p.comb <- metabCombiner(p30, p20, xid = "p30", yid = "p20")
+#'
+#' #full metadata extraction
+#' fdata <- featdata(p.comb, data = NULL)
+#'
+#' #single dataset feature information extraction
+#' fdata <- featdata(p.comb, data = "p20")
+#'
+#'@export
+setGeneric("featdata",function(object, data = NULL) standardGeneric("featdata"))
 
 
 #' @title Get Ordered Retention Time Pairs
@@ -91,8 +186,8 @@ setGeneric("getAnchors", function(object) standardGeneric("getAnchors"))
 #' p20 <- metabData(plasma20, samples = "Red")
 #'
 #' p.comb <- metabCombiner(p30, p20)
-#' p.comb <- selectAnchors(p.comb, windx = 0.05, windy = 0.03)
-#' p.comb <- fit_gam(p.comb, k = 20, iterFilter = 1)
+#' p.comb <- selectAnchors(p.comb, windx = 0.05, windy = 0.04, tolrtq = 0.15)
+#' p.comb <- fit_gam(p.comb, k = 20, iterFilter = 1, family = "gaussian")
 #' p.comb <- calcScores(p.comb, A = 90, B = 14, C = 0.5)
 #'
 #' getCoefficients(p.comb)
@@ -100,6 +195,25 @@ setGeneric("getAnchors", function(object) standardGeneric("getAnchors"))
 #' @export
 setGeneric("getCoefficients", function(object)
             standardGeneric("getCoefficients"))
+
+#' Get Processed Dataset
+#'
+#' @description The \code{\link{metabData}} constructor creates a formatted
+#' dataset from the input, which may be accessed using this method.
+#'
+#' @param object metabData object
+#'
+#' @return Single Metabolomics Data Frame
+#'
+#' @examples
+#' data(plasma30)
+#'
+#' p30 <- metabData(plasma30, samples = "CHEAR")
+#' data <- getData(p30)
+#'
+#' @export
+setGeneric("getData", function(object) standardGeneric("getData"))
+
 
 #' @title Get Fitted RT Model
 #'
@@ -122,8 +236,8 @@ setGeneric("getCoefficients", function(object)
 #' p30 <- metabData(plasma30, samples = "CHEAR")
 #' p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
 #' p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
-#' p.comb <- selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
-#' p.comb <- fit_gam(p.comb, iterFilter = 1, k = 20)
+#' p.comb <- selectAnchors(p.comb, tolrtq = 0.15, tolQ = 0.2, windy = 0.02)
+#' p.comb <- fit_gam(p.comb, iterFilter = 1, k = 20, family = "gaussian")
 #' p.comb <- fit_loess(p.comb, iterFilter = 1, spans = 0.2)
 #' model.gam <- getModel(p.comb, fit = "gam")
 #' model.loess <- getModel(p.comb, fit = "loess")
@@ -132,27 +246,12 @@ setGeneric("getCoefficients", function(object)
 setGeneric("getModel", function(object, fit = c("gam", "loess"))
             standardGeneric("getModel"))
 
-#' Get Processed Dataset
-#'
-#' @param object metabData object
-#'
-#' @return Single Metabolomics Data Frame
-#'
-#' @examples
-#' data(plasma30)
-#'
-#' p30 <- metabData(plasma30, samples = "CHEAR")
-#' data <- getData(p30)
-#'
-#' @export
-setGeneric("getData", function(object) standardGeneric("getData"))
-
 
 #' Get Extra Data Column Names
 #'
-#' @param object metabCombiner or metabData object
+#' @param object  \code{metabCombiner} or \code{metabData} object
 #'
-#' @param data Choice of input dataset, e.g. "x" or "y"
+#' @param data dataset identifier for \code{metabCombiner} objects
 #'
 #' @return character vector of extra column names
 #'
@@ -162,7 +261,7 @@ setGeneric("getData", function(object) standardGeneric("getData"))
 #' getExtra(p30)
 #'
 #' @export
-setGeneric("getExtra", function(object, data = "x")
+setGeneric("getExtra", function(object, data = NULL)
             standardGeneric("getExtra"))
 
 
@@ -171,9 +270,9 @@ setGeneric("getExtra", function(object, data = "x")
 #' @description Returns the sample names from one of the two datasets used in
 #' metabCombiner analysis, denoted as 'x' or 'y.'
 #'
-#' @param object  metabCombiner or metabData object
+#' @param object  \code{metabCombiner} or \code{metabData} object
 #'
-#' @param data   Character. One of either 'x' or 'y'.
+#' @param data dataset identifier for \code{metabCombiner} objects
 #'
 #' @return character vector of sample names. For \code{metabCombiner} objects
 #'     these may come from the 'x' dataset (if \code{data} = "x") or the 'y'
@@ -194,7 +293,7 @@ setGeneric("getExtra", function(object, data = "x")
 #' getSamples(p.comb, data = "y")  #equivalent to previous
 #'
 #' @export
-setGeneric("getSamples", function(object, data = "x")
+setGeneric("getSamples", function(object, data = NULL)
             standardGeneric("getSamples"))
 
 
@@ -221,30 +320,98 @@ setGeneric("getSamples", function(object, data = "x")
 #'
 #' getStats(p.comb) #metabCombiner stats
 #'
-#'
 #' @export
 setGeneric("getStats", function(object) standardGeneric("getStats"))
 
-#' @title Get Nonmatched Features
+
+#' @title Retrieve Feature Identities
 #'
-#' @description
-#' Features that lack a any counterparts in the complementary dataset may be
-#' obtained from this method.
+#' @description  This retrieves user-assigned feature identities from one or
+#' all constituent datasets of a \code{metabCombiner} object
 #'
-#' @param object  metabCombiner object
+#' @param object \code{metabCombiner} object
 #'
-#' @param data  Either one of 'x' or 'y', specifying which dataset's nonmatched
-#'      features to return.
+#' @param data dataset identifier to extract information from; if NULL, extracts
+#' information from all datasets
 #'
-#' @return If data is "x", returns non-matched X features ; if "y", returns
-#'         non-matched Y features
+#' @return data frame of feature identities
 #'
 #' @examples
 #' data(plasma30)
 #' data(plasma20)
 #'
-#' p30 <- metabData(plasma30, samples = "CHEAR")
-#' p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
+#' p30 <- metabData(head(plasma30,500), samples = "CHEAR")
+#' p20 <- metabData(head(plasma20,500), samples = "Red")
+#' p.comb <- metabCombiner(p30, p20, xid = "p30", yid = "p20")
+#'
+#' ##retrieve all ids
+#' ids <- iddata(p.comb, data = NULL)
+#'
+#' ##retrieve ids from p30
+#' ids <- iddata(p.comb, data = "p30")
+#'
+#' @export
+setGeneric("iddata", function(object, data = NULL)
+    standardGeneric("iddata"))
+
+
+#' @title Retrieve m/z Values
+#'
+#' @description  This retrieves feature m/z values from one or all constituent
+#' datasets of a \code{metabCombiner} object. Alternatively, the average
+#' m/z value can be retrieved.
+#'
+#' @param object \code{metabCombiner} object
+#'
+#' @param data dataset identifier to extract information from; if NULL,
+#' extracts data frame information from all datasets
+#'
+#' @param value Either "obs" (observed - default option) or "mean" value
+#'
+#' @return data frame of m/z values (if NULL) or single vector of m/z values
+#'
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 <- metabData(head(plasma30,500), samples = "CHEAR")
+#' p20 <- metabData(head(plasma20,500), samples = "Red")
+#' p.comb <- metabCombiner(p30, p20, xid = "p30", yid = "p20")
+#'
+#' ##retrieve all m/z
+#' mz <- mzdata(p.comb, data = NULL)
+#'
+#' ##retrieve m/z from p30
+#' mz <- mzdata(p.comb, data = "p30")
+#'
+#' ##retrieve mean m/z
+#' mz <- mzdata(p.comb, value = "mean")
+#'
+#' @export
+setGeneric("mzdata", function(object, data = NULL, value = c("obs", "mean"))
+    standardGeneric("mzdata"))
+
+
+#' @title Get Nonmatched Features
+#'
+#' @description
+#' Features that lack a any counterparts in the complementary dataset may be
+#' obtained from this method. If data is set to "x" or "y", will retrieve data
+#' from the current X or Y dataset, respectively. If data is set to NULL, will
+#' retrieve the list of nonmatched features.
+#'
+#' @param object  metabCombiner object
+#'
+#' @param data dataset identifier for \code{metabCombiner} objects; if NULL,
+#' returns full list of non-matched features
+#'
+#' @return Data frame of non-matched features corresponding to data argument
+#'
+#' @examples
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 <- metabData(head(plasma30,500), samples = "CHEAR")
+#' p20 <- metabData(head(plasma20,500), samples = "Red", rtmax = 17.25)
 #' p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.005)
 #'
 #' nnmx <- nonmatched(p.comb, data = "x")
@@ -254,13 +421,120 @@ setGeneric("getStats", function(object) standardGeneric("getStats"))
 setGeneric("nonmatched", function(object, data = "x")
             standardGeneric("nonmatched"))
 
+
+#' @title Retrieve Relative Abundance Values
+#'
+#' @description  This retrieves feature Q values from one or all constituent
+#' dataset features of a \code{metabCombiner} object. Alternatively, the average
+#' Q value can be retrieved.
+#'
+#' @param object \code{metabCombiner} object
+#'
+#' @param data dataset identifier to extract information from; if NULL,
+#' extracts information from all datasets
+#'
+#' @param value Either "obs" (observed - default option) or "mean" average value
+#'
+#' @return data frame or vector of relative ranked abundance (Q) values
+#'
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 <- metabData(head(plasma30,500), samples = "CHEAR")
+#' p20 <- metabData(head(plasma20,500), samples = "Red")
+#' p.comb <- metabCombiner(p30, p20, xid = "p30", yid = "p20")
+#'
+#' ##retrieve all Q
+#' Q <- Qdata(p.comb, data = NULL)
+#'
+#' ##retrieve Q from p30
+#' Q <- Qdata(p.comb, data = "p30")
+#'
+#' ##retrieve mean Q
+#' Q <- Qdata(p.comb, value = "mean")
+#'
+#' @export
+setGeneric("Qdata", function(object, data = NULL, value = c("obs", "mean"))
+    standardGeneric("Qdata"))
+
+
+#' @title Retrieve Retention Time Values
+#'
+#' @description  This retrieves feature RT values from one or all constituent
+#' dataset features of a \code{metabCombiner} object. Alternatively, the average
+#' RT value can be retrieved.
+#'
+#' @param object \code{metabCombiner} object
+#'
+#' @param data dataset identifier to extract information from; if NULL,
+#' extracts information from all datasets
+#'
+#' @param value Either"obs" (observed - default option) or "mean"
+#'
+#' @return data frame or vector of retention time values
+#'
+#' @examples
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 <- metabData(head(plasma30,500), samples = "CHEAR")
+#' p20 <- metabData(head(plasma20,500), samples = "Red")
+#' p.comb <- metabCombiner(p30, p20, xid = "p30", yid = "p20")
+#'
+#' ##retrieve all RTs
+#' rt <- rtdata(p.comb, data = NULL)
+#'
+#' ##retrieve RTs from p30
+#' rt <- rtdata(p.comb, data = "p30")
+#'
+#' ##retrieve mean RT
+#' rt <- rtdata(p.comb, value = "mean")
+#'
+#' @export
+setGeneric("rtdata", function(object, data = NULL, value = c("obs", "mean"))
+    standardGeneric("rtdata"))
+
+
 ##updater methods
-setGeneric("update_mc",function(object, data, combinedTable, nonmatched,
-            samples,extra,anchors, fit, model, coefficients, stats, values)
-            standardGeneric("update_mc"))
+setGeneric("update_mc",function(object, combinedTable, featdata, anchors, model,
+                          fit, samples, extra, xy, datasets, nonmatched, stats,
+                          values, coefficients) standardGeneric("update_mc"))
 
 
 setGeneric("update_md", function(object, data, samples, extra, stats)
             standardGeneric("update_md"))
 
 
+
+#' @title Obtain XY Dataset Identifier
+#'
+#' @description \code{metabCombiner} alignment is performed in a pairwise manner
+#' between two datasets generically termed "X" & "Y". These methods prints the
+#' identifier associated with dataset X and Y, contained within the xy slot of
+#' a constructed \code{metabCombiner} object.
+#'
+#' @param object \code{metabCombiner} object
+#'
+#' @return character X or Y dataset identifiers
+#'
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 <- metabData(head(plasma30,500), samples = "CHEAR")
+#' p20 <- metabData(head(plasma20,500), samples = "Red")
+#' p.comb <- metabCombiner(p30, p20, xid = "p30", yid = "p20")
+#'
+#' #expected: "p30"
+#' x(p.comb)
+#'
+#' #expected: "p20"
+#' y(p.comb)
+#'
+#'
+#' @export
+setGeneric("x", function(object) standardGeneric("x"))
+
+#' @rdname x
+#'
+#' @export
+setGeneric("y", function(object) standardGeneric("y"))

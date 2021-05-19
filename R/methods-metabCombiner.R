@@ -8,12 +8,25 @@ setMethod("combinedTable", signature = "metabCombiner", function(object){
     return(object@combinedTable)
 })
 
+#' @rdname datasets
+#'
+#' @export
+setMethod("datasets", signature = "metabCombiner",
+            function(object, list = FALSE)
+{
+    if(list)
+        return(object@datasets)
+    return(as.character(unlist(object@datasets)))
+})
+
+
 #' @rdname getAnchors
 #'
 #' @export
 setMethod("getAnchors", signature = "metabCombiner", function(object){
     return(object@anchors)
 })
+
 
 #' @rdname getCoefficients
 #'
@@ -25,7 +38,12 @@ setMethod("getCoefficients", signature = "metabCombiner", function(object){
 #' @rdname getExtra
 #'
 #' @export
-setMethod("getExtra", function(object, data = "x"){
+setMethod("getExtra", function(object, data = NULL)
+{
+    if(is.null(data))
+        return(object@extra)
+    if(data == "x") data = x(object)
+    if(data == "y") data = y(object)
     return(object@extra[[data]])
 }, signature = "metabCombiner")
 
@@ -37,7 +55,6 @@ setMethod("getModel", function(object, fit = c("gam", "loess")){
     fit <- match.arg(fit)
     if(fit == "loess")
         return(object@model[["loess"]])
-
     if(fit == "gam")
         return(object@model[["gam"]])
 }, signature = "metabCombiner")
@@ -46,7 +63,12 @@ setMethod("getModel", function(object, fit = c("gam", "loess")){
 #' @rdname getSamples
 #'
 #' @export
-setMethod("getSamples", function(object, data = "x"){
+setMethod("getSamples", function(object, data = NULL){
+    if(is.null(data))
+        return(object@samples)
+    if(data == "x") data = x(object)
+    if(data == "y") data = y(object)
+
     return(object@samples[[data]])
 }, signature = "metabCombiner")
 
@@ -63,7 +85,12 @@ setMethod("getStats", signature = "metabCombiner", function(object){
 #'
 #' @export
 setMethod("nonmatched", signature = "metabCombiner",
-            function(object, data = "x"){
+            function(object, data = "x")
+{
+    if(is.null(data))
+        return(object@nonmatched)
+    if(data == "x") data = x(object)
+    if(data == "y") data = y(object)
     return(object@nonmatched[[data]])
 })
 
@@ -77,6 +104,7 @@ setMethod("nonmatched", signature = "metabCombiner",
 setMethod("plot", signature = "metabCombiner", function(x,y,...){
     plot_fit(object = x,...)
 })
+
 
 ## Show Method
 setMethod("show", signature = "metabCombiner", function(object){
@@ -101,9 +129,9 @@ setMethod("show", signature = "metabCombiner", function(object){
 
     cat("Total Groups:", stats[["nGroups"]], "\n")
     cat("Dataset X contains", stats[["input_size_X"]], "features of which",
-        stats[["grouped_size_X"]], "are grouped\n")
+        stats[["grouped_X"]], "are grouped\n")
     cat("Dataset Y contains", stats[["input_size_Y"]], "features of which",
-        stats[["grouped_size_Y"]], "are grouped\n")
+        stats[["grouped_Y"]], "are grouped\n")
 
     cat("combinedTable currently contains", nrow(cTable), "rows\n")
     if(nrow(anchors) > 0)
@@ -120,39 +148,29 @@ setMethod("show", signature = "metabCombiner", function(object){
 
 #update method
 setMethod("update_mc", signature = "metabCombiner",
-          function(object, data, combinedTable, nonmatched, samples, extra,
-                    anchors, fit, model, coefficients, stats, values)
+        function(object, combinedTable, featdata, anchors, model, fit, samples,
+                 extra, xy, datasets, nonmatched, stats, values, coefficients)
 {
     if(!missing(combinedTable))
         object@combinedTable <- combinedTable
-
-    if(!missing(data)){
-        if(!missing(nonmatched) & data == "x")
-            object@nonmatched[["x"]] <- nonmatched
-        else if(!missing(nonmatched) & data == "y")
-            object@nonmatched[["y"]] <- nonmatched
-        if(!missing(samples) & data == "x")
-            object@samples[["x"]] <- samples
-        else if(!missing(samples) & data == "y")
-            object@samples[["y"]] <- samples
-        if(!missing(extra) & data == "x")
-            object@extra[["x"]] <- extra
-        else if(!missing(extra) & data == "y")
-            object@extra[["y"]] <- extra
-    }
-
+    if(!missing(featdata))
+        object@featdata <- featdata
     if(!missing(anchors))
         object@anchors <- anchors
-
+    if(!missing(nonmatched))
+        object@nonmatched <- nonmatched
+    if(!missing(samples))
+        object@samples <- samples
+    if(!missing(extra))
+        object@extra <- extra
+    if(!missing(datasets))
+        object@datasets <- datasets
+    if(!missing(xy))
+        object@xy <- xy
     if(!missing(model) & !missing(fit))
-        if(fit == "gam")
-            object@model[["gam"]] <- model
-        else if(fit == "loess")
-            object@model[["loess"]] <- model
-
+        object@model[[fit]] <- model
     if(!missing(coefficients))
         object@coefficients <- coefficients
-
     if(!missing(stats) & !missing(values)){
         stats = c(getStats(object), stats::setNames(as.list(values), stats))
         stats = stats[!duplicated(names(stats), fromLast = TRUE)]
@@ -162,6 +180,18 @@ setMethod("update_mc", signature = "metabCombiner",
     return(object)
 })
 
+#' @rdname x
+#'
+#' @export
+setMethod("x", signature = "metabCombiner", function(object){
+    return(object@xy[["x"]])
+})
 
 
+#' @rdname x
+#'
+#' @export
+setMethod("y", signature = "metabCombiner", function(object){
+    return(object@xy[["y"]])
+})
 

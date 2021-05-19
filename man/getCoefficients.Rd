@@ -30,8 +30,8 @@ p30 <- metabData(plasma30, samples = "CHEAR")
 p20 <- metabData(plasma20, samples = "Red")
 
 p.comb <- metabCombiner(p30, p20)
-p.comb <- selectAnchors(p.comb, windx = 0.05, windy = 0.03)
-p.comb <- fit_gam(p.comb, k = 20, iterFilter = 1)
+p.comb <- selectAnchors(p.comb, windx = 0.05, windy = 0.04, tolrtq = 0.15)
+p.comb <- fit_gam(p.comb, k = 20, iterFilter = 1, family = "gaussian")
 p.comb <- calcScores(p.comb, A = 90, B = 14, C = 0.5)
 
 getCoefficients(p.comb)

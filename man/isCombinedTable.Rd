@@ -2,7 +2,7 @@
 % Please edit documentation in R/combinerCheck.R
 \name{isCombinedTable}
 \alias{isCombinedTable}
-\title{Determine combinedTable Validity}
+\title{Determine \code{combinedTable} Validity}
 \usage{
 isCombinedTable(object)
 }
@@ -15,4 +15,19 @@ isCombinedTable(object)
 \description{
 Checks whether input object is a valid metabData.Returns an
 integer code if invalid. Function is used alongside \code{combinerCheck}.
+}
+\details{
+a proper combinedTable must have the following characteristics to
+be deemed valid for \code{metabCombiner} operations:
+
+1) It must be a data.frame with at least 15 columns and at least 1 row
+2) The first 15 columns must be named "idx","idy","mzx","mzy","rtx","rty",
+   "rtProj","Qx","Qy","group","score","rankX","rankY","adductx", & "adducty"
+   in this exact order
+3) The first 15 columns must be of class: "character","character", "numeric",
+   "numeric","numeric", "numeric", "numeric","numeric","numeric","integer",
+   "numeric", "integer", "integer","character", "character"
+4)  The group column must have no missing or negative values
+
+Failing any of these criteria causes an error
 }

@@ -42,5 +42,4 @@ p.comb <- fit_gam(p.comb, iterFilter = 1, k = 20)
 
 getStats(p.comb) #metabCombiner stats
 
-
 }

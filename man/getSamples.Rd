@@ -7,23 +7,21 @@
 \alias{getSamples,metabData-method}
 \title{Get Sample Names From metabCombiner or metabData Object}
 \usage{
-getSamples(object, data = "x")
+getSamples(object, data = NULL)
 
-\S4method{getSamples}{metabCombiner}(object, data = "x")
+\S4method{getSamples}{metabCombiner}(object, data = NULL)
 
 \S4method{getSamples}{metabData}(object)
 }
 \arguments{
-\item{object}{A metabData object}
+\item{object}{\code{metabCombiner} or \code{metabData} object}
 
-\item{data}{Character. One of either 'x' or 'y'.}
+\item{data}{dataset identifier for \code{metabCombiner} objects}
 }
 \value{
 character vector of sample names. For \code{metabCombiner} objects
     these may come from the 'x' dataset (if \code{data} = "x") or the 'y'
     dataset (if \code{data} = "y").
-
-names of samples of formatted dataset.
 }
 \description{
 Returns the sample names from one of the two datasets used in

@@ -7,16 +7,16 @@
 \alias{getExtra,metabData-method}
 \title{Get Extra Data Column Names}
 \usage{
-getExtra(object, data = "x")
+getExtra(object, data = NULL)
 
-\S4method{getExtra}{metabCombiner}(object, data = "x")
+\S4method{getExtra}{metabCombiner}(object, data = NULL)
 
 \S4method{getExtra}{metabData}(object)
 }
 \arguments{
-\item{object}{metabCombiner or metabData object}
+\item{object}{\code{metabCombiner} or \code{metabData} object}
 
-\item{data}{Choice of input dataset, e.g. "x" or "y"}
+\item{data}{dataset identifier for \code{metabCombiner} objects}
 }
 \value{
 character vector of extra column names

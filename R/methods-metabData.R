@@ -21,10 +21,6 @@ setMethod("getExtra", signature = "metabData", function(object){
 
 #' @rdname getSamples
 #'
-#' @param object A metabData object
-#'
-#' @return names of samples of formatted dataset.
-#'
 #' @export
 setMethod("getSamples", signature = "metabData", function(object){
     samples <- object@samples
