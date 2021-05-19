@@ -3,17 +3,17 @@
 \name{combinedTable}
 \alias{combinedTable}
 \alias{combinedTable,metabCombiner-method}
-\title{Obtain metabCombiner Feature Alignment Report}
+\title{Obtain Feature Alignment Report}
 \usage{
 combinedTable(object)
 
 \S4method{combinedTable}{metabCombiner}(object)
 }
 \arguments{
-\item{object}{metabCombiner object.}
+\item{object}{\code{metabCombiner} object.}
 }
 \value{
-Feature Pair Alignment report data.frame. The columns of the report
+Feature Pair Alignment report data frame. The columns of the report
 are as follows:
 
 \item{idx}{Identities of features from dataset X}
@@ -35,14 +35,14 @@ are as follows:
 }
 \description{
 Obtain constructed table reporting every possible metabolomics
-feature alignment.
+feature pair alignment.
 }
 \examples{
 data(plasma30)
 data(plasma20)
 
-p30 <- metabData(plasma30, samples = "CHEAR")
-p20 <- metabData(plasma20, samples = "Red")
+p30 <- metabData(head(plasma30,500), samples = "CHEAR")
+p20 <- metabData(head(plasma20,500), samples = "Red")
 
 p.comb <- metabCombiner(p30, p20)
 p.comb.table <- combinedTable(p.comb)
