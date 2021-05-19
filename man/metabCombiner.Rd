@@ -5,23 +5,45 @@
 \alias{metabCombiner}
 \title{Form a metabCombiner object.}
 \usage{
-metabCombiner(xdata, ydata, binGap = 0.005)
+metabCombiner(
+  xdata,
+  ydata,
+  binGap = 0.005,
+  xid = NULL,
+  yid = NULL,
+  means = list(mz = FALSE, rt = FALSE, Q = FALSE)
+)
 }
 \arguments{
-\item{xdata}{metabData object. One of two datasets to be combined.}
+\item{xdata}{metabData or metabCombiner object}
 
-\item{ydata}{metabData object. One of two datasets to be combined.}
+\item{ydata}{metabData or metabCombiner object}
 
-\item{binGap}{numeric. Parameter used for grouping features by m/z.
+\item{binGap}{numeric parameter used for grouping features by m/z.
 See ?mzGroup for more details.}
+
+\item{xid}{character identifier of xdata. If xdata is a metabData, assigns a
+new ID for this dataset; if xdata is a metabCombiner, must be assigned to one
+of the existing dataset IDs. See details for more information.}
+
+\item{yid}{character identifier of ydata. If ydata is a metabData, assigns a
+new ID for this dataset; if ydata is a metabCombiner, must be assigned to one
+of the existing dataset IDs. See details for more information.}
+
+\item{means}{logical. Option to take average m/z, rt, and/or Q from
+\code{metabComber}. May be a vector (length = 3), a single value (TRUE/FALSE),
+or a list with names "mz", "rt", "Q" as names.}
 }
 \value{
-a metabCombiner object
+a \code{metabCombiner} object constructed from xdata and ydata, with
+features grouped by m/z according to the binGap argument.
 }
 \description{
-\code{metabCombiner()} takes two metabolomics featurelists, contained in
-\code{metabData} objects and constructs a merged dataset containing groups
-of features detected in both featurelists with similar m/z values.
+This constructs of an object of type \code{metabCombiner} from a pair of
+metabolomics datasets, formatted as either \code{metabData} (single-dataset
+class) or \code{metabCombiner} (combined-dataset class). An initial table of
+possible feature pair alignments is constructed by grouping features into m/z
+groups controlled by the binGap argument
 
 Takes two untargeted metabolomics feature lists (consisting of m/z,
 rt, and sample intensity measurements, plus optional identifiers & adduct
@@ -31,9 +53,53 @@ are assumed to be derived from biologically similar samples analyzed with
 a similar analytical method.
 }
 \details{
-The \code{binGap} argument defines consecutive differences between grouped
-m/z features. \code{metabCombiner} objects are used for all subsequent
-processing steps.
+This function serves as a constructor of the \code{metabCombiner} combined
+dataset class and the entry point in the main workflow for pairwise dataset
+alignment. Two arguments must be specified, \code{xdata} and \code{ydata},
+which must be both \code{metabData} objects, both \code{metabCombiner}
+objects, or one \code{metabData} and one \code{metabCombiner}. Each scenario
+is listed here:
+
+1) If xdata & ydata are \code{metabData} objects, a new \code{metabCombiner}
+object is constructed with an alignment of this pair. New character
+identifiers are assigned to each dataset (xid & yid, respectively); if these
+are unassigned, then "1" and "2" will be their respective ids. xdata & ydata
+will be the active "dataset x" and "dataset y" used for the paired alignment.
+
+2) If xdata is a \code{metabCombiner} and ydata is a \code{metabData}, then
+the result is the existing \code{metabCombiner} xdata augmented by an
+additional dataset, ydata. One set of meta-data (id, m/z, rt, Q, adduct
+labels) from xdata is used for alignment with the respective information
+from ydata, which is controlled by the \code{xid} argument; see the
+\code{\link{datasets}} method for extracting existing dataset ids. A new
+identifier yid is assigned to ydata, which must be distinct from the current
+dataset identifier.
+
+3) If xdata is a \code{metabData} and ydata is a \code{metabCombiner}, then
+a similar process to #2 occurs, with xdata augmented to the existing ydata
+object and one of the constitutent dataset's meta-data is accessed, as
+controlled by the yid argument. One major difference is that rts of ydata
+serve as the "reference" or dependent variable in the spline-fitting step.
+
+4) If xdata and ydata are both \code{metabCombiner} objects, the resulting
+\code{metabCombiner} object aligns information from both combined datasets.
+As before, one set of values contained in xdata (specified by xid argument)
+is used to align to the values from ydata (controlled by yid argument).
+The samples and extra columns are concatenated from all datasets.
+
+For \code{metabCombiner} object inputs, the mean of the numeric fields (m/z,
+rt, Q) from all constituent datasets can be used in alignment in place of
+values from a single dataset. These are controlled by the means argument. By
+default this is a list value with "mz", "rt" and "Q" as names, but may also
+accept a sinle logical or a length-3 logical vector. If set to a single
+logical, then all three fields are averaged (TRUE) or not averaged (FALSE).
+If a three-length argument is supplied (e.g. c(TRUE, FALSE, FALSE)), then the
+values correspond to m/z, rt, and Q respectively.
+}
+\note{
+For the x and y datasets selected for analysis, features are allowed
+only once; therefore all duplicates are removed and only the first appearance
+is allowed into the alignment analysis.
 }
 \examples{
 data(plasma30)
@@ -42,6 +108,7 @@ data(plasma20)
 p30 <- metabData(plasma30, samples = "CHEAR")
 p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
 
-p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075,
+                       xid = "p30", yid = "p20")
 
 }

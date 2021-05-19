@@ -26,17 +26,20 @@ combinerCheck <- function(errNo, type, error = "stop"){
 
     errors = switch(type,
         "combinedTable" =
+            paste(
             c("combinedTable is not a data frame",
             "combinedTable has fewer than expected columns",
             "combinedTable is empty",
             "combinedTable column names different from expected column names",
             "combinedTable column classes different from expected classes",
             "at least one missing or invalid group number in combinedTable"),
-
+            "; see: help(isCombinedTable)", sep = ""),
         "metabCombiner" =
             c("input object is not of class 'metabCombiner'",
-            "combinedTable in input object is invalid"),
-
+            "combinedTable in input object is invalid",
+            "duplicate dataset identifiers not allowed",
+            "row name mismatch between combinedTable and featdata"
+            ),
         "metabData" =
             c("input object is not of class 'metabData'",
             "empty data in input object",
@@ -44,7 +47,6 @@ combinerCheck <- function(errNo, type, error = "stop"){
             "data in input object has invalid column names",
             "data in input object has invalid column classes")
         )
-
     if(error == "stop")
         stop(errors[errNo])
     else if(error == "warning")
@@ -54,10 +56,24 @@ combinerCheck <- function(errNo, type, error = "stop"){
 }
 
 
-#' @title Determine combinedTable Validity
+#' @title Determine \code{combinedTable} Validity
 #'
 #' @description Checks whether input object is a valid metabData.Returns an
 #' integer code if invalid. Function is used alongside \code{combinerCheck}.
+#'
+#' @details a proper combinedTable must have the following characteristics to
+#' be deemed valid for \code{metabCombiner} operations:
+#'
+#' 1) It must be a data.frame with at least 15 columns and at least 1 row
+#' 2) The first 15 columns must be named "idx","idy","mzx","mzy","rtx","rty",
+#'    "rtProj","Qx","Qy","group","score","rankX","rankY","adductx", & "adducty"
+#'    in this exact order
+#' 3) The first 15 columns must be of class: "character","character", "numeric",
+#'    "numeric","numeric", "numeric", "numeric","numeric","numeric","integer",
+#'    "numeric", "integer", "integer","character", "character"
+#' 4)  The group column must have no missing or negative values
+#'
+#' Failing any of these criteria causes an error
 #'
 #' @param object  Any R object.
 #'
@@ -69,11 +85,9 @@ isCombinedTable <- function(object){
     expected <- c("idx","idy","mzx","mzy","rtx","rty","rtProj","Qx","Qy",
                 "group","score","rankX","rankY","adductx","adducty")
 
-    if(ncol(object) <= length(expected))
-        return(2)
+    if(ncol(object) <= length(expected)) return(2)
 
-    if(nrow(object) == 0)
-        return(3)
+    if(nrow(object) == 0)  return(3)
 
     if(!identical(names(object)[seq(1,length(expected))], expected))
         return(4)
@@ -86,7 +100,7 @@ isCombinedTable <- function(object){
     if(!identical(coltypes[seq(1,length(expected))], correct_types))
         return(5)
 
-    if(any(is.na(object[["group"]])) | any(object[["group"]] <= 0))
+    if(any(is.na(object[["group"]])) | any(object[["group"]] < 0))
         return(6)
 
     return(0)
@@ -106,12 +120,18 @@ isMetabCombiner <- function(object){
     if(!methods::is(object,"metabCombiner"))
         return(1)
 
-    combiner_table_code <- isCombinedTable(combinedTable(object))
+    combined_table_code <- isCombinedTable(combinedTable(object))
 
-    if(combiner_table_code){
-        combinerCheck(combiner_table_code, "combinedTable", "warning")
+    if(combined_table_code){
+        combinerCheck(combined_table_code, "combinedTable", "warning")
         return(2)
     }
+
+    if(any(duplicated(datasets(object))))
+        return(3)
+
+    if(!identical(row.names(combinedTable(object)),row.names(featdata(object))))
+        return(4)
 
     return(0)
 }

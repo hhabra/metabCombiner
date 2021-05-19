@@ -20,8 +20,8 @@
 #' data report.
 #'
 #' @return list object containing updated xset & yset with group information
-mzGroup <- function(xset, yset, binGap){
-    #forming m/z groups table
+mzGroup <- function(xset, yset, binGap)
+{
     mzGroups <- data.frame(`mz` = c(xset[["mz"]], yset[["mz"]])) %>%
                 dplyr::mutate(`set` = c(rep("x", nrow(xset)),
                                         rep("y", nrow(yset))),
@@ -34,11 +34,13 @@ mzGroup <- function(xset, yset, binGap){
         stop("At least one negative, missing, or non-numeric m/z value")
 
     mzGroups[["group"]] <- .Call("binByMZ",
-                                    mz = mzGroups[["mz"]],
-                                    datasets = mzGroups[["set"]],
-                                    gap = binGap,
-                                    PACKAGE = "metabCombiner")
+                                mz = mzGroups[["mz"]],
+                                datasets = mzGroups[["set"]],
+                                gap = binGap,
+                                PACKAGE = "metabCombiner")
 
+    if(all(mzGroups[["group"]] == 0))
+        stop("no m/z groups formed; check m/z values")
     xgroups <- dplyr::filter(mzGroups, .data$set == "x") %>%
                 dplyr::arrange(.data$index)
     ygroups <- dplyr::filter(mzGroups, .data$set == "y") %>%

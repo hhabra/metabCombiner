@@ -19,7 +19,7 @@ test_that("metabCombiner creation", {
     dy = suppressWarnings(metabData(datay, duplicate = c(0,0)))
     dxdy = metabCombiner(dx, dy, binGap = 0.005)
 
-    testthat::expect_equal(getSamples(dxdy), "sx")
+    testthat::expect_equal(getSamples(dxdy, data = "x"), "sx")
     testthat::expect_equal(getSamples(dxdy, data = "y"), "sy")
     testthat::expect_equal(getStats(dxdy)[["nGroups"]], 500)
 })
