@@ -33,13 +33,14 @@ p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
 p.comb <- selectAnchors(p.comb, tolmz = 0.003, tolrtq = 0.3, windy = 0.02)
 p.comb <- fit_gam(p.comb, k = 20, iterFilter = 1)
 p.comb <- calcScores(p.comb, A = 90, B = 14, C = 0.5)
+p.comb <- labelRows(p.comb, maxRankX = 2, maxRankY = 2, remove = TRUE)
 
 \donttest{
 ###using metabCombiner object as input
 write2file(p.comb, file = "plasma-combined.csv", sep = ",")
 
-###using combinedTable report as input
-cTable <- combinedTable(p.comb)
+###using combinedTable report and feature data as input
+cTable <- cbind.data.frame(combinedTable(p.comb), featdata(p.comb))
 write2file(cTable, file = "plasma-combined.txt", sep = "\t")
 }
 }
