@@ -70,7 +70,6 @@ int balancedGroups(SEXP labels, int *start, int *end, int* rankX, int* rankY)
 	//check if nrows is a square number; if not, group is unbalanced
 	while(root * root < nrows)
 		root++;
-
 	if(root * root != nrows)
 		return *end;
 
@@ -110,23 +109,25 @@ int balancedGroups(SEXP labels, int *start, int *end, int* rankX, int* rankY)
 }
 
 /*
- * filterScoreAndRank:
+ * filterScoreRankErr:
  * ---------------------
  *
- * Finds rows with score less than minScore and rankX & rankY in excess of
- * maxRankX & maxRankY, respectively. Updates and returns 'end' index pointer to
- * lowest non-removed row (all other rows need not be considered).
+ * Finds rows with score < minScore, rankX > maxRankX, rankY > maxRankY, or rterr >
+ * maxRTerr. Updates and returns 'end' index pointer to lowest non-removed row (all other
+ * rows need not be considered).
  *
 */
-int filterScoreAndRank(SEXP labels, int *start, int *end, double* score, int* rankX,
-						int* rankY, double minScore, int maxRankX, int maxRankY)
+int filterScoreRankErr(SEXP labels, int *start, int *end, double* score, int* rankX,
+						int* rankY, double minScore, int maxRankX, int maxRankY,
+						double maxRTerr, double* rterr)
 {
 
 	int updateEnd = 1;
 
 	for(int i = *end; i >= *start; i--){
 		if(strcmp("", CHAR(STRING_ELT(labels,i))) == 0){
-			if(rankX[i] > maxRankX ||  rankY[i] > maxRankY || score[i] < minScore)
+			if(rankX[i] > maxRankX ||  rankY[i] > maxRankY ||
+				score[i] < minScore || rterr[i] > maxRTerr)
 				SET_STRING_ELT(labels, i, mkChar("REMOVE"));
 
 			else
@@ -327,10 +328,15 @@ void findCons(SEXP labels, int* sub, int* alt, int* max, int *start,
  *
  * method: integer conflict detection method (1 = score, 2 = mzrt)
  *
+ * maxRTerr: Maximum allowable retention time fitting error
+ *
+ * rterr: retention time fitting errors
+ *
 */
 SEXP labelRows(SEXP labels, SEXP subgroup, SEXP alt, SEXP mzx, SEXP mzy, SEXP rtx,
                SEXP rty, SEXP score, SEXP rankX, SEXP rankY, SEXP group, SEXP balanced,
-			   SEXP delta, SEXP minScore, SEXP maxRankX, SEXP maxRankY, SEXP method)
+			   SEXP delta, SEXP minScore, SEXP maxRankX, SEXP maxRankY, SEXP method,
+			   SEXP maxRTerr, SEXP rterr)
 {
 	SEXP labels_c = PROTECT(duplicate(labels));
 
@@ -347,11 +353,13 @@ SEXP labelRows(SEXP labels, SEXP subgroup, SEXP alt, SEXP mzx, SEXP mzy, SEXP rt
 	int* rankX_c = INTEGER(rankX);
 	int* rankY_c = INTEGER(rankY);
 	bool balanced_c = LOGICAL(balanced);
-
 	double* delta_c = REAL(delta);
 	double minScore_c = REAL(minScore)[0];
 	int maxRankX_c = INTEGER(maxRankX)[0];
 	int maxRankY_c = INTEGER(maxRankY)[0];
+
+	double maxRTerr_c = REAL(maxRTerr)[0];
+	double* rterr_c = REAL(rterr);
 
 	//choosing conflict detection method
 	int method_c = INTEGER(method)[0];
@@ -384,9 +392,9 @@ SEXP labelRows(SEXP labels, SEXP subgroup, SEXP alt, SEXP mzx, SEXP mzy, SEXP rt
 			*end = balancedGroups(labels_c, start, end, rankX_c, rankY_c);
 		}
 
-		*end = filterScoreAndRank(labels_c, start, end, score_c, rankX_c,
-						          rankY_c, minScore_c, maxRankX_c, maxRankY_c);
-
+		*end = filterScoreRankErr(labels_c, start, end, score_c, rankX_c,
+						          rankY_c, minScore_c, maxRankX_c, maxRankY_c,
+						          maxRTerr_c, rterr_c);
 
 		findCons(labels_c, subgroup_c, alt_c, maxSub, start, end, delta_c, mzx_c,
 		         mzy_c, rtx_c, rty_c, score_c, head, detect_fun);

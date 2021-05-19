@@ -2,29 +2,40 @@
 % Please edit documentation in R/labelRows.R
 \name{labelRows}
 \alias{labelRows}
+\alias{reduceTable}
 \title{Annotate and Remove Report Rows}
 \usage{
 labelRows(
   object,
+  minScore = 0.5,
   maxRankX = 3,
   maxRankY = 3,
-  minScore = 0.5,
   method = c("score", "mzrt"),
   delta = 0.1,
-  balanced = TRUE,
+  maxRTerr = 10,
   remove = FALSE,
+  balanced = TRUE,
+  brackets_ignore = c("(", "[", "{")
+)
+
+reduceTable(
+  object,
+  maxRankX = 2,
+  maxRankY = 2,
+  minScore = 0.5,
+  maxRTerr = 10,
   brackets_ignore = c("(", "[", "{")
 )
 }
 \arguments{
 \item{object}{Either a \code{metabCombiner} object or \code{combinedTable}.}
 
-\item{maxRankX}{Integer. Maximum allowable rank for X dataset features.}
+\item{minScore}{numeric minimum allowable score (between 0 & 1) for
+metabolomics feature pair alignments}
 
-\item{maxRankY}{Integer. Maximum allowable rank for Y dataset features.}
+\item{maxRankX}{integer maximum allowable rank for X dataset features.}
 
-\item{minScore}{Numeric. Minimum allowable score (between 0 & 1) for
-metabolomics FPAs.}
+\item{maxRankY}{integer maximum allowable rank for Y dataset features.}
 
 \item{method}{Conflict detection method. If equal to "score" (default),
 assigns a conflict subgroup if score of lower-ranking FPA is
@@ -32,17 +43,20 @@ within some tolerance of higher-ranking FPA. If set to "mzrt",
 assigns a conflicting subgroup if within a small m/z & rt
 distance of the top-ranked FPA.}
 
-\item{delta}{numeric. Score or mz/rt distances used to define subgroups. If
+\item{delta}{numeric score or mz/rt distances used to define subgroups. If
 method = "score", a value (between 0 & 1) score difference
 between a pair of conflicting FPAs. If method = "mzrt", a length
 4 numeric: (m/z, rt, m/z, rt) tolerances, the first pair for X
 dataset features and the second pair for Y dataset features.}
 
+\item{maxRTerr}{numeric maximum allowable error between model-projected
+retention time (rtProj) and observed retention time (rty)}
+
+\item{remove}{Logical. Option to keep or discard rows deemed removable.}
+
 \item{balanced}{Logical. Optional processing of "balanced" groups, defined
 as groups with an equal number of features from input
 datasets where all features have a 1-1 match.}
-
-\item{remove}{Logical. Option to keep or discard rows deemed removable.}
 
 \item{brackets_ignore}{character. Bracketed identity strings of the types
 in this argument will be ignored}
@@ -56,11 +70,18 @@ table will have three new columns:
 \item{alt}{alternate subgroup for rows in multiple feature pair conflicts}
 }
 \description{
-Method for annotation of identity-matched, removable, & conflicting feature
-pair alignments (FPAs) in \code{combinedTable}. FPAs that fall within some
-small measure (in score or mz/rt) of the top-ranked FPA may require further
-inspection are organized into subgroups.
-.
+This is a method for annotating identity-matched, removable, &
+conflicting feature pair alignment (FPA) rows in the \code{combinedTable}
+report. Simple thresholds for score, rank, retention time error and delta
+score can computationally reduce the set of possible FPAs to the most likely
+compound matches. FPAs falling within some small measure (in score or mz/rt)
+of the top-ranked row are organized into subgroups to facilitate inspection;
+setting delta to 0 automatically reduces to 1-1 matches.
+
+\code{reduceTable} behaves identically to labelRows, but with delta set to 0
+& remove set to TRUE, automatically limiting to 1 - 1 feature matches
+constrained by rank and score threshold parameters. Rank thresholds defaults
+are also stricter with reduceTable.
 }
 \details{
 \code{metabCombiner} initially reports all possible FPAs in the rows of the
@@ -86,7 +107,8 @@ The labeling rules are as follows:
    label "REMOVE"
 5) Conflicting subgroup assignment as determined  by \code{method} &
    \code{delta} arguments. Conflicting alignments following outside
-   \code{delta} thresholds: labeled "REMOVE". Otherwise,
+   \code{delta} thresholds: labeled "REMOVE". Otherwise, they are assigned
+   a "CONFLICT" label and subgroup number.
 }
 \examples{
 data(plasma30)
@@ -98,14 +120,16 @@ p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
 p.comb = selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
 p.comb = fit_gam(p.comb, k = 20, iterFilter = 1)
 p.comb = calcScores(p.comb, A = 90, B = 14, C = 0.5)
-cTable = combinedTable(p.comb)
+
+###merge combinedTable and featdata
+cTable = cbind.data.frame(combinedTable(p.comb), featdata(p.comb))
 
 ##example using score-based conflict detection method
 lTable = labelRows(cTable, maxRankX = 3, maxRankY = 2, minScore = 0.5,
-    method = "score", delta = 0.2)
+         method = "score", maxRTerr = 0.5, delta = 0.2)
 
 ##example using mzrt-based conflict detection method
 lTable = labelRows(cTable, method = "mzrt", maxRankX = 3, maxRankY = 2,
-                     delta = c(0.005, 1, 0.005,0.5))
+                     delta = c(0.005, 0.5, 0.005,0.3), maxRTerr = 0.5)
 
 }
