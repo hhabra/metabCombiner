@@ -2,7 +2,8 @@
 % Please edit documentation in R/params.R
 \name{labelRowsParam}
 \alias{labelRowsParam}
-\title{List labelRows Defaults}
+\alias{reduceTableParam}
+\title{List labelRows & reduceTable Defaults}
 \usage{
 labelRowsParam(
   maxRankX = 3,
@@ -10,15 +11,24 @@ labelRowsParam(
   minScore = 0.5,
   delta = 0.1,
   method = "score",
+  maxRTerr = 10,
   balanced = TRUE,
   remove = FALSE,
   brackets_ignore = c("(", "[", "{")
 )
+
+reduceTableParam(
+  maxRankX = 2,
+  maxRankY = 2,
+  minScore = 0.5,
+  maxRTerr = 10,
+  brackets_ignore = c("(", "[", "{")
+)
 }
 \arguments{
-\item{maxRankX}{maximum rank allowable for X features; default: 3}
+\item{maxRankX}{maximum rank allowable for X features}
 
-\item{maxRankY}{maximum rank allowable for Y features; default: 3}
+\item{maxRankY}{maximum rank allowable for Y features}
 
 \item{minScore}{minimum score threshold; default: 0.5}
 
@@ -27,6 +37,9 @@ default: 0.1}
 
 \item{method}{thresholding method for subgroup detection ("score" or "mzrt");
 default: "score"}
+
+\item{maxRTerr}{maximum allowable difference between predicted RT (rtProj) &
+observed RT (rty); default: 10 minutes}
 
 \item{balanced}{option to reduce balanced groups; default: TRUE}
 
@@ -39,11 +52,13 @@ default: FALSE}
 list of labelRows parameters
 }
 \description{
-List of default parameters for combined table row annotation and removal.
-See help(labelRows) or ?labelRows for more details.
+List of default parameters for combinedTable row annotation and removal.
+See help(labelRows) or ?labelRows for more details. reduceTableParam loads
+parameters for the more automated \code{reduceTable} function
 }
 \examples{
-lrParams <- labelRowsParam(maxRankX = 2, maxRankY = 2, delta = 0.1)
+lrParams <- labelRowsParam(maxRankX = 2, maxRankY = 2, delta = 0.1,
+                             maxRTerr = 0.5)
 
 }
 \seealso{
