@@ -25,7 +25,7 @@
 * groups: feature m/z group placement
 * 
 */
-void write2file(SEXP lines, SEXP file, SEXP groups)
+SEXP write2file(SEXP lines, SEXP file, SEXP groups, SEXP code)
 {
 	int *groups_c = INTEGER(groups);
 	int n = LENGTH(groups);
@@ -37,15 +37,14 @@ void write2file(SEXP lines, SEXP file, SEXP groups)
 	for(int i = 1; i < n; i++){
 		if(groups_c[i] != groups_c[i-1])
 			fputs("\n", output);
-			
+		
 		const char *line = CHAR(STRING_ELT(lines, i));
 	
 		fputs(line, output);
 		fputs("\n", output); 
 	}
 
-	fclose(output);
-	
-	return;
+	fclose(output);	
+	return(code);
 } 
 
