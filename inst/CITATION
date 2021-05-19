@@ -1,0 +1,20 @@
+citHeader("To cite 'metabCombiner' package in publications use:")
+
+citEntry(entry="article",
+	 author=c(
+	 person("H.","Habra"),
+	 person("M.","Kachman"),
+	 person("K.","Bullock"),
+	 person("C.","Clish"),
+	 person("C.","Evans"),
+	 person("A.","Karnovsky")),
+	 title="metabCombiner: Paired Untargeted LC-HRMS Metabolomics Feature Matching and Concatenation of Disparately Acquired Data Sets",
+	 journal="Analytical Chemistry",
+	 year="2021",
+	 month="March",
+	 volume="93",
+	 issue="12",
+	 url="https://doi.org/10.1021/acs.analchem.0c03693",
+	 textVersion=paste("H. Habra, M. Kachman, K. Bullock, C. Clish, C. Evans, A. Karnovsky.",
+	 "metabCombiner: Paired Untargeted LC-HRMS Metabolomics Feature Matching and Concatenation of Disparately Acquired Data Sets",
+	 "Analytical Chemistry, 93:5028–5036 (2021)"))
