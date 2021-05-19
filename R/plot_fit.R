@@ -23,7 +23,10 @@
 #' different color and associated legend.
 #'
 #' @param ocol color of the outlier points; outlier argument must be set to
-#'  "highlight" or "h"
+#' "highlight" or "h"
+#'
+#' @param legend length-2 character vector indicating point labels in the legend
+#' if outlier argument set to "highlight" or "h"
 #'
 #' @param ... Other variables passed into graphics::plot
 #'
@@ -49,13 +52,17 @@
 #' @export
 plot_fit <- function(object, fit = c("gam","loess"), pcol = "black",
                     lcol = "red", lwd = 3, pch = 19, outlier = "show",
-                    ocol = "springgreen4",...)
+                    ocol = "springgreen4", legend = c("anchor", "outlier"),
+                    ...)
 {
     fit <- match.arg(fit)
     model <- getModel(object, fit = fit)
 
     if(is.null(model))
         stop(paste("object missing model of type", fit))
+
+    if(length(legend) != 2)
+        stop("legend must be a length 2 character vector")
 
     if(fit == "loess")
         data <- data.frame(rtx = model[["x"]], rty = model[["y"]],
@@ -68,19 +75,20 @@ plot_fit <- function(object, fit = c("gam","loess"), pcol = "black",
 
     data <- dplyr::arrange(data, .data$rtx)
 
-    if(outlier %in% c("remove", "r"))
+    if(outlier %in% c("remove", "r", "highlight", "h")){
+        data2 <- dplyr::filter(data, .data$weights == 0)
         data <- dplyr::filter(data, .data$weights > 0)
+    }
 
     rtx <- data[["rtx"]];  rty <- data[["rty"]]
-
     graphics::plot(rtx, rty, type = "p", col = pcol, pch = pch, ...)
     graphics::lines(x = data[["rtx"]], y = data[["preds"]],
                     col = lcol, lwd = lwd,...)
 
     if(outlier %in% c("highlight", "h")){
-        data <- dplyr::filter(data, .data$weights == 0)
-        graphics::points(data[["rtx"]],data[["rty"]], col = ocol,...)
-        graphics::legend("topleft", legend = c("anchor", "outlier"),
-                        col = c(pcol, ocol), pch = pch)
+        graphics::points(data2[["rtx"]],data2[["rty"]], col = ocol,
+                        pch = pch,...)
+        graphics::legend("topleft", legend = legend, col = c(pcol, ocol),
+                        pch = pch)
     }
 }

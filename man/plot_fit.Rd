@@ -16,6 +16,7 @@ plot_fit(
   pch = 19,
   outlier = "show",
   ocol = "springgreen4",
+  legend = c("anchor", "outlier"),
   ...
 )
 }
@@ -45,6 +46,9 @@ different color and associated legend.}
 
 \item{ocol}{color of the outlier points; outlier argument must be set to
 "highlight" or "h"}
+
+\item{legend}{length-2 character vector indicating point labels in the legend
+if outlier argument set to "highlight" or "h"}
 }
 \value{
 no values returned
