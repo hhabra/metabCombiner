@@ -74,12 +74,9 @@ detectSamples <- function(colnames, coltypes){
 
     if(all(coltypes == "numeric"))
         return(colnames)
-
     if (base::all(coltypes != "numeric"))
         stop("no numeric sample columns could be detected")
-
     consec <- base::rle(coltypes)    #looks for consecutive column types
-
     consec.numeric <- (consec[["values"]] == "numeric")
     longest.numeric <- base::max(consec$lengths[consec.numeric])
 
@@ -88,7 +85,6 @@ detectSamples <- function(colnames, coltypes){
     lastSample <- cumsum(consec[["lengths"]])[index]
 
     samples <- colnames[seq(firstSample, lastSample)]
-
     return(samples)
 }
 
@@ -147,9 +143,9 @@ selectRT <- function(table, col){
     if(any(rts <= 0) | any(is.na(rts)))
         stop("retention time values must be positive with no missing values")
 
-    if(any(rts > 100))
+    if(any(rts > 500))
         warning("program defaults expect time in minutes, ",
-                "adjust values if time units are in seconds!")
+                "adjust values if time units are in seconds")
 
     return(rts)
 }

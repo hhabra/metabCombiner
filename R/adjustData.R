@@ -32,17 +32,12 @@ filterRT <- function(data, rtmin, rtmax)
 
     if(rtmin == "min")
         rtmin <- min(rts)
-
     if(rtmax == "max")
         rtmax <- max(rts)
-
-    if(!is.numeric(rtmin) | rtmin > rtmax | rtmin < 0 |
-        rtmin > max(rts) | rtmin < min(rts))
+    if(!is.numeric(rtmin) | rtmin > rtmax | rtmin < 0 | rtmin > max(rts))
         stop("invalid value supplied for 'rtmin' argument")
-
-    if(!is.numeric(rtmax) | rtmin > rtmax | rtmax < 0 | rtmax > max(rts))
+    if(!is.numeric(rtmax) | rtmax < min(rts) | rtmax < 0)
         stop("invalid value supplied for 'rtmax' argument")
-
     data <- dplyr::filter(data, .data$rt >= rtmin & .data$rt <= rtmax)
 
     if(nrow(data) == 0)
@@ -187,7 +182,6 @@ adjustData <- function(Data, misspc, measure, rtmin, rtmax, zero,duplicate)
         data <- data[-duplicates,]
         counts <- counts[-duplicates]
     }
-
     stats[["filtered_as_duplicates"]] <- length(duplicates)
     stats[["final_count"]] <- nrow(data)
 
