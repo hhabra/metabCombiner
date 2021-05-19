@@ -39,18 +39,24 @@ setClass("metabData", slots = c(data = "data.frame",
 #'
 #' @description
 #' This is the main object for the \code{metabCombiner} package workflow. This
-#' object holds a combined feature table, along with a retention time
-#' projection model, the ordered pair anchors used to generate this model, and
-#' key object statistics.
+#' object holds a combined feature table, along with a retention time warping
+#' model, the ordered pair anchors used to generate this model, important
+#' information organized by dataset, and key object statistics.
 #'
-#' @slot combinedTable data.frame displaying all feature pair alignments,
+#' @slot combinedTable data frame displaying all feature pair alignments,
 #' combining measurements of all possible shared compounds
 #'
-#' @slot nonmatched list of data frames consisting of nonmatched features
+#' @slot featdata data frame of feature metadata (id, m/z, rt, Q, adduct)
 #'
-#' @slot anchors data.frame of of feature alignments used for rt modeling
+#' @slot anchors data frame of feature pairs used for RT warping model
 #'
 #' @slot model  list containing the last fitted nonlinear model(s)
+#'
+#' @slot datasets list of constituent datasets from xdata & ydata inputs
+#'
+#' @slot xy current X & Y datasets
+#'
+#' @slot nonmatched list of data frames consisting of nonmatched features
 #'
 #' @slot coefficients list of last used A,B,C similarity weight values
 #'
@@ -62,22 +68,28 @@ setClass("metabData", slots = c(data = "data.frame",
 #'
 #' @export
 setClass("metabCombiner", slots = c(combinedTable = "data.frame",
-                                    nonmatched = "list",
+                                    featdata = "data.frame",
                                     anchors = "data.frame",
                                     model = "list",
-                                    coefficients = "list",
+                                    datasets = "list",
+                                    xy = "list",
                                     samples = "list",
                                     extra = "list",
+                                    nonmatched = "list",
+                                    coefficients = "list",
                                     stats = "list"
                             ),
                             prototype = prototype(
                                     combinedTable = data.frame(),
-                                    nonmatched = list(),
+                                    featdata = data.frame(),
                                     anchors = data.frame(),
                                     model = list(),
-                                    coefficients = list(),
+                                    datasets = list(),
+                                    xy = list(),
                                     samples = list(),
                                     extra = list(),
+                                    nonmatched = list(),
+                                    coefficients = list(),
                                     stats = list()
                             )
 )

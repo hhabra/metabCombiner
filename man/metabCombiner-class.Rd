@@ -6,21 +6,27 @@
 \title{'metabCombiner' Combined Metabolomics Dataset Class}
 \description{
 This is the main object for the \code{metabCombiner} package workflow. This
-object holds a combined feature table, along with a retention time
-projection model, the ordered pair anchors used to generate this model, and
-key object statistics.
+object holds a combined feature table, along with a retention time warping
+model, the ordered pair anchors used to generate this model, important
+information organized by dataset, and key object statistics.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{combinedTable}}{data.frame displaying all feature pair alignments,
+\item{\code{combinedTable}}{data frame displaying all feature pair alignments,
 combining measurements of all possible shared compounds}
 
-\item{\code{nonmatched}}{list of data frames consisting of nonmatched features}
+\item{\code{featdata}}{data frame of feature metadata (id, m/z, rt, Q, adduct)}
 
-\item{\code{anchors}}{data.frame of of feature alignments used for rt modeling}
+\item{\code{anchors}}{data frame of feature pairs used for RT warping model}
 
 \item{\code{model}}{list containing the last fitted nonlinear model(s)}
+
+\item{\code{datasets}}{list of constituent datasets from xdata & ydata inputs}
+
+\item{\code{xy}}{current X & Y datasets}
+
+\item{\code{nonmatched}}{list of data frames consisting of nonmatched features}
 
 \item{\code{coefficients}}{list of last used A,B,C similarity weight values}
 
