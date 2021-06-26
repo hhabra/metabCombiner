@@ -1,5 +1,85 @@
 Updates:
 
+Version 1.2.1
+----------------------
+Changes to fit_gam()/ fit_loess():
+    + messages changed from using cat() to using message()
+
+Changes to metabCombiner() & combinedTable / featData slots:
+    + rowID column now the first column in both tables instead of having this
+      information be the row names
+
+Changes to calcScores() / evaluateParams() / labelRows():
+    + updated to reflect above changes to keep rowID identical between
+      combinedTable & featData
+
+Changes to write2file():
+    + combinedTable & featData merged by rowID column when metabCombiner objects
+      used as input
+
+
+Version 1.1.4 (2021-5-18)
+-------------------------------
+Multi-dataset support and batchCombine added to metabCombiner package.
+
+Changes to metabCombiner-class:
+    + new slot "featdata" for feature descriptor (id,mz,rt,Q,adduct) tracking
+    + new slot "datasets" for dataset ID tracking
+    + new slot "xy" for tracking current x & y dataset labels
+
+New metabCombiner methods:
+    + datasets: retrieves dataset identifiers from metabCombiner object
+    + x: retrieves identifier of current x dataset
+    + y: retrieves identifier of current y dataset
+    + featdata: retrieves all feature meta-data or from one dataset
+    + iddata: retrieves all feature identities or identities from one dataset
+    + mzdata: retrieves all feature m/z values or m/z values from one dataset
+    + rtdata: retrieves all feature rt values or rt values from one dataset
+    + Qdata: retrieves all feature Q values or Q values from one dataset
+    + adductdata: retrieves all adduct labels or adduct labels from one dataset
+
+New reduceTable()/ reduceTableParam() functions:
+    + variant of labelRows where reduce argument automatically set to TRUE
+    + defaults are the same as labelRows()/ labelRowsParam(), except for rank
+      thresholds (set to 2 for maxRankX & maxRankY)
+
+New batchCombine() function:
+    + method for automated sequential alignment of metabolomics batch datasets
+    + modeled after metabCombine function, but takes a list of metabData objects
+      as input and applies reduceTable with reduceTableParam() parameter inputs
+
+Changes to object methods (getExtra, getSamples, nonmatched):
+    + default data argument value changed to NULL
+    + if data = NULL, returns full list pertaining to object slot
+
+Changes to data.R:
+    + new object "metabBatches" - a list of three batch data frame for use as an
+      example dataset for batchCombine()
+
+Changes to metabCombiner():
+    + xdata & ydata arguments now accept metabCombiner objects as inputs
+    + featdata slot constructed alongside combinedTable at this step
+    + xid & yid arguments added for individual dataset naming (metabData) or
+      specifying active x & y dataset to use for analysis (metabCombiner)
+    + option to average m/z, rt, & Q for metabCombiner object inputs
+    + faster metabCombiner table construction
+
+Changes to labelRows()/ labelRowsParam():
+    + new argument maxRTerr for annotating/ removing feature pair alignment rows
+      with excessive retention time fitting errors
+
+Changes to plot_fit():
+    + bug fix for highlighting outliers
+    + new legend argument for specifying points on the legend
+
+Changes to write2file():
+    + when metabCombiner objects provided as input, merges the combinedTable with
+      featData in output file for printing
+    + faster data pasting with tidyr::unite
+
+numerous other changes to documentation, parameter & error checking
+
+
 Version 1.1.3 (2021-1-13)
 -------------------------------
 Package additions:
@@ -19,6 +99,7 @@ Changes to fit_loess():
 
 Changes to selectAnchors():
     + default for "tolrtq" argument changed from 0.5 to 0.3
+
 
 Version 1.1.2 (2020-12-28)
 -------------------------------
