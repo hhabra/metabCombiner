@@ -80,7 +80,7 @@ setting delta to 0 automatically reduces to 1-1 matches.
 
 \code{reduceTable} behaves identically to labelRows, but with delta set to 0
 & remove set to TRUE, automatically limiting to 1 - 1 feature matches
-constrained by rank and score threshold parameters. Rank thresholds defaults
+constrained by rank and score threshold parameters. Rank threshold defaults
 are also stricter with reduceTable.
 }
 \details{

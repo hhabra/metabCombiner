@@ -18,9 +18,12 @@ form_means <- function(means){
 }
 
 
-#' @title Form Single Dataset
+#' @title Form Single Dataset from Object
 #'
-#' @description
+#' @description When a metabCombiner object is supplied as input for a new
+#' metabCombiner construction, information from one dataset or the mean of all
+#' constituent datasets is chosen to represent that object. Only one row is
+#' allowed for each feature, with duplicates discarded.
 #'
 #' @param object metabCombiner object
 #'
@@ -89,14 +92,26 @@ formCombinedTable <- function(object, xset, yset, xreps, yreps){
                     stringsAsFactors = FALSE, check.names = FALSE)
     consec <- lapply(rle(cTable[["group"]])[["lengths"]], function(l) seq(1,l))
     consec <- unlist(consec)
-    row.names(cTable) = sprintf("%s.%s", cTable[["group"]], consec)
+    rowID <- sprintf("%s.%s", cTable[["group"]], consec)
+    cTable <- cbind.data.frame(rowID = rowID, cTable)
+
     return(cTable)
 }
 
 #' @title Form Feature Metadata
 #'
+#' @description This forms the featdata slot of a metabCombiner object,
+#' consisting of feature descriptors from all constituent datasets.
 #'
+#' @param object metabCombiner object
 #'
+#' @param xfeat data frame of X dataset feature descriptors
+#'
+#' @param yfeat data frame of Y dataset feature descriptors
+#'
+#' @param xreps Number of repeats for X dataset features
+#'
+#' @param yreps Number of repeat for Y dataset features
 #'
 #' @noRd
 form_featdata <- function(object, cTable, xfeat, yfeat, xreps, yreps)
@@ -128,7 +143,8 @@ form_featdata <- function(object, cTable, xfeat, yfeat, xreps, yreps)
     else if(!is.null(xfeat) & !is.null(yfeat)){
         xfeat <- dplyr::slice(xfeat, rep(seq(1,n()), times = xreps))
         yfeat <- yfeat[yreps,]
-        featdata <- cbind.data.frame(dplyr::select(xfeat, starts_with("id_")),
+        featdata <- cbind.data.frame(
+                                dplyr::select(xfeat, starts_with("id_")),
                                 dplyr::select(yfeat, starts_with("id_")),
                                 dplyr::select(xfeat, starts_with("mz_")),
                                 dplyr::select(yfeat, starts_with("mz_")),
@@ -142,12 +158,30 @@ form_featdata <- function(object, cTable, xfeat, yfeat, xreps, yreps)
     fields <- c("id","mz","rt","Q","adduct")
     names(featdata) <- paste(rep(fields, each = length(datasets(object))),
                              rep(datasets(object),length(fields)), sep = "_")
-    row.names(featdata) <- row.names(cTable)
+    featdata <- cbind.data.frame(rowID = cTable[["rowID"]], featdata)
     return(featdata)
 }
 
 #' @title Form combinedTable and featData
 #'
+#' @description This wraps together the formation of the combinedTable and
+#' featdata from the input datasets used to construct the metabCombiner object.
+#' This completes the initial object formation from the features previously
+#' grouped by m/z.
+#'
+#' @param object metabCombiner object
+#'
+#' @param xset data frame of grouped X dataset features used to form the
+#'              combinedTable result
+#'
+#' @param yset data frame of grouped X dataset features used to form the
+#'              combinedTable result
+#'
+#' @param xfeat data frame of feature metadata originating from xdata input
+#'
+#' @param yfeat data frame of feature metadata originating from ydata input
+#'
+#' @param nGroups total number of feature groups as determined by similar m/z
 #'
 #'
 #' @noRd

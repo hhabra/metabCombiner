@@ -1,4 +1,3 @@
-
 #' Reform Report with New Labels
 #'
 #' @description Helper function for labelRows(). After determining row
@@ -36,6 +35,28 @@ formLabeledTable <- function(fields, values, remove)
 }
 
 
+
+
+annotateFPAs <- function(data, minScore, delta, maxRankX, maxRankY, method,
+                        rterr, maxRTerr, balanced)
+{
+    data[["labels"]] <- .Call("labelRows",
+                                labels = data$labels, subgroup = data$subgroup,
+                                alt = data$alt, mzx = data$mzx,
+                                mzy = data$mzy, rtx = data$rtx,
+                                rty = data$rty, score = data$score,
+                                rankX = data$rankX, rankY = data$rankY,
+                                group = data$group, balanced = balanced,
+                                delta = delta, minScore = minScore,
+                                maxRankX = as.integer(maxRankX[1]),
+                                maxRankY = as.integer(maxRankY[1]),
+                                method = method, maxRTerr = as.numeric(maxRTerr),
+                                rterr = rterr, PACKAGE = "metabCombiner")
+
+    return(data)
+}
+
+
 #' @title Annotate and Remove Report Rows
 #'
 #' @description
@@ -49,7 +70,7 @@ formLabeledTable <- function(fields, values, remove)
 #'
 #' \code{reduceTable} behaves identically to labelRows, but with delta set to 0
 #' & remove set to TRUE, automatically limiting to 1 - 1 feature matches
-#' constrained by rank and score threshold parameters. Rank thresholds defaults
+#' constrained by rank and score threshold parameters. Rank threshold defaults
 #' are also stricter with reduceTable.
 #'
 #' @param object Either a \code{metabCombiner} object or \code{combinedTable}.
@@ -158,31 +179,23 @@ labelRows <- function(object, minScore = 0.5, maxRankX = 3, maxRankY = 3,
     check_lblrows_pars(maxRankX, maxRankY, minScore, maxRTerr, balanced,
                        method, delta)
     cTable <- cTable[with(cTable, order(`group`, desc(`score`))), ]
-    values <- cTable[,-seq(1,15)]
-    fields <- cTable[,seq(1,15)]
+    values <- cTable[,-seq(1,16)]
+    fields <- cTable[,seq(1,16)]
     fields[["labels"]] <- compare_strings(fields[["idx"]], fields[["idy"]],
                                         "IDENTITY", "", brackets_ignore)
-    fields[["subgroup"]] <- fields[["alt"]]  <- integer(nrow(fields))
+    fields[["subgroup"]] <- integer(nrow(fields))
+    fields[["alt"]] <- integer(nrow(fields))
     method <- as.integer(ifelse(method == "score", 1, 2))  #score: 1,  mzrt: 2
     rterr <- abs(fields[["rty"]] - fields[["rtProj"]])
 
-    fields[["labels"]] <- .Call("labelRows",
-                            labels = fields$labels, subgroup = fields$subgroup,
-                            alt = fields$alt, mzx = fields$mzx,
-                            mzy = fields$mzy, rtx = fields$rtx,
-                            rty = fields$rty, score = fields$score,
-                            rankX = fields$rankX, rankY = fields$rankY,
-                            group = fields$group, balanced = balanced,
-                            delta = delta, minScore = minScore,
-                            maxRankX = as.integer(maxRankX[1]),
-                            maxRankY = as.integer(maxRankY[1]),
-                            method = method, maxRTerr = as.numeric(maxRTerr),
-                            rterr = rterr, PACKAGE = "metabCombiner")
+    fields <- annotateFPAs(fields, minScore, delta, maxRankX, maxRankY, method,
+                            rterr, maxRTerr, balanced)
 
     cTable <- formLabeledTable(fields, values, remove)
 
     if(methods::is(object, "metabCombiner")){
-        fdata <- featdata(object)[row.names(cTable),]
+        fdata <- featdata(object)
+        fdata <- fdata[match(cTable[["rowID"]], fdata[["rowID"]]),]
         object <- update_mc(object, combinedTable = cTable, featdata = fdata)
     }
     else

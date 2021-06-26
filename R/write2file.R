@@ -39,7 +39,7 @@
 write2file <- function(object, file, sep = ","){
     if(isCombinedTable(object) == 0) cTable = object
     else if(isMetabCombiner(object) == 0)
-        cTable = cbind.data.frame(combinedTable(object), featdata(object))
+        cTable = merge(combinedTable(object), featdata(object), by = "rowID")
     else{
         combinerCheck(isMetabCombiner(object), "metabCombiner", "warning")
         combinerCheck(isCombinedTable(object), "combinedTable", "warning")
@@ -72,12 +72,12 @@ write2file <- function(object, file, sep = ","){
     if(any(duplicated(names(cTable))))
         lines <- do.call(paste, c(cTable, list(sep = sep)))
     else
-        lines <- tidyr::unite(cTable, col = "dat", names(cTable), sep = ",")$dat
+        lines <- tidyr::unite(cTable, col = "dat", names(cTable), sep = sep)$dat
 
     .Call("write2file", lines = lines, file = file, groups = group, code = 0,
             PACKAGE = "metabCombiner")
 
-    return()
+    return(invisible())
 }
 
 

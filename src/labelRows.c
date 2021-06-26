@@ -169,7 +169,7 @@ void detect_con_score(SEXP labels, int* sub, int* alt, int ri, int rj, double* d
 	}
 
 	if(sub[ri] == 0){
-		if(strcmp("", CHAR(STRING_ELT(labels,ri))) == 0)
+	    if(strcmp("", CHAR(STRING_ELT(labels,ri))) == 0)
 			SET_STRING_ELT(labels, ri, mkChar("CONFLICT"));
 
         sub[ri] = ++*max;
@@ -236,9 +236,6 @@ void detect_con_mzrt(SEXP labels, int* sub, int* alt, int ri, int rj, double* de
  * ------------------------
  * This function loops through the features of a group that remain after score and rank
  * filtering, finding pairs of alignments which may be in conflict over a single feature.
- *
- * PARAMETERS:
- *
  *
 */
 void findCons(SEXP labels, int* sub, int* alt, int* max, int *start,
@@ -364,7 +361,7 @@ SEXP labelRows(SEXP labels, SEXP subgroup, SEXP alt, SEXP mzx, SEXP mzy, SEXP rt
 	//choosing conflict detection method
 	int method_c = INTEGER(method)[0];
 	void (*detect_fun)(SEXP, int*, int*, int, int, double*, double*, double*, double*,
-	                   int*, int, int*);
+	                    int*, int, int*);
 
 	int* head;   //head index of subgroup; special variable for score-conflict method
 
@@ -393,11 +390,11 @@ SEXP labelRows(SEXP labels, SEXP subgroup, SEXP alt, SEXP mzx, SEXP mzy, SEXP rt
 		}
 
 		*end = filterScoreRankErr(labels_c, start, end, score_c, rankX_c,
-						          rankY_c, minScore_c, maxRankX_c, maxRankY_c,
-						          maxRTerr_c, rterr_c);
+						        rankY_c, minScore_c, maxRankX_c, maxRankY_c,
+						        maxRTerr_c, rterr_c);
 
 		findCons(labels_c, subgroup_c, alt_c, maxSub, start, end, delta_c, mzx_c,
-		         mzy_c, rtx_c, rty_c, score_c, head, detect_fun);
+		        mzy_c, rtx_c, rty_c, score_c, head, detect_fun);
 	}
 
 	UNPROTECT(1);

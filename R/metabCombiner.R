@@ -2,7 +2,7 @@
 #' @title Form a metabCombiner object.
 #'
 #' @description
-#' This constructs of an object of type \code{metabCombiner} from a pair of
+#' This constructs an object of type \code{metabCombiner} from a pair of
 #' metabolomics datasets, formatted as either \code{metabData} (single-dataset
 #' class) or \code{metabCombiner} (combined-dataset class). An initial table of
 #' possible feature pair alignments is constructed by grouping features into m/z
@@ -74,9 +74,10 @@
 #' @return a \code{metabCombiner} object constructed from xdata and ydata, with
 #' features grouped by m/z according to the binGap argument.
 #'
-#' @note For the x and y datasets selected for analysis, features are allowed
-#' only once; therefore all duplicates are removed and only the first appearance
-#' is allowed into the alignment analysis.
+#' @note If using a \code{metabCombiner} object as input, only one row is
+#' allowed per feature corresponding to its first appearance. It is strongly
+#' recommended to reduce the table to 1-1 paired matches prior to aligning it
+#' with a new dataset.
 #'
 #' @examples
 #' data(plasma30)

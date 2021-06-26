@@ -214,7 +214,7 @@ selectAnchors <- function(object, useID = FALSE, tolmz = 0.003, tolQ = 0.3,
 
     check_anchors_pars(useID, tolmz, tolQ, tolrtq, windx, windy)
 
-    cTable <- combinedTable(object)[,seq(1,15)]
+    cTable <- combinedTable(object)[,seq(1,16)]
     rte <- c(min(cTable$rtx), min(cTable$rty), max(cTable$rtx), max(cTable$rty))
 
     cTable <- dplyr::select(cTable, -.data$score, -.data$rankX,-.data$rankY) %>%
