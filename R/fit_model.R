@@ -109,7 +109,7 @@ filterAnchors <- function(rts, fit, vals, outlier, coef, iterFilter,
     iter <- 0
     while(iter < iterFilter){
         if(message)
-            cat("Performing filtering iteration: ", iter + 1, "\n", sep = "")
+            message("Performing filtering iteration: ", iter + 1, "\n", sep = "")
         if(fit == "gam")
             residuals <- suppressWarnings(vapply(vals, function(v){
                 model <- mgcv::gam(rty ~ s(rtx, k = v, bs = bs, m = m,...),
@@ -181,7 +181,7 @@ filterAnchors <- function(rts, fit, vals, outlier, coef, iterFilter,
 crossValFit <- function(rts, fit, vals, bs, family, m, method, optimizer,
                         control, message, ...)
 {
-    if(message) cat("Performing 10-fold cross validation\n")
+    if(message) message("Performing 10-fold cross validation\n")
     rts <- dplyr::filter(rts, .data$weights != 0)
     N <- nrow(rts) - 1
     folds <- caret::createFolds(seq(2,N), k = 10, returnTrain = FALSE)
@@ -366,7 +366,7 @@ fit_gam <- function(object, useID = FALSE, k = seq(10,20,2),iterFilter = 2,
     else
         best_k <- k
 
-    if(message) cat("Fitting Model with k =", best_k, "\n")
+    if(message) message("Fitting Model with k = ", best_k, "\n")
     best_model <- mgcv::gam(rty ~ s(rtx, k = best_k, bs = bs, m = m, ...),
                             data = rts, family = family, method = method,
                             optimizer = c("outer", optimizer),
@@ -474,7 +474,7 @@ fit_loess <- function(object, useID = FALSE, spans = seq(0.2, 0.3, by = 0.02),
     else
         best_span <- spans
 
-    cat("Fitting Model with span =", best_span,"\n")
+    message("Fitting Model with span = ", best_span,"\n")
 
     best_model <- loess(rty ~ rtx, data = rts, span = best_span, degree = 1,
                         family = "symmetric", control = control,
