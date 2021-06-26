@@ -16,7 +16,8 @@ setMethod("datasets", signature = "metabCombiner",
 {
     if(list)
         return(object@datasets)
-    return(as.character(unlist(object@datasets)))
+    else
+        return(as.character(unlist(object@datasets)))
 })
 
 

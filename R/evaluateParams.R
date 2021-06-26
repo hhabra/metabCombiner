@@ -248,7 +248,7 @@ evaluateParams <- function(object, A = seq(60,150,by = 10), B = seq(6,15),
                         groups = NULL,brackets_ignore = c("(", "[", "{"))
 {
     combinerCheck(isMetabCombiner(object), "metabCombiner")
-    cTable <- combinedTable(object)[,seq(1,15)]
+    cTable <- combinedTable(object)[,seq(1,16)]
     fit <- match.arg(fit)
     model <- getModel(object, fit = fit)
     if(is.null(groups))  groups <- unique(cTable[["group"]])
