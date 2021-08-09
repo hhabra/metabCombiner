@@ -13,6 +13,8 @@ labelRows(
   method = c("score", "mzrt"),
   delta = 0.1,
   maxRTerr = 10,
+  resolveConflicts = FALSE,
+  rtOrder = TRUE,
   remove = FALSE,
   balanced = TRUE,
   brackets_ignore = c("(", "[", "{")
@@ -24,6 +26,7 @@ reduceTable(
   maxRankY = 2,
   minScore = 0.5,
   maxRTerr = 10,
+  rtOrder = TRUE,
   brackets_ignore = c("(", "[", "{")
 )
 }
@@ -51,6 +54,12 @@ dataset features and the second pair for Y dataset features.}
 
 \item{maxRTerr}{numeric maximum allowable error between model-projected
 retention time (rtProj) and observed retention time (rty)}
+
+\item{resolveConflicts}{logical option to computationally resolve conflicting
+rows to a final set of 1-1 feature pair alignments}
+
+\item{rtOrder}{logical. If resolveConflicts set to TRUE, then this imposes
+retention order consistency on rows deemed "RESOLVED" within subgroups.}
 
 \item{remove}{Logical. Option to keep or discard rows deemed removable.}
 

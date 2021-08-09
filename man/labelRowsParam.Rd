@@ -12,8 +12,10 @@ labelRowsParam(
   delta = 0.1,
   method = "score",
   maxRTerr = 10,
-  balanced = TRUE,
+  resolveConflicts = FALSE,
+  rtOrder = TRUE,
   remove = FALSE,
+  balanced = TRUE,
   brackets_ignore = c("(", "[", "{")
 )
 
@@ -22,6 +24,8 @@ reduceTableParam(
   maxRankY = 2,
   minScore = 0.5,
   maxRTerr = 10,
+  delta = 0.1,
+  rtOrder = TRUE,
   brackets_ignore = c("(", "[", "{")
 )
 }
@@ -41,10 +45,16 @@ default: "score"}
 \item{maxRTerr}{maximum allowable difference between predicted RT (rtProj) &
 observed RT (rty); default: 10 minutes}
 
-\item{balanced}{option to reduce balanced groups; default: TRUE}
+\item{resolveConflicts}{logical. If TRUE, automatically resolves subgroups to
+1-1 feature pair alignments}
+
+\item{rtOrder}{logical. If TRUE and resolveConflicts is TRUE, imposes
+retention order condition on paired alignments}
 
 \item{remove}{option to eliminate rows determined as removable;
 default: FALSE}
+
+\item{balanced}{option to reduce balanced groups; default: TRUE}
 
 \item{brackets_ignore}{bracket types for ignoring string comparisons}
 }
@@ -62,5 +72,6 @@ lrParams <- labelRowsParam(maxRankX = 2, maxRankY = 2, delta = 0.1,
 
 }
 \seealso{
-\code{\link{labelRows}}, \code{\link{metabCombine}}
+\code{\link{labelRows}}, \code{\link{metabCombine}},
+\code{\link{batchCombine}}, \code{\link{reduceTable}}
 }

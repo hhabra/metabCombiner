@@ -15,7 +15,8 @@ metabCombine(
   anchorParam = selectAnchorsParam(),
   fitParam = fitgamParam(),
   scoreParam = calcScoresParam(),
-  labelParam = labelRowsParam()
+  labelParam = labelRowsParam(),
+  rtOrder = TRUE
 )
 }
 \arguments{
@@ -47,6 +48,9 @@ or a list with names "mz", "rt", "Q" as names.}
 \item{scoreParam}{list of parameter values for calcScores()}
 
 \item{labelParam}{list of parameter values for labelRows()}
+
+\item{rtOrder}{logical. If set to TRUE, retention order consistency expected
+when resolving conflicting alignments for \code{metabCombiner} object inputs.}
 }
 \value{
 a \code{metabCombiner} object following complete analysis

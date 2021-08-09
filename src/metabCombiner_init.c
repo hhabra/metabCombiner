@@ -10,6 +10,8 @@ extern SEXP labelRows(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP
 extern SEXP selectAnchorsByID(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP selectIterativeAnchors(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP write2file(SEXP, SEXP, SEXP, SEXP);
+extern SEXP resolveRows(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+
 
 static const R_CallMethodDef CallEntries[] = {
     {"binByMZ",                (DL_FUNC) &binByMZ,                 3},
@@ -18,6 +20,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"selectAnchorsByID",      (DL_FUNC) &selectAnchorsByID,       6},
     {"selectIterativeAnchors", (DL_FUNC) &selectIterativeAnchors,  7},
     {"write2file",             (DL_FUNC) &write2file,              4},
+    {"resolveRows",             (DL_FUNC) &resolveRows,              9},
     {NULL, NULL, 0}
 };
 

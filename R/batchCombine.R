@@ -115,11 +115,11 @@ batchCombine <- function(batches, binGap = 0.005, fitMethod = "gam",
     if(any(duplicated(names(batches))))
         stop("duplicate names detected in batches argument")
     reduceParam[["remove"]] <- TRUE;   reduceParam[["method"]] <- "score"
-    reduceParam[["delta"]] <- 0
+    reduceParam[["resolveConflicts"]] <- TRUE
     object <- batches[[1]]
     for(b in seq(2,length(batches))){
         xid <- names(batches)[b-1];  yid <- names(batches)[b]
-        message("Aligning ", xid, " with ", yid, "\n")
+        message("Aligning ", xid, " with ", yid)
         object <- metabCombine(xdata = object, ydata = batches[[b]],
                             xid = xid, yid = yid, means = means,
                             fitMethod = fitMethod, fitParam = fitParam,

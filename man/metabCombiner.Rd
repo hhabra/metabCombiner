@@ -10,7 +10,8 @@ metabCombiner(
   binGap = 0.005,
   xid = NULL,
   yid = NULL,
-  means = list(mz = FALSE, rt = FALSE, Q = FALSE)
+  means = list(mz = FALSE, rt = FALSE, Q = FALSE),
+  rtOrder = TRUE
 )
 }
 \arguments{
@@ -32,6 +33,9 @@ of the existing dataset IDs. See details for more information.}
 \item{means}{logical. Option to take average m/z, rt, and/or Q from
 \code{metabComber}. May be a vector (length = 3), a single value (TRUE/FALSE),
 or a list with names "mz", "rt", "Q" as names.}
+
+\item{rtOrder}{logical. If set to TRUE, retention order consistency expected
+when resolving conflicting alignments for \code{metabCombiner} object inputs.}
 }
 \value{
 a \code{metabCombiner} object constructed from xdata and ydata, with
@@ -46,7 +50,7 @@ groups controlled by the binGap argument
 }
 \details{
 This function serves as a constructor of the \code{metabCombiner} combined
-dataset class and the entry point in the main workflow for pairwise dataset
+dataset class and the entry point to the main workflow for pairwise dataset
 alignment. Two arguments must be specified, \code{xdata} and \code{ydata},
 which must be both \code{metabData} objects, both \code{metabCombiner}
 objects, or one \code{metabData} and one \code{metabCombiner}. Each scenario
@@ -79,14 +83,17 @@ As before, one set of values contained in xdata (specified by xid argument)
 is used to align to the values from ydata (controlled by yid argument).
 The samples and extra columns are concatenated from all datasets.
 
-For \code{metabCombiner} object inputs, the mean of the numeric fields (m/z,
-rt, Q) from all constituent datasets can be used in alignment in place of
-values from a single dataset. These are controlled by the means argument. By
-default this is a list value with "mz", "rt" and "Q" as names, but may also
-accept a sinle logical or a length-3 logical vector. If set to a single
-logical, then all three fields are averaged (TRUE) or not averaged (FALSE).
-If a three-length argument is supplied (e.g. c(TRUE, FALSE, FALSE)), then the
-values correspond to m/z, rt, and Q respectively.
+For \code{metabCombiner} object inputs, the full workflow (selectAnchors,
+fit_gam/fit_loess, calcScores, labelRows) must be performed prior to use for
+further alignment. If not completed already, features are pared down to 1-1
+alignments via the resolveConflicts approach (see: help(labelRows)). The mean
+of the numeric fields (m/z, rt, Q) from all constituent datasets can be used
+in alignment in place of values from a single dataset. These are controlled by
+the means argument. By default this is a list value with "mz", "rt" and "Q" as
+names, but may also accept a single logical or a length-3 logical vector. If
+set to a single logical, then all three fields are averaged (TRUE) or not
+averaged (FALSE). If a three-length argument is supplied (e.g. c(TRUE, FALSE,
+FALSE)), then the values correspond to m/z, rt, and Q respectively.
 }
 \note{
 If using a \code{metabCombiner} object as input, only one row is

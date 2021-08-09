@@ -104,7 +104,7 @@ check_score_pars <- function(cTable, A, B, C, model, fit, groups,
 
 ##row labeling parameter checks
 check_lblrows_pars <- function(maxRankX, maxRankY, minScore, maxRTerr, balanced,
-                                method, delta)
+                                method, delta, resolveConflicts, rtOrder)
 {
     if((!is.numeric(maxRankX) & !is.integer(maxRankX)) |
         (!is.numeric(maxRankY) & !is.integer(maxRankY)))
@@ -121,6 +121,12 @@ check_lblrows_pars <- function(maxRankX, maxRankY, minScore, maxRTerr, balanced,
 
     if(!is.logical(balanced))
         stop("expected a logical for argument 'balanced'")
+
+    if(!is.logical(resolveConflicts))
+        stop("expected a logical for argument 'resolveConflicts'")
+
+    if(!is.logical(rtOrder))
+        stop("expected a logical for argument 'rtOrder'")
 
     if(method == "score"){
         if(!is.numeric(delta) | delta > 1 | delta < 0)

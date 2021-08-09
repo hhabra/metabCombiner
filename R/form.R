@@ -17,6 +17,39 @@ form_means <- function(means){
     return(means)
 }
 
+#' Reform Report with New Labels
+#'
+#' @description Helper function for labelRows(). After determining row
+#' annotations, stitches together the metadata, the row annotations, and
+#' the sample + extra value data.
+#'
+#' @param fields data.frame abridged combinedTable with metadata fields.
+#'
+#' @param values data.frame combinedTable with sample (+ extra) columns
+#'
+#' @noRd
+formLabeledTable <- function(fields, values, remove)
+{
+    #option to eliminate rows labeled as removables
+    if(remove == TRUE){
+        keepRows <- which(fields[["labels"]] != "REMOVE")
+        fields <- fields[keepRows,]
+        values <- values[keepRows,]
+    }
+
+    #eliminating potential duplicate columns
+    labnames <- c("labels", "subgroup", "alt", "resolveScore")
+    if(any(labnames %in% utils::head(names(values)))){
+        duplicates <- grep(paste(labnames, collapse = "|"), head(names(values)))
+        values <- values[,-duplicates]
+    }
+
+    cTable <- data.frame(fields, values, stringsAsFactors = FALSE,
+                         check.names = FALSE)
+
+    return(cTable)
+}
+
 
 #' @title Form Single Dataset from Object
 #'
@@ -33,13 +66,19 @@ form_means <- function(means){
 #'              of m/z, RT, or Q, respectively;
 #'
 #' @noRd
-form_dataset <- function(object, data, means)
+form_dataset <- function(object, data, means, rtOrder)
 {
     cTable <- combinedTable(object)
+    fields <- resolveRows(cTable[,seq(1,19)], rtOrder)
+    values <- cTable[,seq(20,ncol(cTable))]
+    cTable <- formLabeledTable(fields, values, remove = TRUE)
+
     fdata <- featdata(object, data = data)
+    fdata <- fdata[match(cTable[["rowID"]], fdata[["rowID"]]),]
+
     samples_extras <- unlist(lapply(datasets(object), function(d)
         c(getSamples(object, d), getExtra(object,d))))
-    names(fdata) <- c("id","mz","rt","Q","adduct")
+    names(fdata) <- c("rowID", "id","mz","rt","Q","adduct")
     means <- form_means(means)
     if(means[1] == TRUE)  fdata[["mz"]] <- mzdata(object, value = "mean")
     if(means[2] == TRUE)  fdata[["rt"]] <- rtdata(object, value = "mean")

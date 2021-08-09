@@ -33,6 +33,9 @@
 #'
 #' @param labelParam list of parameter values for labelRows()
 #'
+#' @param rtOrder logical. If set to TRUE, retention order consistency expected
+#' when resolving conflicting alignments for \code{metabCombiner} object inputs.
+#'
 #' @details
 #' The five main steps in \code{metabCombine} are 1) m/z grouping & combined
 #' table construction, 2) selection of ordered pair RT anchors, 3) nonlinear
@@ -90,14 +93,15 @@
 #' @export
 metabCombine <- function(xdata, ydata, binGap = 0.005, xid = NULL, yid = NULL,
                         means = list('mz' = FALSE, 'rt' = FALSE, 'Q' = FALSE),
-                        fitMethod = "gam",  anchorParam = selectAnchorsParam(),
+                        fitMethod = "gam", anchorParam = selectAnchorsParam(),
                         fitParam = fitgamParam(),scoreParam = calcScoresParam(),
-                        labelParam = labelRowsParam())
+                        labelParam = labelRowsParam(), rtOrder = TRUE)
 {
     anchors <- anchorParam;    fit <- fitParam;
     scores <- scoreParam;      labels <- labelParam;
     object <- metabCombiner(xdata = xdata, ydata = ydata, binGap = binGap,
-                            xid = xid, yid = yid, means = means)
+                            xid = xid, yid = yid, means = means,
+                            rtOrder = rtOrder)
     object <- selectAnchors(object, useID = anchors$useID, tolQ = anchors$tolQ,
                             tolmz = anchors$tolmz, tolrtq = anchors$tolrtq,
                             windx = anchors$windx, windy = anchors$windy,
@@ -127,7 +131,8 @@ metabCombine <- function(xdata, ydata, binGap = 0.005, xid = NULL, yid = NULL,
                         maxRankX = labels$maxRankX, maxRankY = labels$maxRankY,
                         method = labels$method, balanced = labels$balanced,
                         remove = labels$remove, delta = labels$delta,
-                        maxRTerr = labels$maxRTerr,
+                        maxRTerr = labels$maxRTerr, rtOrder = labels$rtOrder,
+                        resolveConflicts = labels$resolveConflicts,
                         brackets_ignore = labels$brackets_ignore)
     return(object)
 }

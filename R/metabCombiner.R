@@ -27,9 +27,12 @@
 #' \code{metabComber}. May be a vector (length = 3), a single value (TRUE/FALSE),
 #' or a list with names "mz", "rt", "Q" as names.
 #'
+#' @param rtOrder logical. If set to TRUE, retention order consistency expected
+#' when resolving conflicting alignments for \code{metabCombiner} object inputs.
+#'
 #' @details
 #' This function serves as a constructor of the \code{metabCombiner} combined
-#' dataset class and the entry point in the main workflow for pairwise dataset
+#' dataset class and the entry point to the main workflow for pairwise dataset
 #' alignment. Two arguments must be specified, \code{xdata} and \code{ydata},
 #' which must be both \code{metabData} objects, both \code{metabCombiner}
 #' objects, or one \code{metabData} and one \code{metabCombiner}. Each scenario
@@ -62,14 +65,17 @@
 #' is used to align to the values from ydata (controlled by yid argument).
 #' The samples and extra columns are concatenated from all datasets.
 #'
-#' For \code{metabCombiner} object inputs, the mean of the numeric fields (m/z,
-#' rt, Q) from all constituent datasets can be used in alignment in place of
-#' values from a single dataset. These are controlled by the means argument. By
-#' default this is a list value with "mz", "rt" and "Q" as names, but may also
-#' accept a sinle logical or a length-3 logical vector. If set to a single
-#' logical, then all three fields are averaged (TRUE) or not averaged (FALSE).
-#' If a three-length argument is supplied (e.g. c(TRUE, FALSE, FALSE)), then the
-#' values correspond to m/z, rt, and Q respectively.
+#' For \code{metabCombiner} object inputs, the full workflow (selectAnchors,
+#' fit_gam/fit_loess, calcScores, labelRows) must be performed prior to use for
+#' further alignment. If not completed already, features are pared down to 1-1
+#' alignments via the resolveConflicts approach (see: help(labelRows)). The mean
+#' of the numeric fields (m/z, rt, Q) from all constituent datasets can be used
+#' in alignment in place of values from a single dataset. These are controlled by
+#' the means argument. By default this is a list value with "mz", "rt" and "Q" as
+#' names, but may also accept a single logical or a length-3 logical vector. If
+#' set to a single logical, then all three fields are averaged (TRUE) or not
+#' averaged (FALSE). If a three-length argument is supplied (e.g. c(TRUE, FALSE,
+#' FALSE)), then the values correspond to m/z, rt, and Q respectively.
 #'
 #' @return a \code{metabCombiner} object constructed from xdata and ydata, with
 #' features grouped by m/z according to the binGap argument.
@@ -92,7 +98,8 @@
 #' @export
 ##
 metabCombiner <- function(xdata, ydata, binGap = 0.005, xid = NULL, yid = NULL,
-                        means = list('mz' = FALSE, 'rt' = FALSE, 'Q' = FALSE))
+                        means = list('mz' = FALSE, 'rt' = FALSE, 'Q' = FALSE),
+                        rtOrder = TRUE)
 {
     check_combine_pars(binGap, means, xid, yid)
     if(methods::is(xdata,"metabData") & methods::is(ydata,"metabData"))
@@ -146,7 +153,7 @@ combine_default <- function(xdata, ydata, binGap, xid, yid)
 }
 
 ## xdata: metabCombiner,  ydata: metabData
-combine_X_y <- function(xdata, ydata, binGap, xid, yid, means)
+combine_X_y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder)
 {
     combinerCheck(isMetabCombiner(xdata), "metabCombiner")
     combinerCheck(isMetabData(ydata), "metabData")
@@ -181,13 +188,13 @@ combine_X_y <- function(xdata, ydata, binGap, xid, yid, means)
     object <- update_mc(object, nonmatched = nonmatched, datasets = datasets,
                         stats = c("grouped_X", "grouped_Y", "nGroups"),
                         values = c(nrow(xset), nrow(yset), nGroups))
-    xfeat <- featdata(xdata)[row.names(xset),]
+    xfeat <- featdata(xdata)[match(xset[["rowID"]],featdata(xdata)[["rowID"]]),]
     object <- form_tables(object, xset, yset, xfeat, NULL, nGroups)
     return(object)
 }
 
 ## xdata: metabData,  ydata: metabCombiner
-combine_x_Y <- function(xdata, ydata, binGap, xid, yid, means)
+combine_x_Y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder)
 {
     combinerCheck(isMetabData(xdata), "metabData")
     combinerCheck(isMetabCombiner(ydata), "metabCombiner")
@@ -224,13 +231,13 @@ combine_x_Y <- function(xdata, ydata, binGap, xid, yid, means)
     object <- update_mc(object, nonmatched = nn, datasets = datasets,
                         stats = c("grouped_X", "grouped_Y", "nGroups"),
                         values = c(nrow(xset), nrow(yset), nGroups))
-    yfeat <- featdata(ydata)[row.names(yset),]
+    yfeat <- featdata(ydata)[match(yset[["rowID"]],featdata(ydata)[["rowID"]]),]
     object <- form_tables(object, xset, yset, NULL, yfeat, nGroups)
     return(object)
 }
 
 ## xdata: metabCombiner, ydata: metabCombiner
-combine_X_Y <- function(xdata, ydata, binGap, xid, yid, means){
+combine_X_Y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder){
     combinerCheck(isMetabCombiner(xdata), "metabCombiner")
     combinerCheck(isMetabCombiner(ydata), "metabCombiner")
     xid <- ifelse(is.null(xid), x(xdata), xid)
@@ -270,8 +277,8 @@ combine_X_Y <- function(xdata, ydata, binGap, xid, yid, means){
     object <- update_mc(object, nonmatched = nonmatched, datasets = datasets,
                         stats = c("grouped_X", "grouped_Y", "nGroups"),
                         values = c(nrow(xset), nrow(yset), nGroups))
-    xfeat <- featdata(xdata)[row.names(xset),]
-    yfeat <- featdata(ydata)[row.names(yset),]
+    xfeat <- featdata(xdata)[match(xset[["rowID"]],featdata(xdata)[["rowID"]]),]
+    yfeat <- featdata(ydata)[match(yset[["rowID"]],featdata(ydata)[["rowID"]]),]
     object <- form_tables(object, xset, yset, xfeat, yfeat, nGroups)
     return(object)
 }

@@ -173,26 +173,35 @@ calcScoresParam <- function(A = 75, B = 10, C = 0.25, fit = "gam",
 #'      default: 0.1
 #' @param maxRTerr maximum allowable difference between predicted RT (rtProj) &
 #'     observed RT (rty); default: 10 minutes
-#' @param balanced option to reduce balanced groups; default: TRUE
+#' @param resolveConflicts logical. If TRUE, automatically resolves subgroups to
+#'     1-1 feature pair alignments
+#' @param rtOrder logical. If TRUE and resolveConflicts is TRUE, imposes
+#'     retention order condition on paired alignments
+#'
 #' @param remove option to eliminate rows determined as removable;
 #'     default: FALSE
+#' @param balanced option to reduce balanced groups; default: TRUE
+
 #' @param brackets_ignore bracket types for ignoring string comparisons
 #'
 #' @examples
 #' lrParams <- labelRowsParam(maxRankX = 2, maxRankY = 2, delta = 0.1,
 #'                              maxRTerr = 0.5)
 #'
-#' @seealso \code{\link{labelRows}}, \code{\link{metabCombine}}
+#' @seealso \code{\link{labelRows}}, \code{\link{metabCombine}},
+#' \code{\link{batchCombine}}, \code{\link{reduceTable}}
 #'
 #' @export
 labelRowsParam <- function(maxRankX = 3, maxRankY = 3, minScore = 0.5,
                             delta = 0.1, method = "score", maxRTerr = 10,
-                            balanced = TRUE, remove = FALSE,
+                            resolveConflicts = FALSE, rtOrder = TRUE,
+                            remove = FALSE,  balanced = TRUE,
                             brackets_ignore = c("(", "[", "{"))
 {
     params <- list(maxRankX = maxRankX, maxRankY = maxRankY,
                   minScore = minScore, method = method, delta = delta,
                   maxRTerr = maxRTerr, balanced = balanced, remove = remove,
+                  resolveConflicts = resolveConflicts, rtOrder = rtOrder,
                   brackets_ignore = brackets_ignore)
     return(params)
 }
@@ -201,11 +210,13 @@ labelRowsParam <- function(maxRankX = 3, maxRankY = 3, minScore = 0.5,
 #'
 #' @export
 reduceTableParam <- function(maxRankX = 2, maxRankY = 2, minScore = 0.5,
-                            maxRTerr = 10, brackets_ignore = c("(", "[", "{"))
+                            maxRTerr = 10, delta = 0.1, rtOrder = TRUE,
+                            brackets_ignore = c("(", "[", "{"))
 {
     params <- list(maxRankX = maxRankX, maxRankY = maxRankY,
-                   minScore = minScore, method = "score", delta = 0,
+                   minScore = minScore, method = "score", delta = delta,
                    maxRTerr = maxRTerr, balanced = TRUE, remove = TRUE,
+                   resolveConflicts = TRUE, rtOrder = rtOrder,
                    brackets_ignore = brackets_ignore)
     return(params)
 }

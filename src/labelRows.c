@@ -1,4 +1,4 @@
-#define EPS 1e-6
+#define EPS 1e-5
 #include <R.h>
 #include <Rdefines.h>
 #include <Rmath.h>
@@ -294,7 +294,7 @@ void findCons(SEXP labels, int* sub, int* alt, int* max, int *start,
  *
  * subgroup: subdivision of feature groupings based on conflict assignments
  *
- * alt: alternative subgrouping of features that conflict with multiple subgroups
+ * alt: alternative subgroup for features that conflict with multiple subgroups
  *
  * mzx: m/z values from dataset X.
  *
@@ -340,7 +340,6 @@ SEXP labelRows(SEXP labels, SEXP subgroup, SEXP alt, SEXP mzx, SEXP mzy, SEXP rt
 	//R variables in C
 	int* subgroup_c = INTEGER(subgroup);
 	int* alt_c = INTEGER(alt);
-
 	double* mzx_c = REAL(mzx);
 	double* mzy_c = REAL(mzy);
 	double* rtx_c = REAL(rtx);
@@ -396,8 +395,8 @@ SEXP labelRows(SEXP labels, SEXP subgroup, SEXP alt, SEXP mzx, SEXP mzy, SEXP rt
 		findCons(labels_c, subgroup_c, alt_c, maxSub, start, end, delta_c, mzx_c,
 		        mzy_c, rtx_c, rty_c, score_c, head, detect_fun);
 	}
-
+	
 	UNPROTECT(1);
-
+	
 	return labels_c;
 }

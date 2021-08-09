@@ -1,61 +1,26 @@
-#' Reform Report with New Labels
-#'
-#' @description Helper function for labelRows(). After determining row
-#' annotations, stitches together the metadata, the row annotations, and
-#' the sample + extra value data.
-#'
-#' @param fields data.frame abridged combinedTable with metadata fields.
-#'
-#' @param values data.frame combinedTable with sample (+ extra) columns
+
+#' Helper function containing C function call
 #'
 #' @noRd
-formLabeledTable <- function(fields, values, remove)
+get_labels <- function(fields, minScore, delta, maxRankX, maxRankY, method,
+                    rterr, maxRTerr, balanced)
 {
-    #option to eliminate rows labeled as removables
-    if(remove == TRUE){
-        keepRows <- which(fields[["labels"]] != "REMOVE")
-        fields <- fields[keepRows,]
-        values <- values[keepRows,]
-    }
-
-    #when there are existing columns named "labels", "subgroup", "alt"
-    labnames <- c("labels", "subgroup", "alt")
-    N <- 1
-
-    while(any(names(values) %in% labnames)){
-        labnames <- paste(c("labels", "subgroup", "alt"), N, sep = ".")
-        names(fields)[seq(16,18)] <- labnames
-        N <- N+1
-    }
-
-    cTable <- data.frame(fields, values, stringsAsFactors = FALSE,
-                        check.names = FALSE)
-
-    return(cTable)
-}
-
-
-
-
-annotateFPAs <- function(data, minScore, delta, maxRankX, maxRankY, method,
-                        rterr, maxRTerr, balanced)
-{
-    data[["labels"]] <- .Call("labelRows",
-                                labels = data$labels, subgroup = data$subgroup,
-                                alt = data$alt, mzx = data$mzx,
-                                mzy = data$mzy, rtx = data$rtx,
-                                rty = data$rty, score = data$score,
-                                rankX = data$rankX, rankY = data$rankY,
-                                group = data$group, balanced = balanced,
+    fields[["labels"]] <- .Call("labelRows",
+                                labels = fields$labels,
+                                subgroup = fields$subgroup,
+                                alt = fields$alt, mzx = fields$mzx,
+                                mzy = fields$mzy, rtx = fields$rtx,
+                                rty = fields$rty, score = fields$score,
+                                rankX = fields$rankX, rankY = fields$rankY,
+                                group = fields$group, balanced = balanced,
                                 delta = delta, minScore = minScore,
                                 maxRankX = as.integer(maxRankX[1]),
                                 maxRankY = as.integer(maxRankY[1]),
                                 method = method, maxRTerr = as.numeric(maxRTerr),
                                 rterr = rterr, PACKAGE = "metabCombiner")
 
-    return(data)
+    return(fields)
 }
-
 
 #' @title Annotate and Remove Report Rows
 #'
@@ -97,11 +62,17 @@ annotateFPAs <- function(data, minScore, delta, maxRankX, maxRankY, method,
 #' @param maxRTerr numeric maximum allowable error between model-projected
 #'                 retention time (rtProj) and observed retention time (rty)
 #'
+#' @param resolveConflicts logical option to computationally resolve conflicting
+#' rows to a final set of 1-1 feature pair alignments
+#'
+#' @param rtOrder logical. If resolveConflicts set to TRUE, then this imposes
+#' retention order consistency on rows deemed "RESOLVED" within subgroups.
+#'
+#' @param remove  Logical. Option to keep or discard rows deemed removable.
+#'
 #' @param balanced  Logical. Optional processing of "balanced" groups, defined
 #'                  as groups with an equal number of features from input
 #'                  datasets where all features have a 1-1 match.
-#'
-#' @param remove  Logical. Option to keep or discard rows deemed removable.
 #'
 #' @param brackets_ignore character. Bracketed identity strings of the types
 #' in this argument will be ignored
@@ -165,8 +136,8 @@ annotateFPAs <- function(data, minScore, delta, maxRankX, maxRankY, method,
 #' @export
 labelRows <- function(object, minScore = 0.5, maxRankX = 3, maxRankY = 3,
                     method = c("score", "mzrt"), delta = 0.1, maxRTerr = 10,
-                    remove = FALSE, balanced = TRUE,
-                    brackets_ignore = c("(", "[", "{"))
+                    resolveConflicts = FALSE, rtOrder = TRUE, remove = FALSE,
+                    balanced = TRUE, brackets_ignore = c("(", "[", "{"))
 {
     if(isCombinedTable(object) == 0) cTable <- object
     else if(isMetabCombiner(object) == 0) cTable <- combinedTable(object)
@@ -177,19 +148,21 @@ labelRows <- function(object, minScore = 0.5, maxRankX = 3, maxRankY = 3,
     }
     method <- match.arg(method)
     check_lblrows_pars(maxRankX, maxRankY, minScore, maxRTerr, balanced,
-                       method, delta)
+                       method, delta, resolveConflicts, rtOrder)
     cTable <- cTable[with(cTable, order(`group`, desc(`score`))), ]
     values <- cTable[,-seq(1,16)]
-    fields <- cTable[,seq(1,16)]
+    fields <- cTable[combinerNames()]
     fields[["labels"]] <- compare_strings(fields[["idx"]], fields[["idy"]],
-                                        "IDENTITY", "", brackets_ignore)
+                        "IDENTITY", "", brackets_ignore)
     fields[["subgroup"]] <- integer(nrow(fields))
     fields[["alt"]] <- integer(nrow(fields))
     method <- as.integer(ifelse(method == "score", 1, 2))  #score: 1,  mzrt: 2
     rterr <- abs(fields[["rty"]] - fields[["rtProj"]])
 
-    fields <- annotateFPAs(fields, minScore, delta, maxRankX, maxRankY, method,
-                            rterr, maxRTerr, balanced)
+    fields <- get_labels(fields, minScore, delta, maxRankX, maxRankY, method,
+                        rterr, maxRTerr, balanced)
+
+    if(resolveConflicts)  fields <- resolveRows(fields, rtOrder)
 
     cTable <- formLabeledTable(fields, values, remove)
 
@@ -209,11 +182,13 @@ labelRows <- function(object, minScore = 0.5, maxRankX = 3, maxRankY = 3,
 #'
 #'@export
 reduceTable <- function(object, maxRankX = 2, maxRankY = 2, minScore = 0.5,
-                        maxRTerr = 10, brackets_ignore = c("(", "[", "{"))
+                        maxRTerr = 10, rtOrder = TRUE,
+                        brackets_ignore = c("(", "[", "{"))
 {
     object <- labelRows(object, maxRankX = maxRankX, maxRankY = maxRankY,
                         minScore = minScore, method = "score", delta = 0,
                         maxRTerr = maxRTerr, balanced = TRUE,
+                        rtOrder = rtOrder,
                         brackets_ignore = brackets_ignore)
 
     return(object)
