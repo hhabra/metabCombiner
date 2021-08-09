@@ -56,6 +56,16 @@ combinerCheck <- function(errNo, type, error = "stop"){
 }
 
 
+
+combinerNames <- function(){
+    return(c("rowID", "idx","idy","mzx","mzy","rtx","rty","rtProj","Qx", "Qy",
+      "group","score","rankX","rankY","adductx","adducty"))
+}
+
+
+
+
+
 #' @title Determine \code{combinedTable} Validity
 #'
 #' @description Checks whether input object is a valid metabData.Returns an
@@ -83,11 +93,9 @@ isCombinedTable <- function(object){
     if(!is.data.frame(object))
         return(1)
 
-    expected <- c("rowID", "idx","idy","mzx","mzy","rtx","rty","rtProj","Qx",
-                "Qy", "group","score","rankX","rankY","adductx","adducty")
+    expected <- combinerNames()
 
     if(ncol(object) <= length(expected)) return(2)
-
     if(nrow(object) == 0)  return(3)
 
     if(!identical(names(object)[seq(1,length(expected))], expected))

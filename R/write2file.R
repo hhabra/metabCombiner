@@ -31,7 +31,7 @@
 #' write2file(p.comb, file = "plasma-combined.csv", sep = ",")
 #'
 #' ###using combinedTable report and feature data as input
-#' cTable <- cbind.data.frame(combinedTable(p.comb), featdata(p.comb))
+#' cTable <- combinedTable(p.comb)
 #' write2file(cTable, file = "plasma-combined.txt", sep = "\t")
 #' }
 #' @export

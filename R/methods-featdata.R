@@ -16,7 +16,7 @@ setMethod("adductdata",signature = "metabCombiner",
     else if(!(data %in% datasets(object)))
         stop("no dataset identifer found for 'data' argument")
     cols <- paste("adduct", data, sep = "_")
-    return(fdata[cols])
+    return(fdata[c("rowID", cols)])
 })
 
 #' @rdname iddata
@@ -32,7 +32,7 @@ setMethod("iddata", signature = "metabCombiner", function(object, data = NULL)
     else if(!(data %in% datasets(object)))
         stop("no dataset found with identifer in data argument")
     cols <- paste("id", data, sep = "_")
-    return(fdata[cols])
+    return(fdata[c("rowID", cols)])
 })
 
 #' @rdname featdata
@@ -48,7 +48,7 @@ setMethod("featdata", signature = "metabCombiner", function(object, data = NULL)
     else if(!(data %in% datasets(object)))
         stop("no dataset found with identifer in data argument")
     cols <- grep(paste("_",data,"$",sep = ""), names(fdata), value = TRUE)
-    return(fdata[cols])
+    return(fdata[c("rowID", cols)])
 })
 
 
@@ -68,7 +68,7 @@ setMethod("mzdata", signature = "metabCombiner",
 
     cols <- paste("mz", data, sep = "_")
     if(value == "obs")
-        return(fdata[cols])
+        return(fdata[c("rowID", cols)])
     else
         return(matrixStats::rowMeans2(as.matrix(fdata[cols])))
 })
@@ -90,7 +90,7 @@ setMethod("Qdata", signature = "metabCombiner",
     cols <- paste("Q", data, sep = "_")
 
     if(value == "obs")
-        return(fdata[cols])
+        return(fdata[c("rowID", cols)])
     else
         return(matrixStats::rowMeans2(as.matrix(fdata[cols])))
 })
@@ -112,7 +112,7 @@ setMethod("rtdata", signature = "metabCombiner",
     cols <- paste("rt", data, sep = "_")
 
     if(value == "obs")
-        return(fdata[cols])
+        return(fdata[c("rowID", cols)])
     else
         return(matrixStats::rowMeans2(as.matrix(fdata[cols])))
 })
