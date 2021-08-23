@@ -74,8 +74,8 @@
 #' batchdata <- lapply(metabBatches, metabData, samples = "POOL",
 #'                     extra = "SAMP", zero = TRUE)
 #'
-#' #optional: give each batch dataset a name
-#' names(batchdata) <- paste("B", seq_along(batchdata), sep = "")
+#' #recommended: give each batch dataset a unique name
+#' names(batchdata) <- paste("exb", seq_along(batchdata), sep = "")
 #'
 #' #customize main workflow parameter lists
 #' saparam <- selectAnchorsParam(tolmz = 0.002, tolQ = 0.2, tolrtq = 0.1)
@@ -111,12 +111,15 @@ batchCombine <- function(batches, binGap = 0.005, fitMethod = "gam",
     if(any(ts == FALSE))
         stop("'batches' must be a list consisting of metabData objects")
     if(is.null(names(batches)))
-        names(batches) <- as.character(seq(1, length(batches)))
+        names(batches) <- paste("b", seq(1, length(batches)),sep = "")
     if(any(duplicated(names(batches))))
         stop("duplicate names detected in batches argument")
+    if(length(batches) < 2)
+        stop("expected more than one batch dataset as input")
     reduceParam[["remove"]] <- TRUE;   reduceParam[["method"]] <- "score"
     reduceParam[["resolveConflicts"]] <- TRUE
     object <- batches[[1]]
+
     for(b in seq(2,length(batches))){
         xid <- names(batches)[b-1];  yid <- names(batches)[b]
         message("Aligning ", xid, " with ", yid)
@@ -131,7 +134,7 @@ batchCombine <- function(batches, binGap = 0.005, fitMethod = "gam",
     cTable <- combinedTable(object)[samples_extras]
     table <- cbind.data.frame(featdata(object), cTable)
     output <- list(object = object, table = table)
-
+    message("batchCombine Process Complete")
     return(output)
 }
 
