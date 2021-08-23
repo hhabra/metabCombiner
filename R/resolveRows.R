@@ -5,7 +5,6 @@
 #'
 #' @param rtOrder logical option to impose RT order for resolving subgroups
 #'
-#'
 #' @noRd
 resolveRows <- function(fields, rtOrder){
     if(!any(fields[["labels"]] == "CONFLICT"))

@@ -105,12 +105,12 @@ metabCombiner <- function(xdata, ydata, binGap = 0.005, xid = NULL, yid = NULL,
     if(methods::is(xdata,"metabData") & methods::is(ydata,"metabData"))
         object <- combine_default(xdata, ydata, binGap, xid, yid)
     else if(methods::is(xdata,"metabCombiner") & methods::is(ydata,"metabData"))
-        object <- combine_X_y(xdata, ydata, binGap, xid, yid, means)
+        object <- combine_X_y(xdata, ydata, binGap, xid, yid, means, rtOrder)
     else if(methods::is(xdata,"metabData") & methods::is(ydata,"metabCombiner"))
-        object <- combine_x_Y(xdata, ydata, binGap, xid, yid, means)
+        object <- combine_x_Y(xdata, ydata, binGap, xid, yid, means, rtOrder)
     else if(methods::is(xdata,"metabCombiner") &
             methods::is(ydata,"metabCombiner"))
-        object <- combine_X_Y(xdata, ydata, binGap, xid, yid, means)
+        object <- combine_X_Y(xdata, ydata, binGap, xid, yid, means, rtOrder)
     else
         stop("improper inputs for arguments 'xdata' & 'ydata'")
 
@@ -162,7 +162,7 @@ combine_X_y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder)
     else if(xid == "y") xid = y(xdata)
     if(!(xid %in% datasets(xdata)))
         stop("no dataset with label ", xid, " found in xdata")
-    xset <- form_dataset(xdata, data = xid, means = means)
+    xset <- form_dataset(xdata, data = xid, means = means, rtOrder = rtOrder)
     yid <- ifelse(is.null(yid), as.character(length(datasets(xdata))+1), yid)
     if(yid %in% datasets(xdata))
         stop("argument 'yid' must be a character id not in xdata")
@@ -209,7 +209,7 @@ combine_x_Y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder)
     if(yid == "y") yid = y(ydata)
     if(!(yid %in% datasets(ydata)))
         stop("no dataset with label ", yid, " found in ydata")
-    yset <- form_dataset(ydata, data = yid, means = means)
+    yset <- form_dataset(ydata, data = yid, means = means, rtOrder = rtOrder)
     xygroups <- mzGroup(xset = xset, yset = yset, binGap = binGap)
     datasets = list("x" = xid, "y" = datasets(ydata))
     dats <- as.character(unlist(datasets))
@@ -237,7 +237,8 @@ combine_x_Y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder)
 }
 
 ## xdata: metabCombiner, ydata: metabCombiner
-combine_X_Y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder){
+combine_X_Y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder)
+{
     combinerCheck(isMetabCombiner(xdata), "metabCombiner")
     combinerCheck(isMetabCombiner(ydata), "metabCombiner")
     xid <- ifelse(is.null(xid), x(xdata), xid)
@@ -245,7 +246,7 @@ combine_X_Y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder){
     if(xid == "y") xid = y(xdata)
     if(!(xid %in% datasets(xdata)))
         stop("no dataset with label ", xid, " found in xdata")
-    xset <- form_dataset(xdata, data = xid, means = means)
+    xset <- form_dataset(xdata, data = xid, means = means, rtOrder = rtOrder)
     yid <- ifelse(is.null(yid), y(ydata), yid)
     if(yid == "x") yid <- x(ydata)
     if(yid == "y") yid <- y(ydata)

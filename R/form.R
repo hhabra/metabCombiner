@@ -69,7 +69,7 @@ formLabeledTable <- function(fields, values, remove)
 form_dataset <- function(object, data, means, rtOrder)
 {
     cTable <- combinedTable(object)
-    fields <- resolveRows(cTable[,seq(1,19)], rtOrder)
+    fields <- resolveRows(cTable[,seq(1,19)], rtOrder = rtOrder)
     values <- cTable[,seq(20,ncol(cTable))]
     cTable <- formLabeledTable(fields, values, remove = TRUE)
 

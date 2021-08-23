@@ -244,17 +244,10 @@ SEXP resolveRows(SEXP labels, SEXP subgroup, SEXP mzx, SEXP mzy, SEXP rtx, SEXP 
 	int* start = calloc(1,sizeof(int));
 	int* end = calloc(1,sizeof(int));
 	int* rowsetnum = calloc(LENGTH(subgroup),sizeof(int));
-	
-	//DELETE LATER
-	const char *filename = "output.txt";
-	int sgnum = 0;
-	// END DELETE
 		
 	while(cursor < LENGTH(subgroup)){
 		cursor = detectGroup(cursor, subgroup_c, start, end, LENGTH(subgroup));
-		
-		sgnum = subgroup_c[*end];
-		
+				
 		resolve(labels_c, rowsetnum, *start, *end, score_c, mzx_c, mzy_c, rtx_c, rty_c, 
 		        retOrder_c, resolveScore_c);		
 	}

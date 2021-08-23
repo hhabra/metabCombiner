@@ -1,5 +1,17 @@
 Updates:
 
+Version 1.3.3
+-----------------------
+Changes in metabCombiner():
+    + rtOrder parameter bug fix
+
+Changes in batchCombine():
+    +multiple (2 or more) datasets expected as input
+    +ending message added ("batchCombine Process Complete")
+
+
+
+
 Version 1.3.2
 ---------------------
 Changes to labelRows():
@@ -11,13 +23,12 @@ Changes to labelRows():
     + duplicate column names for {labels, subgroup, alt} removed and no longer
       allowed in resulting combinedTable
 
-Changes to metabCombiner():
+Changes to metabCombiner()/ metabCombine():
     + new check for metabCombiner object inputs: labelRows must be called before
       aligning a metabCombiner object with a new dataset
     + resolveConflicts method applied to metabCombiner object to eliminate
       conflicting alignments/ attain 1-1 matches for all features
     + new rtOrder argument controlling resolveConflicts similar to above
-
 
 
 
