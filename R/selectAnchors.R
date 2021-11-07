@@ -43,14 +43,14 @@ identityAnchorSelection <- function(cTable, windx, windy, useID, brackets)
     if(any(cTable[["labels"]] == "I"))
     {
         #retain most abundant representation, remove duplicates
-        xTable <- dplyr::mutate(cTable,
+        table <- dplyr::mutate(cTable,
                                 `row` = seq(1,nrow(cTable)),
                                 `idx` = tolower(.data$idx)) %>%
                 dplyr::filter(.data$labels == "I") %>%
                 dplyr::arrange(dplyr::desc(.data$Qx+ .data$Qy)) %>%
                 dplyr::filter(duplicated(.data$idx))
 
-        cTable$labels[xTable[["row"]]] <- "N"
+        cTable$labels[table[["row"]]] <- "N"
 
         ids <- which(cTable[["labels"]] == "I")
 
@@ -211,20 +211,18 @@ selectAnchors <- function(object, useID = FALSE, tolmz = 0.003, tolQ = 0.3,
     brackets_ignore = c("(", "[", "{"))
 {
     combinerCheck(isMetabCombiner(object), "metabCombiner")
-
     check_anchors_pars(useID, tolmz, tolQ, tolrtq, windx, windy)
 
-    cTable <- combinedTable(object)[,seq(1,16)]
+    cTable <- dplyr::filter(combinedTable(object)[combinerNames()],
+                            .data$group > 0)
     rte <- c(min(cTable$rtx), min(cTable$rty), max(cTable$rtx), max(cTable$rty))
 
     cTable <- dplyr::select(cTable, -.data$score, -.data$rankX,-.data$rankY) %>%
-            dplyr::mutate(`rtqx` = (.data$rtx - rte[1])/ (rte[3] - rte[1]),
+                dplyr::mutate(`rtqx` = (.data$rtx - rte[1])/ (rte[3] - rte[1]),
                         `rtqy` = (.data$rty - rte[2])/ (rte[4] - rte[2]),
                         `labels` = rep("P", nrow(cTable)))
-
     cTable <- identityAnchorSelection(cTable, windx = windx, windy = windy,
                                     useID = useID, brackets = brackets_ignore)
-
     cTable <- dplyr::filter(cTable, (abs(.data$mzx - .data$mzy) < tolmz &
                                     abs(.data$Qx - .data$Qy) < tolQ &
                                     abs(.data$rtqx - .data$rtqy) < tolrtq &

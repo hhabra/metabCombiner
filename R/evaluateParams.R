@@ -248,10 +248,10 @@ evaluateParams <- function(object, A = seq(60,150,by = 10), B = seq(6,15),
                         groups = NULL,brackets_ignore = c("(", "[", "{"))
 {
     combinerCheck(isMetabCombiner(object), "metabCombiner")
-    cTable <- combinedTable(object)[,seq(1,16)]
+    cTable <- combinedTable(object)[combinerNames()]
     fit <- match.arg(fit)
     model <- getModel(object, fit = fit)
-    if(is.null(groups))  groups <- unique(cTable[["group"]])
+    if(is.null(groups))  groups <- setdiff(unique(cTable[["group"]]),0)
     check_score_pars(cTable, A, B, C, model, fit, groups, minScore, penalty)
     rtrange <- max(cTable[["rty"]]) - min(cTable[["rty"]])
     rows <- which(cTable[["group"]] %in% groups)

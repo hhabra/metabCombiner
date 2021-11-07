@@ -219,9 +219,7 @@ calcScores <- function(object, A = 75, B = 10, C = 0.25, fit = c("gam", "loess")
     fdata <- featdata(object)
     fit <- match.arg(fit)
     model <- getModel(object, fit = fit)
-    if(is.null(groups))
-        groups <- unique(cTable[["group"]])
-
+    if(is.null(groups)) groups <- setdiff(unique(cTable[["group"]]),0)
     check_score_pars(cTable, A, B, C, fit, model, groups, adduct = adduct)
 
     if(length(A) > 1 | length(B) > 1 | length(C) > 1){

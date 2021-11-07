@@ -52,6 +52,8 @@ selectAnchorsParam <- function(useID = FALSE, tolmz = 0.003, tolQ = 0.3,
 #' @param family  choice of family ("scat" or "gaussian"); default: "scat"
 #' @param m       basis and penalty order; default: c(3,2)
 #' @param method  smoothing parameter estimation method; default: "REML"
+#' @param rtx ordered pair of endpoints for rtx; default: ("min", "max")
+#' @param rty ordered pair of endpoints for rty; default: ("min", "max")
 #' @param optimizer  numerical optimization for GAM; default: "newton"
 #' @param message   option to print progress message; default: TRUE
 #'
@@ -67,12 +69,13 @@ selectAnchorsParam <- function(useID = FALSE, tolmz = 0.003, tolQ = 0.3,
 fitgamParam <- function(useID = FALSE, k = seq(10,20,2), iterFilter = 2,
                         outlier = "MAD", coef = 2, prop = 0.5, weights = 1,
                         bs = "bs", family = "scat", m = c(3,2), method = "REML",
+                        rtx = c("min", "max"), rty = c("min", "max"),
                         optimizer = "newton", message = TRUE)
 {
     params <- list(useID = useID, k = k, iterFilter = iterFilter,
                    outlier = outlier, coef = coef, prop = prop, bs = bs,
                    family = family, weights = weights, m = m, method = method,
-                   optimizer = optimizer, message = message)
+                   rtx = rtx, rty = rty, optimizer = optimizer, message = message)
     return(params)
 }
 
@@ -95,6 +98,8 @@ fitgamParam <- function(useID = FALSE, k = seq(10,20,2), iterFilter = 2,
 #' @param prop minimum proportion of fits where a point can be a flagged outlier;
 #'       default: 0.5
 #' @param weights optional supplied weights to individual points; default: 1
+#' @param rtx ordered pair of endpoints for rtx; default: ("min", "max")
+#' @param rty ordered pair of endpoints for rty; default: ("min", "max")
 #' @param message option to print progress message; default: TRUE
 #' @param control loess-specific control parameters; see: ?loess.control
 #'
@@ -109,6 +114,7 @@ fitgamParam <- function(useID = FALSE, k = seq(10,20,2), iterFilter = 2,
 fitloessParam <- function(useID = FALSE, spans = seq(0.2, 0.3, by = 0.02),
                         outlier = "MAD", coef = 2, iterFilter = 2,
                         prop = 0.5, weights = 1, message = TRUE,
+                        rtx = c("min", "max"), rty = c("min", "max"),
                         control = loess.control(surface = "direct",
                                                 iterations = 10))
 {
@@ -177,11 +183,13 @@ calcScoresParam <- function(A = 75, B = 10, C = 0.25, fit = "gam",
 #'     1-1 feature pair alignments
 #' @param rtOrder logical. If TRUE and resolveConflicts is TRUE, imposes
 #'     retention order condition on paired alignments
-#'
 #' @param remove option to eliminate rows determined as removable;
 #'     default: FALSE
 #' @param balanced option to reduce balanced groups; default: TRUE
-
+#'
+#' @param useID option to annotate identity-matched strings as IDENTITY;
+#'     default: FALSE
+#'
 #' @param brackets_ignore bracket types for ignoring string comparisons
 #'
 #' @examples
@@ -195,7 +203,7 @@ calcScoresParam <- function(A = 75, B = 10, C = 0.25, fit = "gam",
 labelRowsParam <- function(maxRankX = 3, maxRankY = 3, minScore = 0.5,
                             delta = 0.1, method = "score", maxRTerr = 10,
                             resolveConflicts = FALSE, rtOrder = TRUE,
-                            remove = FALSE,  balanced = TRUE,
+                            remove = FALSE,  balanced = TRUE, useID = FALSE,
                             brackets_ignore = c("(", "[", "{"))
 {
     params <- list(maxRankX = maxRankX, maxRankY = maxRankY,
@@ -211,7 +219,7 @@ labelRowsParam <- function(maxRankX = 3, maxRankY = 3, minScore = 0.5,
 #' @export
 reduceTableParam <- function(maxRankX = 2, maxRankY = 2, minScore = 0.5,
                             maxRTerr = 10, delta = 0.1, rtOrder = TRUE,
-                            brackets_ignore = c("(", "[", "{"))
+                            useID = FALSE, brackets_ignore = c("(", "[", "{"))
 {
     params <- list(maxRankX = maxRankX, maxRankY = maxRankY,
                    minScore = minScore, method = "score", delta = delta,
