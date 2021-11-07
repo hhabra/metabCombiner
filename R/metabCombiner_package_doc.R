@@ -14,7 +14,7 @@
 #' @importFrom graphics plot lines
 #' @importFrom stats loess loess.control predict setNames
 #' @importFrom S4Vectors isSorted
-#' @importFrom methods new
+#' @importFrom methods new is
 #' @importFrom utils read.csv read.delim write.table head
 #' @importFrom caret createFolds
 #' @importFrom rlang .data
