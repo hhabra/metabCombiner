@@ -22,7 +22,7 @@ test_that("row annotation tests", {
                             C = seq(0,0.5,0.1), minScore = 0.7)
     p = calcScores(p, A = scores$A[1], B = scores$B[1], C = scores$C[1])
 
-    p = labelRows(p, minScore = 0.5, maxRankX = 2, maxRankY = 2,
+    p = labelRows(p, minScore = 0.5, maxRankX = 2, maxRankY = 2, useID = TRUE,
                     method = "score", delta = 0.1, remove = TRUE)
 
     p.output = combinedTable(p)

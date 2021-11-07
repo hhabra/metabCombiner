@@ -16,29 +16,60 @@ get_labels <- function(fields, minScore, delta, maxRankX, maxRankY, method,
                                 delta = delta, minScore = minScore,
                                 maxRankX = as.integer(maxRankX[1]),
                                 maxRankY = as.integer(maxRankY[1]),
-                                method = method, maxRTerr = as.numeric(maxRTerr),
+                                method = method,maxRTerr = as.numeric(maxRTerr),
                                 rterr = rterr, PACKAGE = "metabCombiner")
 
     return(fields)
 }
 
+
+#' Separate combinedTable into fields & values
+#'
+#' @noRd
+prepare_fields_values <- function(cTable, useID, brackets_ignore)
+{
+    cTable <- cTable[with(cTable, order(`group`, desc(`score`))), ]
+    values <- cTable[,-seq(1,length(combinerNames()))]
+    fields <- cTable[combinerNames()]
+    if(useID == TRUE)
+        fields[["labels"]] <- compare_strings(fields[["idx"]], fields[["idy"]],
+                                              "IDENTITY", "", brackets_ignore)
+    else
+        fields[["labels"]] <- ""
+    fields[["subgroup"]] <- integer(nrow(fields))
+    fields[["alt"]] <- integer(nrow(fields))
+
+    if(any(cTable[["group"]]) == 0)
+        group0 <- list(fields = fields[cTable[["group"]] == 0,],
+                       values = values[cTable[["group"]] == 0,])
+    else
+        group0 <- NULL
+
+    fields <- fields[cTable[["group"]] > 0,]
+    values <- values[cTable[["group"]] > 0,]
+
+    return(list(fields = fields, values = values, group0 = group0))
+}
+
+
 #' @title Annotate and Remove Report Rows
 #'
 #' @description
-#' This is a method for annotating identity-matched, removable, &
-#' conflicting feature pair alignment (FPA) rows in the \code{combinedTable}
-#' report. Simple thresholds for score, rank, retention time error and delta
-#' score can computationally reduce the set of possible FPAs to the most likely
-#' compound matches. FPAs falling within some small measure (in score or mz/rt)
-#' of the top-ranked row are organized into subgroups to facilitate inspection;
-#' setting delta to 0 automatically reduces to 1-1 matches.
+#' This is a method for annotating removable, conflicting, and identity-matched
+#' feature pair alignment (FPA) rows in the \code{combinedTable} report. Simple
+#' thresholds for score, rank, retention time error and delta score can
+#' computationally reduce the set of possible FPAs to the most likely feature
+#' matches. FPAs falling within some small delta score or mz/rt of the
+#' top-ranked pair are organized into subgroups to facilitate inspection.
+#' Automated reduction to 1-1 pairs is also possible with this function.
 #'
-#' \code{reduceTable} behaves identically to labelRows, but with delta set to 0
-#' & remove set to TRUE, automatically limiting to 1 - 1 feature matches
-#' constrained by rank and score threshold parameters. Rank threshold defaults
-#' are also stricter with reduceTable.
+#' \code{reduceTable} behaves identically to labelRows, but with a focus on
+#' automated table reduction. Rank threshold defaults in \code{reduceTable} are
+#' also stricter than in \code{labelRows}.
 #'
-#' @param object Either a \code{metabCombiner} object or \code{combinedTable}.
+#' @param object Either a \code{metabCombiner} object or \code{combinedTable}
+#'
+#' @param useID option to annotate identity-matched strings as "IDENTITY"
 #'
 #' @param minScore  numeric minimum allowable score (between 0 & 1) for
 #'                  metabolomics feature pair alignments
@@ -62,29 +93,29 @@ get_labels <- function(fields, minScore, delta, maxRankX, maxRankY, method,
 #' @param maxRTerr numeric maximum allowable error between model-projected
 #'                 retention time (rtProj) and observed retention time (rty)
 #'
+#' @param remove  Logical. Option to keep or discard rows deemed removable.
+#'
 #' @param resolveConflicts logical option to computationally resolve conflicting
 #' rows to a final set of 1-1 feature pair alignments
 #'
 #' @param rtOrder logical. If resolveConflicts set to TRUE, then this imposes
 #' retention order consistency on rows deemed "RESOLVED" within subgroups.
 #'
-#' @param remove  Logical. Option to keep or discard rows deemed removable.
-#'
 #' @param balanced  Logical. Optional processing of "balanced" groups, defined
 #'                  as groups with an equal number of features from input
 #'                  datasets where all features have a 1-1 match.
 #'
-#' @param brackets_ignore character. Bracketed identity strings of the types
-#' in this argument will be ignored
+#' @param brackets_ignore character. If useID = TRUE, bracketed identity strings
+#' of the types in this argument will be ignored
 #'
 #' @details
-#' \code{metabCombiner} initially reports all possible FPAs in the rows of the
-#' \code{combinedTable} report. Most of these are misalignments that
-#'  require removal. This function is used to automate most of the reduction
-#'  process by labeling rows as removable or conflicting, based on certain
-#'  conditions, and is performed after computing similarity scores.
+#' \code{metabCombiner} initially reports all possible feature pairings in the
+#' rows of the \code{combinedTable} report. Most of these are misalignments that
+#' require removal. This function is used to automate this reduction
+#' process by labeling rows as removable or conflicting, based on certain
+#' conditions, and is performed after computing similarity scores.
 #'
-#'  A label may take on one of four values:
+#' A label may take on one of four values:
 #'
 #'  a) "": No determination made
 #'  b) "IDENTITY": an alignment with matching identity "idx & idy" strings
@@ -92,17 +123,19 @@ get_labels <- function(fields, minScore, delta, maxRankX, maxRankY, method,
 #'  d) "CONFLICT": competing alignments for one or multiple shared features
 #'
 #' The labeling rules are as follows:
-#' 1) Rows with matching idx & idy strings are labeled "IDENTITY". These rows
-#'    are not labeled "REMOVE", irrespective of subsequent criteria.
-#' 2) Groups determined to be 'balanced': label rows with rankX > 1 & rankY > 1
+#'
+#' 1) Groups determined to be 'balanced': label rows with rankX > 1 & rankY > 1
 #'    "REMOVE" irrespective of \code{delta} criteria
-#' 3) Rows with a score < \code{minScore}: label "REMOVE"
-#' 4) Rows with rankX > \code{maxRankX} and/or rankY > \code{maxRankY}:
+#' 2) Rows with a score < \code{minScore}: label "REMOVE"
+#' 3) Rows with rankX > \code{maxRankX} and/or rankY > \code{maxRankY}:
 #'    label "REMOVE"
-#' 5) Conflicting subgroup assignment as determined  by \code{method} &
+#' 4) Conflicting subgroup assignment as determined  by \code{method} &
 #'    \code{delta} arguments. Conflicting alignments following outside
 #'    \code{delta} thresholds: labeled "REMOVE". Otherwise, they are assigned
 #'    a "CONFLICT" label and subgroup number.
+#' 5) If \code{useID} argument set to TRUE, rows with matching idx & idy strings
+#'    are labeled "IDENTITY". These rows are not changed to "REMOVE" or
+#'    "CONFLICT" irrespective of subsequent criteria.
 #'
 #' @return  updated \code{combinedTable} or \code{metabCombiner} object. The
 #' table will have three new columns:
@@ -112,32 +145,41 @@ get_labels <- function(fields, minScore, delta, maxRankX, maxRankY, method,
 #' \item{alt}{alternate subgroup for rows in multiple feature pair conflicts}
 #'
 #' @examples
+#'
+#' #required steps prior to function use
 #' data(plasma30)
 #' data(plasma20)
-#'
 #' p30 <- metabData(plasma30, samples = "CHEAR")
 #' p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
-#' p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
-#' p.comb = selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
-#' p.comb = fit_gam(p.comb, k = 20, iterFilter = 1)
-#' p.comb = calcScores(p.comb, A = 90, B = 14, C = 0.5)
+#' p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+#' p.comb <- selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
+#' p.comb <- fit_gam(p.comb, k = 20, iterFilter = 1)
+#' p.comb <- calcScores(p.comb, A = 90, B = 14, C = 0.5)
 #'
-#' ###merge combinedTable and featdata
+#' ##applies labels, but maintains all rows
+#' p.comb <- labelRows(p.comb, maxRankX = 2, maxRankY = 2, maxRTerr = 0.5,
+#'                     delta = 0.1, resolveConflicts = FALSE, remove = FALSE)
+#'
+#' ##automatically resolve conflicts and filter to 1-1 feature pairs
+#' p.comb.2 <- labelRows(p.comb, resolveConflicts = FALSE, remove = FALSE)
+#'
+#' #this is identical to the previous command
+#' p.comb.2 <- reduceTable(p.comb)
+#'
+#' p.comb = labelRows(p.comb, method = "mzrt", delta = c(0.005, 0.5, 0.005,0.3))
+#'
+#' ##this function may be applied to combinedTable inputs as well
 #' cTable = cbind.data.frame(combinedTable(p.comb), featdata(p.comb))
 #'
-#' ##example using score-based conflict detection method
 #' lTable = labelRows(cTable, maxRankX = 3, maxRankY = 2, minScore = 0.5,
 #'          method = "score", maxRTerr = 0.5, delta = 0.2)
 #'
-#' ##example using mzrt-based conflict detection method
-#' lTable = labelRows(cTable, method = "mzrt", maxRankX = 3, maxRankY = 2,
-#'                      delta = c(0.005, 0.5, 0.005,0.3), maxRTerr = 0.5)
-#'
 #' @export
-labelRows <- function(object, minScore = 0.5, maxRankX = 3, maxRankY = 3,
-                    method = c("score", "mzrt"), delta = 0.1, maxRTerr = 10,
-                    resolveConflicts = FALSE, rtOrder = TRUE, remove = FALSE,
-                    balanced = TRUE, brackets_ignore = c("(", "[", "{"))
+labelRows <- function(object, useID = FALSE, minScore = 0.5, maxRankX = 3,
+                    maxRankY = 3, method = c("score", "mzrt"), delta = 0.1,
+                    maxRTerr = 10, resolveConflicts = FALSE, rtOrder = TRUE,
+                    remove = FALSE, balanced = TRUE,
+                    brackets_ignore = c("(", "[", "{"))
 {
     if(isCombinedTable(object) == 0) cTable <- object
     else if(isMetabCombiner(object) == 0) cTable <- combinedTable(object)
@@ -149,22 +191,17 @@ labelRows <- function(object, minScore = 0.5, maxRankX = 3, maxRankY = 3,
     method <- match.arg(method)
     check_lblrows_pars(maxRankX, maxRankY, minScore, maxRTerr, balanced,
                        method, delta, resolveConflicts, rtOrder)
-    cTable <- cTable[with(cTable, order(`group`, desc(`score`))), ]
-    values <- cTable[,-seq(1,16)]
-    fields <- cTable[combinerNames()]
-    fields[["labels"]] <- compare_strings(fields[["idx"]], fields[["idy"]],
-                        "IDENTITY", "", brackets_ignore)
-    fields[["subgroup"]] <- integer(nrow(fields))
-    fields[["alt"]] <- integer(nrow(fields))
+    if(all(cTable[["score"]] == 1))
+        stop("must call calcScores before using this function")
+    fvs <- prepare_fields_values(cTable, useID, brackets_ignore)
+    fields <- fvs[["fields"]]
+    values <- fvs[["values"]]
     method <- as.integer(ifelse(method == "score", 1, 2))  #score: 1,  mzrt: 2
     rterr <- abs(fields[["rty"]] - fields[["rtProj"]])
-
     fields <- get_labels(fields, minScore, delta, maxRankX, maxRankY, method,
                         rterr, maxRTerr, balanced)
-
     if(resolveConflicts)  fields <- resolveRows(fields, rtOrder)
-
-    cTable <- formLabeledTable(fields, values, remove)
+    cTable <- formLabeledTable(fields, values, remove, fvs[["group0"]])
 
     if(methods::is(object, "metabCombiner")){
         fdata <- featdata(object)
@@ -173,7 +210,6 @@ labelRows <- function(object, minScore = 0.5, maxRankX = 3, maxRankY = 3,
     }
     else
         object <- cTable
-
     return(object)
 }
 
@@ -181,14 +217,15 @@ labelRows <- function(object, minScore = 0.5, maxRankX = 3, maxRankY = 3,
 #'@rdname labelRows
 #'
 #'@export
-reduceTable <- function(object, maxRankX = 2, maxRankY = 2, minScore = 0.5,
-                        maxRTerr = 10, rtOrder = TRUE,
-                        brackets_ignore = c("(", "[", "{"))
+reduceTable <- function(object, useID = FALSE, maxRankX = 2, maxRankY = 2,
+                        minScore = 0.5, delta = 0.1, maxRTerr = 10,
+                        rtOrder = TRUE, brackets_ignore = c("(", "[", "{"))
 {
-    object <- labelRows(object, maxRankX = maxRankX, maxRankY = maxRankY,
-                        minScore = minScore, method = "score", delta = 0,
-                        maxRTerr = maxRTerr, balanced = TRUE,
-                        rtOrder = rtOrder,
+    object <- labelRows(object, useID = useID, maxRankX = maxRankX,
+                        maxRankY = maxRankY, minScore = minScore,
+                        method = "score", delta = delta, maxRTerr = maxRTerr,
+                        balanced = TRUE, resolveConflicts = TRUE,
+                        rtOrder = rtOrder, remove = TRUE,
                         brackets_ignore = brackets_ignore)
 
     return(object)
