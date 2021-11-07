@@ -25,6 +25,14 @@
 #'
 #' @param fitMethod RT spline-fitting method, either "gam" or "loess"
 #'
+#' @param union logical. Option to include non-matched features in final
+#' \code{combinedTable} results
+#'
+#' @param impute logical. If TRUE, imputes the mean mz/rt/Q values for missing
+#' features in \code{metabCombiner} object inputs before use in alignment (not
+#' recommended for disparate data alignment); if FALSE, features with missing
+#' information are dropped.
+#'
 #' @param anchorParam list of parameter values for selectAnchors() function
 #'
 #' @param fitParam list of parameter values for fit_gam() or fit_loess()
@@ -93,15 +101,16 @@
 #' @export
 metabCombine <- function(xdata, ydata, binGap = 0.005, xid = NULL, yid = NULL,
                         means = list('mz' = FALSE, 'rt' = FALSE, 'Q' = FALSE),
-                        fitMethod = "gam", anchorParam = selectAnchorsParam(),
+                        fitMethod = "gam", rtOrder = TRUE, union = FALSE,
+                        impute = FALSE, anchorParam = selectAnchorsParam(),
                         fitParam = fitgamParam(),scoreParam = calcScoresParam(),
-                        labelParam = labelRowsParam(), rtOrder = TRUE)
+                        labelParam = labelRowsParam())
 {
     anchors <- anchorParam;    fit <- fitParam;
     scores <- scoreParam;      labels <- labelParam;
     object <- metabCombiner(xdata = xdata, ydata = ydata, binGap = binGap,
                             xid = xid, yid = yid, means = means,
-                            rtOrder = rtOrder)
+                            rtOrder = rtOrder, impute = impute)
     object <- selectAnchors(object, useID = anchors$useID, tolQ = anchors$tolQ,
                             tolmz = anchors$tolmz, tolrtq = anchors$tolrtq,
                             windx = anchors$windx, windy = anchors$windy,
@@ -112,13 +121,14 @@ metabCombine <- function(xdata, ydata, binGap = 0.005, xid = NULL, yid = NULL,
                             iterFilter = fit$iterFilter, outlier = fit$outlier,
                             coef = fit$coef, prop = fit$prop, bs = fit$bs,
                             family = fit$family, m = fit$m, method = fit$method,
-                            optimizer = fit$optimizer, weights = fit$weights,
-                            message = fit$message)
+                            rtx = fit$rtx, rty = fit$rty, weights = fit$weights,
+                            optimizer = fit$optimizer, message = fit$message)
     else if(fitMethod == "loess")
         object <- fit_loess(object, useID = fit$useID, spans = fit$spans,
                             iterFilter = fit$iterFilter, outlier = fit$outlier,
-                            coef = fit$coef, prop = fit$prop,
-                            weights = fit$weights, message = fit$message)
+                            coef = fit$coef, prop = fit$prop, rtx = fit$rtx,
+                            rty = fit$rty, weights = fit$weights,
+                            message = fit$message)
     else
         stop("'fitMethod' must be either 'gam' or 'loess'")
 
@@ -134,5 +144,9 @@ metabCombine <- function(xdata, ydata, binGap = 0.005, xid = NULL, yid = NULL,
                         maxRTerr = labels$maxRTerr, rtOrder = labels$rtOrder,
                         resolveConflicts = labels$resolveConflicts,
                         brackets_ignore = labels$brackets_ignore)
+
+    if(isTRUE(union))
+        object <- updateTables(object, xdata = xdata, ydata = ydata)
+
     return(object)
 }

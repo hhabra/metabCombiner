@@ -9,6 +9,7 @@ batchCombine(
   binGap = 0.005,
   fitMethod = "gam",
   means = list(mz = TRUE, rt = TRUE, Q = TRUE),
+  union = FALSE,
   anchorParam = selectAnchorsParam(),
   fitParam = fitgamParam(),
   scoreParam = calcScoresParam(B = 30),
@@ -24,8 +25,12 @@ See ?mzGroup for more details.}
 \item{fitMethod}{RT spline-fitting method, either "gam" or "loess"}
 
 \item{means}{logical. Option to take average m/z, rt, and/or Q from
-\code{metabComber}. May be a 3-length vector, single value (TRUE/FALSE),
+\code{metabCombiner}. May be a 3-length vector, single value (TRUE/FALSE),
 or a list with names "mz", "rt", "Q" as names.}
+
+\item{union}{logical. If FALSE, only feature present in all batches will
+be in the final result. If TRUE, features missing in at least one batch are
+included. The mean m/z, RT, and Q values imputed for matching in each step.}
 
 \item{anchorParam}{list of parameter values for selectAnchors() function}
 
@@ -92,8 +97,8 @@ data(metabBatches)
 batchdata <- lapply(metabBatches, metabData, samples = "POOL",
                     extra = "SAMP", zero = TRUE)
 
-#optional: give each batch dataset a name
-names(batchdata) <- paste("B", seq_along(batchdata), sep = "")
+#recommended: give each batch dataset a unique name
+names(batchdata) <- paste("exb", seq_along(batchdata), sep = "")
 
 #customize main workflow parameter lists
 saparam <- selectAnchorsParam(tolmz = 0.002, tolQ = 0.2, tolrtq = 0.1)

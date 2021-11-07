@@ -12,11 +12,13 @@ metabCombine(
   yid = NULL,
   means = list(mz = FALSE, rt = FALSE, Q = FALSE),
   fitMethod = "gam",
+  rtOrder = TRUE,
+  union = FALSE,
+  impute = FALSE,
   anchorParam = selectAnchorsParam(),
   fitParam = fitgamParam(),
   scoreParam = calcScoresParam(),
-  labelParam = labelRowsParam(),
-  rtOrder = TRUE
+  labelParam = labelRowsParam()
 )
 }
 \arguments{
@@ -41,6 +43,17 @@ or a list with names "mz", "rt", "Q" as names.}
 
 \item{fitMethod}{RT spline-fitting method, either "gam" or "loess"}
 
+\item{rtOrder}{logical. If set to TRUE, retention order consistency expected
+when resolving conflicting alignments for \code{metabCombiner} object inputs.}
+
+\item{union}{logical. Option to include non-matched features in final
+\code{combinedTable} results}
+
+\item{impute}{logical. If TRUE, imputes the mean mz/rt/Q values for missing
+features in \code{metabCombiner} object inputs before use in alignment (not
+recommended for disparate data alignment); if FALSE, features with missing
+information are dropped.}
+
 \item{anchorParam}{list of parameter values for selectAnchors() function}
 
 \item{fitParam}{list of parameter values for fit_gam() or fit_loess()}
@@ -48,9 +61,6 @@ or a list with names "mz", "rt", "Q" as names.}
 \item{scoreParam}{list of parameter values for calcScores()}
 
 \item{labelParam}{list of parameter values for labelRows()}
-
-\item{rtOrder}{logical. If set to TRUE, retention order consistency expected
-when resolving conflicting alignments for \code{metabCombiner} object inputs.}
 }
 \value{
 a \code{metabCombiner} object following complete analysis

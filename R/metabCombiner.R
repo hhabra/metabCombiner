@@ -15,13 +15,13 @@
 #' @param binGap numeric parameter used for grouping features by m/z.
 #' See ?mzGroup for more details.
 #'
-#' @param xid character identifier of xdata. If xdata is a metabData, assigns a
-#' new ID for this dataset; if xdata is a metabCombiner, must be assigned to one
-#' of the existing dataset IDs. See details for more information.
+#' @param xid character. If xdata is a \code{metabData}, assigns a new identifier
+#' for this dataset; if xdata is a \code{metabCombiner}, selects one of the
+#' existing dataset IDs to represent xdata. See details for more information.
 #'
-#' @param yid character identifier of ydata. If ydata is a metabData, assigns a
-#' new ID for this dataset; if ydata is a metabCombiner, must be assigned to one
-#' of the existing dataset IDs. See details for more information.
+#' @param yid character. If ydata is a \code{metabData}, assigns a new identifier
+#' for this dataset; if ydata is a \code{metabCombiner}, selects one of the
+#' existing dataset IDs to represent ydata. See details for more information.
 #'
 #' @param means logical. Option to take average m/z, rt, and/or Q from
 #' \code{metabComber}. May be a vector (length = 3), a single value (TRUE/FALSE),
@@ -30,13 +30,17 @@
 #' @param rtOrder logical. If set to TRUE, retention order consistency expected
 #' when resolving conflicting alignments for \code{metabCombiner} object inputs.
 #'
+#' @param impute logical. If TRUE, imputes the mean mz/rt/Q values for missing
+#' features in \code{metabCombiner} object inputs before use in alignment (not
+#' recommended for disparate data alignment); if FALSE, features with missing
+#' information are dropped.
+#'
 #' @details
 #' This function serves as a constructor of the \code{metabCombiner} combined
 #' dataset class and the entry point to the main workflow for pairwise dataset
 #' alignment. Two arguments must be specified, \code{xdata} and \code{ydata},
-#' which must be both \code{metabData} objects, both \code{metabCombiner}
-#' objects, or one \code{metabData} and one \code{metabCombiner}. Each scenario
-#' is listed here:
+#' which must be either \code{metabData} or \code{metabCombiner} objects.
+#' There are four scenarios listed here:
 #'
 #' 1) If xdata & ydata are \code{metabData} objects, a new \code{metabCombiner}
 #' object is constructed with an alignment of this pair. New character
@@ -65,17 +69,28 @@
 #' is used to align to the values from ydata (controlled by yid argument).
 #' The samples and extra columns are concatenated from all datasets.
 #'
-#' For \code{metabCombiner} object inputs, the full workflow (selectAnchors,
-#' fit_gam/fit_loess, calcScores, labelRows) must be performed prior to use for
-#' further alignment. If not completed already, features are pared down to 1-1
-#' alignments via the resolveConflicts approach (see: help(labelRows)). The mean
-#' of the numeric fields (m/z, rt, Q) from all constituent datasets can be used
-#' in alignment in place of values from a single dataset. These are controlled by
-#' the means argument. By default this is a list value with "mz", "rt" and "Q" as
-#' names, but may also accept a single logical or a length-3 logical vector. If
-#' set to a single logical, then all three fields are averaged (TRUE) or not
-#' averaged (FALSE). If a three-length argument is supplied (e.g. c(TRUE, FALSE,
-#' FALSE)), then the values correspond to m/z, rt, and Q respectively.
+#' For \code{metabCombiner} object inputs, the full workflow
+#' (\code{\link{selectAnchors}}, \code{\link{fit_gam}}/\code{\link{fit_loess}},
+#' \code{\link{calcScores}}, \code{\link{labelRows}}) must be performed before
+#' further alignment. If not completed already, features are pared down to
+#' 1-1 alignments via the resolveConflicts approach (see: help(resolveRows)).
+#' Features may not be used more than twice and will be removed if they are
+#' detected as duplicates.
+#'
+#' The mean of the numeric fields (m/z, rt, Q) from all constituent datasets can
+#' be used in alignment in place of values from a single dataset. These are
+#' controlled by the means argument. By default this is a list value with "mz",
+#' "rt" and "Q" as names, but may also accept a single logical or a length-3
+#' logical vector. If set to a single logical value, then all three fields are
+#' averaged (TRUE) or not averaged (FALSE). If a three-length argument is
+#' supplied (e.g. c(TRUE, FALSE, FALSE)), then the values correspond to m/z, rt,
+#' and Q respectively. RT averaging is generally not recommended for disparate
+#' data alignment.
+#'
+#' If missing features have been incorporated into the \code{metabCombiner},
+#' they an be imputed using the average m/z, rt, and Q values for that feature
+#' in datasets in which it is present by setting \code{impute} to TRUE.
+#' Likewise, this option is not recommended for disparate data alignment.
 #'
 #' @return a \code{metabCombiner} object constructed from xdata and ydata, with
 #' features grouped by m/z according to the binGap argument.
@@ -99,18 +114,21 @@
 ##
 metabCombiner <- function(xdata, ydata, binGap = 0.005, xid = NULL, yid = NULL,
                         means = list('mz' = FALSE, 'rt' = FALSE, 'Q' = FALSE),
-                        rtOrder = TRUE)
+                        rtOrder = TRUE, impute = FALSE)
 {
     check_combine_pars(binGap, means, xid, yid)
     if(methods::is(xdata,"metabData") & methods::is(ydata,"metabData"))
         object <- combine_default(xdata, ydata, binGap, xid, yid)
     else if(methods::is(xdata,"metabCombiner") & methods::is(ydata,"metabData"))
-        object <- combine_X_y(xdata, ydata, binGap, xid, yid, means, rtOrder)
+        object <- combine_X_y(xdata, ydata, binGap, xid, yid, means,
+                              rtOrder, impute)
     else if(methods::is(xdata,"metabData") & methods::is(ydata,"metabCombiner"))
-        object <- combine_x_Y(xdata, ydata, binGap, xid, yid, means, rtOrder)
+        object <- combine_x_Y(xdata, ydata, binGap, xid, yid, means,
+                              rtOrder, impute)
     else if(methods::is(xdata,"metabCombiner") &
             methods::is(ydata,"metabCombiner"))
-        object <- combine_X_Y(xdata, ydata, binGap, xid, yid, means, rtOrder)
+        object <- combine_X_Y(xdata, ydata, binGap, xid, yid, means,
+                              rtOrder, impute)
     else
         stop("improper inputs for arguments 'xdata' & 'ydata'")
 
@@ -135,8 +153,9 @@ combine_default <- function(xdata, ydata, binGap, xid, yid)
     extra[[xid]] <- getExtra(xdata);     extra[[yid]] <- getExtra(ydata)
     nonmatched[[xid]] <- dplyr::filter(xygroups[["x"]],.data$group == 0)
     nonmatched[[yid]] <- dplyr::filter(xygroups[["y"]],.data$group == 0)
-    xy = list("x" = xid, "y" = yid)
-    datasets = list("x" = xid, "y" = yid)
+    xy <- list("x" = xid, "y" = yid, "xtype" = "metabData",
+              "ytype" = "metabData")
+    datasets <- list("x" = xid, "y" = yid)
     object <- update_mc(object, samples = samples, extra = extra, xy = xy,
                         stats = c("binGap","input_size_X", "input_size_Y"),
                         values = c(binGap, nrow(xset),nrow(yset)))
@@ -153,19 +172,20 @@ combine_default <- function(xdata, ydata, binGap, xid, yid)
 }
 
 ## xdata: metabCombiner,  ydata: metabData
-combine_X_y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder)
+combine_X_y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder, impute)
 {
     combinerCheck(isMetabCombiner(xdata), "metabCombiner")
     combinerCheck(isMetabData(ydata), "metabData")
     xid <- ifelse(is.null(xid), x(xdata), xid)
-    if(xid == "x") xid = x(xdata)
-    else if(xid == "y") xid = y(xdata)
+    if(xid == "x") xid <- x(xdata)
+    else if(xid == "y") xid <- y(xdata)
     if(!(xid %in% datasets(xdata)))
         stop("no dataset with label ", xid, " found in xdata")
-    xset <- form_dataset(xdata, data = xid, means = means, rtOrder = rtOrder)
+    xset <- form_dataset(xdata, data = xid, means = means, rtOrder = rtOrder,
+                        impute = impute)
     yid <- ifelse(is.null(yid), as.character(length(datasets(xdata))+1), yid)
     if(yid %in% datasets(xdata))
-        stop("argument 'yid' must be a character id not in xdata")
+        stop("argument 'yid' must be a character identifier not in xdata")
     if(yid %in% c("x", "y") )
         stop("naming single datasets as 'x' or 'y' forbidden")
     yset <- getData(ydata)
@@ -174,7 +194,8 @@ combine_X_y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder)
     extra <- getExtra(xdata);        extra[[yid]] <- getExtra(ydata)
     nonmatched <- nonmatched(xdata, data = NULL)
     nonmatched[[yid]] <- dplyr::filter(xygroups[["y"]],.data$group == 0)
-    xy <- list("x" = xid, "y" = yid)
+    xy <- list("x" = xid, "y" = yid, "xtype" = "metabCombiner",
+               "ytype" = "metabData")
     datasets <- list("x" = datasets(xdata), "y" = yid)
     object <- methods::new("metabCombiner")
     object <- update_mc(object, samples = samples, extra = extra, xy = xy,
@@ -194,22 +215,23 @@ combine_X_y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder)
 }
 
 ## xdata: metabData,  ydata: metabCombiner
-combine_x_Y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder)
+combine_x_Y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder, impute)
 {
     combinerCheck(isMetabData(xdata), "metabData")
     combinerCheck(isMetabCombiner(ydata), "metabCombiner")
     xset <- getData(xdata)
     xid <- ifelse(is.null(xid), as.character(length(datasets(ydata))+1), xid)
     if(xid %in% datasets(ydata))
-        stop("argument 'xid' must be a character id not in ydata")
+        stop("argument 'xid' must be a character identifier not in ydata")
     if(xid %in% c("x", "y"))
         stop("naming initial datasets as 'x' or 'y' forbidden")
     yid <- ifelse(is.null(yid), y(ydata), yid)
-    if(yid == "x") yid = x(ydata)
-    if(yid == "y") yid = y(ydata)
+    if(yid == "x") yid <- x(ydata)
+    if(yid == "y") yid <- y(ydata)
     if(!(yid %in% datasets(ydata)))
         stop("no dataset with label ", yid, " found in ydata")
-    yset <- form_dataset(ydata, data = yid, means = means, rtOrder = rtOrder)
+    yset <- form_dataset(ydata, data = yid, means = means, rtOrder = rtOrder,
+                        impute = impute)
     xygroups <- mzGroup(xset = xset, yset = yset, binGap = binGap)
     datasets = list("x" = xid, "y" = datasets(ydata))
     dats <- as.character(unlist(datasets))
@@ -218,7 +240,8 @@ combine_x_Y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder)
     nn <- list(xid = c(dplyr::filter(xygroups[["x"]],.data$group == 0)))
     nn <- append(nn, nonmatched(ydata, data = NULL))
     names(samples) <- names(extra) <- names(nn) <- dats
-    xy <- list("x" = xid, "y" = yid)
+    xy <- list("x" = xid, "y" = yid, "xtype" = "metabData",
+               "ytype" = "metabCombiner")
     object <- methods::new("metabCombiner")
     object <- update_mc(object, samples = samples, extra = extra, xy = xy,
                         stats = c("binGap","input_size_X", "input_size_Y"),
@@ -237,22 +260,24 @@ combine_x_Y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder)
 }
 
 ## xdata: metabCombiner, ydata: metabCombiner
-combine_X_Y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder)
+combine_X_Y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder, impute)
 {
     combinerCheck(isMetabCombiner(xdata), "metabCombiner")
     combinerCheck(isMetabCombiner(ydata), "metabCombiner")
     xid <- ifelse(is.null(xid), x(xdata), xid)
-    if(xid == "x") xid = x(xdata)
-    if(xid == "y") xid = y(xdata)
+    if(xid == "x") xid <- x(xdata)
+    if(xid == "y") xid <- y(xdata)
     if(!(xid %in% datasets(xdata)))
         stop("no dataset with label ", xid, " found in xdata")
-    xset <- form_dataset(xdata, data = xid, means = means, rtOrder = rtOrder)
+    xset <- form_dataset(xdata, data = xid, means = means, rtOrder = rtOrder,
+                        impute = impute)
     yid <- ifelse(is.null(yid), y(ydata), yid)
     if(yid == "x") yid <- x(ydata)
     if(yid == "y") yid <- y(ydata)
     if(!(yid %in% datasets(ydata)))
         stop("no dataset with label ", yid, " found in ydata")
-    yset <- form_dataset(ydata, data = yid, means = means)
+    yset <- form_dataset(ydata, data = yid, means = means, rtOrder = rtOrder,
+                         impute = impute)
     xygroups <- mzGroup(xset = xset, yset = yset, binGap = binGap)
     dats <- c(datasets(xdata), datasets(ydata))
     if(any(duplicated(dats))){
@@ -265,7 +290,8 @@ combine_X_Y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder)
     nonmatched <- c(nonmatched(xdata, NULL), nonmatched(ydata, NULL))
     datasets <- list("x" = datasets(xdata),
                      "y" = dats[seq(length(datasets(xdata))+1,length(dats))])
-    xy <- list("x" = xid, "y" = yid)
+    xy <- list("x" = xid, "y" = yid, "xtype" = "metabCombiner",
+               "ytype" = "metabCombiner")
     object <- methods::new("metabCombiner")
     object <- update_mc(object, samples = samples, extra = extra, xy = xy,
                         stats = c("binGap","input_size_X", "input_size_Y"),

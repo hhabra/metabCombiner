@@ -12,10 +12,14 @@
 #' @param binGap numeric parameter used for grouping features by m/z.
 #' See ?mzGroup for more details.
 #'
+#' @param union logical. If FALSE, only feature present in all batches will
+#' be in the final result. If TRUE, features missing in at least one batch are
+#' included. The mean m/z, RT, and Q values imputed for matching in each step.
+#'
 #' @param fitMethod RT spline-fitting method, either "gam" or "loess"
 #'
 #' @param means logical. Option to take average m/z, rt, and/or Q from
-#' \code{metabComber}. May be a 3-length vector, single value (TRUE/FALSE),
+#' \code{metabCombiner}. May be a 3-length vector, single value (TRUE/FALSE),
 #' or a list with names "mz", "rt", "Q" as names.
 #'
 #' @param anchorParam list of parameter values for selectAnchors() function
@@ -102,7 +106,7 @@
 #' @export
 batchCombine <- function(batches, binGap = 0.005, fitMethod = "gam",
                         means = list('mz' = TRUE, 'rt' = TRUE, 'Q' = TRUE),
-                        anchorParam = selectAnchorsParam(),
+                        union = FALSE, anchorParam = selectAnchorsParam(),
                         fitParam = fitgamParam(),
                         scoreParam = calcScoresParam(B = 30),
                         reduceParam = reduceTableParam())
@@ -123,10 +127,10 @@ batchCombine <- function(batches, binGap = 0.005, fitMethod = "gam",
     for(b in seq(2,length(batches))){
         xid <- names(batches)[b-1];  yid <- names(batches)[b]
         message("Aligning ", xid, " with ", yid)
-        object <- metabCombine(xdata = object, ydata = batches[[b]],
-                            xid = xid, yid = yid, means = means,
+        object <- metabCombine(xdata = object, ydata = batches[[b]], xid = xid,
+                            yid = yid, means = means, union = union,
                             fitMethod = fitMethod, fitParam = fitParam,
-                            anchorParam =  anchorParam,
+                            impute = union, anchorParam =  anchorParam,
                             scoreParam = scoreParam, labelParam = reduceParam)
     }
     samples_extras <- unlist(lapply(datasets(object), function(d)
