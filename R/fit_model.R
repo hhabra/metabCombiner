@@ -8,11 +8,34 @@
 #'
 #' @param useID  logical. Option to use matched IDs to inform fit
 #'
+#' @param rtx ordered pair of endpoints for rtx; if "max" or "min", gives the
+#' maximum or minimum rtx, respectively, as model endpoints for rtx
+#'
+#' @param rty ordered pair of endpoints for rty; if "max" or "min", gives the
+#' maximum or minimum rtx, respectively, as model endpoints for rty
+#'
 #' @noRd
-formatAnchors <- function(object, anchors, weights, useID){
+formatAnchors <- function(object, anchors, weights, useID, rtx, rty){
     if(!useID | is.null(anchors[["labels"]]))
         anchors[["labels"]] = "A"
-    cTable <- combinedTable(object)
+    cTable <- combinedTable(object)[combinerNames()] %>%
+        dplyr::filter(!is.na(.data$rtx) & !is.na(.data$rty))
+
+    if(any(!c(rtx, rty) %in% c("min", "max"))){
+        rtx_min <- ifelse(rtx[1] == "min", min(cTable$rtx), as.numeric(rtx[1]))
+        rtx_max <- ifelse(rtx[2] == "max", max(cTable$rtx), as.numeric(rtx[2]))
+        rty_min <- ifelse(rty[1] == "min", min(cTable$rty), as.numeric(rty[1]))
+        rty_max <- ifelse(rty[2] == "max", max(cTable$rty), as.numeric(rty[2]))
+        anchors <- dplyr::filter(anchors, .data$rtx >= rtx_min &
+                                .data$rtx <= rtx_max & .data$rty >= rty_min,
+                                .data$rty <= rty_max)
+        cTable <- dplyr::filter(anchors, .data$rtx >= rtx_min &
+                                .data$rtx <= rtx_max & .data$rty >= rty_min,
+                                .data$rty <= rty_max)
+        if(nrow(anchors) < 20)
+            stop("invalid rtx & rty limits; model cannot be fitted")
+    }
+
     rtx <- c(min(cTable[["rtx"]]), anchors[["rtx"]], max(cTable[["rtx"]]))
     rty <- c(min(cTable[["rty"]]), anchors[["rty"]], max(cTable[["rty"]]))
     labels <- c("I", anchors[["labels"]], "I")
@@ -104,7 +127,7 @@ flagOutliers <- function(residuals, include, vals, outlier, coef)
 #' @return anchor rts data frame with updated weights.
 filterAnchors <- function(rts, fit, vals, outlier, coef, iterFilter,
                           prop, bs, m, family, method, optimizer, control,
-                          message,...)
+                          message, ...)
 {
     iter <- 0
     while(iter < iterFilter){
@@ -260,6 +283,12 @@ crossValFit <- function(rts, fit, vals, bs, family, m, method, optimizer,
 #' @param method character smoothing parameter estimation method; see:
 #' ?mgcv::gam
 #'
+#' @param rtx ordered pair of endpoints for rtx; if "max" or "min", gives the
+#' maximum or minimum rtx, respectively, as model endpoints for rtx
+#'
+#' @param rty ordered pair of endpoints for rty; if "max" or "min", gives the
+#' maximum or minimum rtx, respectively, as model endpoints for rty
+#'
 #' @param optimizer character. Method to optimize smoothing parameter; see:
 #' ?mgcv::gam
 #'
@@ -343,6 +372,7 @@ fit_gam <- function(object, useID = FALSE, k = seq(10,20,2),iterFilter = 2,
                     outlier = c("MAD", "boxplot"), coef = 2, prop = 0.5,
                     weights = 1, bs = c("bs", "ps"), m = c(3,2),
                     family = c("scat", "gaussian"), method = "REML",
+                    rtx = c("min", "max"), rty = c("min", "max"),
                     optimizer = "newton", message = TRUE, ...)
 {
     combinerCheck(isMetabCombiner(object), "metabCombiner")
@@ -353,7 +383,7 @@ fit_gam <- function(object, useID = FALSE, k = seq(10,20,2),iterFilter = 2,
     bs <- match.arg(bs)
     family <- match.arg(family)
 
-    rts <- formatAnchors(object, anchors, weights, useID)
+    rts <- formatAnchors(object, anchors, weights, useID, rtx, rty)
     rts <- filterAnchors(rts = rts, fit = "gam", vals = k, outlier = outlier,
                          coef = coef, iterFilter = iterFilter, prop = prop,
                          bs = bs, m = m, family = family, method = method,
@@ -413,6 +443,12 @@ fit_gam <- function(object, useID = FALSE, k = seq(10,20,2),iterFilter = 2,
 #'
 #' @param control control parameters for loess fits; see: ?loess.control
 #'
+#' @param rtx ordered pair of endpoints for rtx; if "max" or "min", gives the
+#' maximum or minimum rtx, respectively, as model endpoints for rtx
+#'
+#' @param rty ordered pair of endpoints for rty; if "max" or "min", gives the
+#' maximum or minimum rtx, respectively, as model endpoints for rty
+#'
 #' @param message Option to print message indicating function progress
 #'
 #' @return \code{metabCombiner} object with \code{model} slot updated to
@@ -451,7 +487,8 @@ fit_gam <- function(object, useID = FALSE, k = seq(10,20,2),iterFilter = 2,
 #' @export
 fit_loess <- function(object, useID = FALSE, spans = seq(0.2, 0.3, by = 0.02),
                     outlier = c("MAD", "boxplot"), coef = 2, iterFilter = 2,
-                    prop = 0.5, weights = 1, message = TRUE,
+                    prop = 0.5, weights = 1, rtx = c("min", "max"),
+                    rty = c("min", "max"), message = TRUE,
                     control = loess.control(surface = "direct",iterations = 10))
 {
     combinerCheck(isMetabCombiner(object), "metabCombiner")
@@ -460,9 +497,8 @@ fit_loess <- function(object, useID = FALSE, spans = seq(0.2, 0.3, by = 0.02),
     check_fit_pars(anchors = anchors, fit = "loess", useID = useID,
                     iterFilter = iterFilter, coef = coef, prop = prop,
                     spans = spans)
-
     outlier <- match.arg(outlier)
-    rts <- formatAnchors(object, anchors, weights, useID)
+    rts <- formatAnchors(object, anchors, weights, useID, rtx, rty)
 
     rts <- filterAnchors(rts = rts, fit = "loess", iterFilter = iterFilter,
                         outlier = outlier, coef = coef, prop = prop,

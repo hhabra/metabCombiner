@@ -16,6 +16,8 @@ fitgamParam(
   family = "scat",
   m = c(3, 2),
   method = "REML",
+  rtx = c("min", "max"),
+  rty = c("min", "max"),
   optimizer = "newton",
   message = TRUE
 )
@@ -44,6 +46,10 @@ outlier; default: 0.5}
 \item{m}{basis and penalty order; default: c(3,2)}
 
 \item{method}{smoothing parameter estimation method; default: "REML"}
+
+\item{rtx}{ordered pair of endpoints for rtx; default: ("min", "max")}
+
+\item{rty}{ordered pair of endpoints for rty; default: ("min", "max")}
 
 \item{optimizer}{numerical optimization for GAM; default: "newton"}
 

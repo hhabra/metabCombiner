@@ -13,6 +13,8 @@ fitloessParam(
   prop = 0.5,
   weights = 1,
   message = TRUE,
+  rtx = c("min", "max"),
+  rty = c("min", "max"),
   control = loess.control(surface = "direct", iterations = 10)
 )
 }
@@ -34,6 +36,10 @@ default: 0.5}
 \item{weights}{optional supplied weights to individual points; default: 1}
 
 \item{message}{option to print progress message; default: TRUE}
+
+\item{rtx}{ordered pair of endpoints for rtx; default: ("min", "max")}
+
+\item{rty}{ordered pair of endpoints for rty; default: ("min", "max")}
 
 \item{control}{loess-specific control parameters; see: ?loess.control}
 }

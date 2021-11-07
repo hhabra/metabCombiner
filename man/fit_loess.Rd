@@ -13,6 +13,8 @@ fit_loess(
   iterFilter = 2,
   prop = 0.5,
   weights = 1,
+  rtx = c("min", "max"),
+  rty = c("min", "max"),
   message = TRUE,
   control = loess.control(surface = "direct", iterations = 10)
 )
@@ -40,6 +42,12 @@ this proportion of fits. Must be between 0 & 1.}
 
 \item{weights}{Optional user supplied weights for each ordered pair. Must be
 of length equal to number of anchors (n) or a divisor of (n + 2)}
+
+\item{rtx}{ordered pair of endpoints for rtx; if "max" or "min", gives the
+maximum or minimum rtx, respectively, as model endpoints for rtx}
+
+\item{rty}{ordered pair of endpoints for rty; if "max" or "min", gives the
+maximum or minimum rtx, respectively, as model endpoints for rty}
 
 \item{message}{Option to print message indicating function progress}
 

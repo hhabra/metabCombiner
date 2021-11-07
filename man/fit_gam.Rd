@@ -17,6 +17,8 @@ fit_gam(
   m = c(3, 2),
   family = c("scat", "gaussian"),
   method = "REML",
+  rtx = c("min", "max"),
+  rty = c("min", "max"),
   optimizer = "newton",
   message = TRUE,
   ...
@@ -56,6 +58,12 @@ splines) or "ps" (penalized basis splines)}
 
 \item{method}{character smoothing parameter estimation method; see:
 ?mgcv::gam}
+
+\item{rtx}{ordered pair of endpoints for rtx; if "max" or "min", gives the
+maximum or minimum rtx, respectively, as model endpoints for rtx}
+
+\item{rty}{ordered pair of endpoints for rty; if "max" or "min", gives the
+maximum or minimum rtx, respectively, as model endpoints for rty}
 
 \item{optimizer}{character. Method to optimize smoothing parameter; see:
 ?mgcv::gam}
