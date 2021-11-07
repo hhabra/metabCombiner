@@ -242,13 +242,14 @@ selectColumn <- function(table, col = NULL){
 #'
 #' @return  an initialized and formatted \code{metabData} object.
 #'
-detectFields <- function(Data, table, mz, rt, id, adduct, samples, extra, Q){
+detectFields <- function(Data, table, mz, rt, id, adduct, samples, extra, Q)
+{
     mzCol <- detect(mz, names(table), type = "single")
-    new_mz <- selectMZ(table = table, col = mzCol)
+    new_mz <- round(selectMZ(table = table, col = mzCol),4)
     table <- table[-mzCol]
 
     rtCol <- detect(rt, names(table), type = "single")
-    new_rt <- selectRT(table, col = rtCol)
+    new_rt <- round(selectRT(table, col = rtCol),4)
     table = table[-rtCol]
 
     idCol <- detect(id, names(table), type = "single")
