@@ -27,6 +27,17 @@ ignore_brackets = function(s, brackets)
     return(s)
 }
 
+#' @title remove bracket characters in strings
+#'
+#' @description This removes bracket characters, usually in conjunction with
+#' usage of "grep" for sample & extra column indexing
+#'
+#' @noRd
+rmbrackets <- function(s){
+    gsub("\\(|\\[|\\{|\\}|\\]|\\)", "", s)
+}
+
+
 #' Determine Matching Identity Strings
 #'
 #' @param s1  One of two character vectors to be compared
@@ -48,11 +59,8 @@ ignore_brackets = function(s, brackets)
 #' @noRd
 compare_strings <- function(s1,s2, match, mismatch, brackets, type = "m")
 {
-    s1 <- ifelse(is.na(s1), "", s1)
-    s2 <- ifelse(is.na(s2), "", s2)
-
-    s1 <- ignore_brackets(s1, brackets)
-    s2 <- ignore_brackets(s2, brackets)
+    s1 <- ignore_brackets(ifelse(is.na(s1), "", s1), brackets)
+    s2 <- ignore_brackets(ifelse(is.na(s2), "", s2), brackets)
 
     if (type == "m")
         return(ifelse(!(s1 == "" | s2 == "") & tolower(s1) == tolower(s2),
