@@ -1,16 +1,42 @@
 Updates:
 
-Version 1.3.3
+Version 1.5.1
 -----------------------
+New function updateTables():
+    + allows user-changes to combinedTable report
+    + inclusion of non-intersected features lost from original xdata & ydata
+      objects used as input for metabCombiner object construction
+
 Changes in metabCombiner():
+    + handling of missing features enabled (i.e. when update() is used)
+    + new argument "impute": if TRUE, mean m/z, RT, and Q imputed wherever a
+      feature is missing (note: for similarly acquired data only!)
     + rtOrder parameter bug fix
 
+Changes in metabCombine():
+    + new argument "union" performs the update method on input xdata & ydata
+    + new argument "impute" uses the mean m/z, RT, and Q information whenever
+      information is missing from active dataset
+
+Changes in fit_model/ fit_gam()/ fit_loess():
+    + new arguments rtx & rty limit the range of X & Y retention times
+
 Changes in batchCombine():
-    +multiple (2 or more) datasets expected as input
-    +ending message added ("batchCombine Process Complete")
+    + new argument "union" performs the update method on input xdata & ydata
+      (similar to batchCombine)
+    + if union set to TRUE, imputation is performed at each step (impute = TRUE)
+    + multiple (2 or more) datasets expected as input
+    + ending message added ("batchCombine Process Complete")
 
+Changes in labelRows()/ reduceTable()/ labelRowParam()/ reduceTableParam():
+    + new argument 'useID'- controls whether matched identifiers should be used
+      (identity-matched rows will be labeled as "identity"); default: FALSE
+    + 'resolveConflicts' and 'remove' hard-coded as TRUE in reduceTable()
 
+Changes to metabData objects:
+    + "extra"" column count added to show() message
 
+Package functions updated to handle "group 0"
 
 Version 1.3.2
 ---------------------

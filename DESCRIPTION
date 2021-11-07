@@ -1,6 +1,6 @@
 Package: metabCombiner
-Version: 1.2.2
-Date: 2021-08-09
+Version: 1.5.1
+Date: 2021-11-07
 Title: Method for Combining LC-MS Metabolomics Feature Measurements
 Authors@R: c(
 	   person("Hani", "Habra", email = "hhabra1@gmail.com",role = c("aut","cre")),
@@ -63,6 +63,7 @@ Collate:
     'plot_fit.R'
     'resolveRows.R'
     'selectAnchors.R'
+    'updateTables.R'
     'write2file.R'
     'zzz.R'
 VignetteBuilder: knitr
