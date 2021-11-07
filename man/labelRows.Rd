@@ -7,6 +7,7 @@
 \usage{
 labelRows(
   object,
+  useID = FALSE,
   minScore = 0.5,
   maxRankX = 3,
   maxRankY = 3,
@@ -22,16 +23,20 @@ labelRows(
 
 reduceTable(
   object,
+  useID = FALSE,
   maxRankX = 2,
   maxRankY = 2,
   minScore = 0.5,
+  delta = 0.1,
   maxRTerr = 10,
   rtOrder = TRUE,
   brackets_ignore = c("(", "[", "{")
 )
 }
 \arguments{
-\item{object}{Either a \code{metabCombiner} object or \code{combinedTable}.}
+\item{object}{Either a \code{metabCombiner} object or \code{combinedTable}}
+
+\item{useID}{option to annotate identity-matched strings as "IDENTITY"}
 
 \item{minScore}{numeric minimum allowable score (between 0 & 1) for
 metabolomics feature pair alignments}
@@ -67,8 +72,8 @@ retention order consistency on rows deemed "RESOLVED" within subgroups.}
 as groups with an equal number of features from input
 datasets where all features have a 1-1 match.}
 
-\item{brackets_ignore}{character. Bracketed identity strings of the types
-in this argument will be ignored}
+\item{brackets_ignore}{character. If useID = TRUE, bracketed identity strings
+of the types in this argument will be ignored}
 }
 \value{
 updated \code{combinedTable} or \code{metabCombiner} object. The
@@ -79,27 +84,26 @@ table will have three new columns:
 \item{alt}{alternate subgroup for rows in multiple feature pair conflicts}
 }
 \description{
-This is a method for annotating identity-matched, removable, &
-conflicting feature pair alignment (FPA) rows in the \code{combinedTable}
-report. Simple thresholds for score, rank, retention time error and delta
-score can computationally reduce the set of possible FPAs to the most likely
-compound matches. FPAs falling within some small measure (in score or mz/rt)
-of the top-ranked row are organized into subgroups to facilitate inspection;
-setting delta to 0 automatically reduces to 1-1 matches.
+This is a method for annotating removable, conflicting, and identity-matched
+feature pair alignment (FPA) rows in the \code{combinedTable} report. Simple
+thresholds for score, rank, retention time error and delta score can
+computationally reduce the set of possible FPAs to the most likely feature
+matches. FPAs falling within some small delta score or mz/rt of the
+top-ranked pair are organized into subgroups to facilitate inspection.
+Automated reduction to 1-1 pairs is also possible with this function.
 
-\code{reduceTable} behaves identically to labelRows, but with delta set to 0
-& remove set to TRUE, automatically limiting to 1 - 1 feature matches
-constrained by rank and score threshold parameters. Rank threshold defaults
-are also stricter with reduceTable.
+\code{reduceTable} behaves identically to labelRows, but with a focus on
+automated table reduction. Rank threshold defaults in \code{reduceTable} are
+also stricter than in \code{labelRows}.
 }
 \details{
-\code{metabCombiner} initially reports all possible FPAs in the rows of the
-\code{combinedTable} report. Most of these are misalignments that
- require removal. This function is used to automate most of the reduction
- process by labeling rows as removable or conflicting, based on certain
- conditions, and is performed after computing similarity scores.
+\code{metabCombiner} initially reports all possible feature pairings in the
+rows of the \code{combinedTable} report. Most of these are misalignments that
+require removal. This function is used to automate this reduction
+process by labeling rows as removable or conflicting, based on certain
+conditions, and is performed after computing similarity scores.
 
- A label may take on one of four values:
+A label may take on one of four values:
 
  a) "": No determination made
  b) "IDENTITY": an alignment with matching identity "idx & idy" strings
@@ -107,38 +111,48 @@ are also stricter with reduceTable.
  d) "CONFLICT": competing alignments for one or multiple shared features
 
 The labeling rules are as follows:
-1) Rows with matching idx & idy strings are labeled "IDENTITY". These rows
-   are not labeled "REMOVE", irrespective of subsequent criteria.
-2) Groups determined to be 'balanced': label rows with rankX > 1 & rankY > 1
+
+1) Groups determined to be 'balanced': label rows with rankX > 1 & rankY > 1
    "REMOVE" irrespective of \code{delta} criteria
-3) Rows with a score < \code{minScore}: label "REMOVE"
-4) Rows with rankX > \code{maxRankX} and/or rankY > \code{maxRankY}:
+2) Rows with a score < \code{minScore}: label "REMOVE"
+3) Rows with rankX > \code{maxRankX} and/or rankY > \code{maxRankY}:
    label "REMOVE"
-5) Conflicting subgroup assignment as determined  by \code{method} &
+4) Conflicting subgroup assignment as determined  by \code{method} &
    \code{delta} arguments. Conflicting alignments following outside
    \code{delta} thresholds: labeled "REMOVE". Otherwise, they are assigned
    a "CONFLICT" label and subgroup number.
+5) If \code{useID} argument set to TRUE, rows with matching idx & idy strings
+   are labeled "IDENTITY". These rows are not changed to "REMOVE" or
+   "CONFLICT" irrespective of subsequent criteria.
 }
 \examples{
+
+#required steps prior to function use
 data(plasma30)
 data(plasma20)
-
 p30 <- metabData(plasma30, samples = "CHEAR")
 p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
-p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
-p.comb = selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
-p.comb = fit_gam(p.comb, k = 20, iterFilter = 1)
-p.comb = calcScores(p.comb, A = 90, B = 14, C = 0.5)
+p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+p.comb <- selectAnchors(p.comb, tolmz = 0.003, tolQ = 0.3, windy = 0.02)
+p.comb <- fit_gam(p.comb, k = 20, iterFilter = 1)
+p.comb <- calcScores(p.comb, A = 90, B = 14, C = 0.5)
 
-###merge combinedTable and featdata
+##applies labels, but maintains all rows
+p.comb <- labelRows(p.comb, maxRankX = 2, maxRankY = 2, maxRTerr = 0.5,
+                    delta = 0.1, resolveConflicts = FALSE, remove = FALSE)
+
+##automatically resolve conflicts and filter to 1-1 feature pairs
+p.comb.2 <- labelRows(p.comb, resolveConflicts = FALSE, remove = FALSE)
+
+#this is identical to the previous command
+p.comb.2 <- reduceTable(p.comb)
+
+p.comb = labelRows(p.comb, method = "mzrt", delta = c(0.005, 0.5, 0.005,0.3))
+
+##this function may be applied to combinedTable inputs as well
 cTable = cbind.data.frame(combinedTable(p.comb), featdata(p.comb))
 
-##example using score-based conflict detection method
 lTable = labelRows(cTable, maxRankX = 3, maxRankY = 2, minScore = 0.5,
          method = "score", maxRTerr = 0.5, delta = 0.2)
-
-##example using mzrt-based conflict detection method
-lTable = labelRows(cTable, method = "mzrt", maxRankX = 3, maxRankY = 2,
-                     delta = c(0.005, 0.5, 0.005,0.3), maxRTerr = 0.5)
 
 }

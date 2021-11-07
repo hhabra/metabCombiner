@@ -506,12 +506,12 @@ setGeneric("update_md", function(object, data, samples, extra, stats)
 
 
 
-#' @title Obtain XY Dataset Identifier
+#' @title Obtain x & y Data Identifiers
 #'
 #' @description \code{metabCombiner} alignment is performed in a pairwise manner
-#' between two datasets generically termed "X" & "Y". These methods prints the
-#' identifier associated with dataset X and Y, contained within the xy slot of
-#' a constructed \code{metabCombiner} object.
+#' between two datasets generically termed "x" & "y". These methods print the
+#' identifier(s) associated with datasets X and Y, contained within the xy slot
+#' of a constructed \code{metabCombiner} object.
 #'
 #' @param object \code{metabCombiner} object
 #'
@@ -530,9 +530,16 @@ setGeneric("update_md", function(object, data, samples, extra, stats)
 #' #expected: "p20"
 #' y(p.comb)
 #'
+#' #list of x & y data descriptors
+#' xy(p.comb)
 #'
 #' @export
 setGeneric("x", function(object) standardGeneric("x"))
+
+#' @rdname x
+#'
+#' @export
+setGeneric("xy", function(object) standardGeneric("xy"))
 
 #' @rdname x
 #'

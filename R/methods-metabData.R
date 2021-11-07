@@ -43,13 +43,14 @@ setMethod("getStats", signature = "metabData", function(object){
 setMethod("show", signature = "metabData", function(object){
     data <- getData(object)
     samples <- getSamples(object)
+    extra <- getExtra(object)
     stats <- getStats(object)
 
-    unit <- ifelse(max(data[["rt"]]) < 180, "minutes", "seconds")
+    unit <- ifelse(max(data[["rt"]]) < 240, "minutes", "seconds")
 
     cat("A metabData object\n")
     cat("-------------------------\n")
-    cat("Total Samples:", length(samples), "\n")
+    cat("Total Samples:", length(samples), "  Total Extra:", length(extra),"\n")
 
     cat("Mass Range: ", min(data[["mz"]]), "-", max(data[["mz"]]), " ",
         "m/z\n", sep = "" )

@@ -29,7 +29,6 @@
 filterRT <- function(data, rtmin, rtmax)
 {
     rts <- data[["rt"]]
-
     if(rtmin == "min")
         rtmin <- min(rts)
     if(rtmax == "max")

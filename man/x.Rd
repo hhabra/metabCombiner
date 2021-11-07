@@ -2,16 +2,22 @@
 % Please edit documentation in R/generics.R, R/methods-metabCombiner.R
 \name{x}
 \alias{x}
+\alias{xy}
 \alias{y}
 \alias{x,metabCombiner-method}
+\alias{xy,metabCombiner-method}
 \alias{y,metabCombiner-method}
-\title{Obtain XY Dataset Identifier}
+\title{Obtain x & y Data Identifiers}
 \usage{
 x(object)
+
+xy(object)
 
 y(object)
 
 \S4method{x}{metabCombiner}(object)
+
+\S4method{xy}{metabCombiner}(object)
 
 \S4method{y}{metabCombiner}(object)
 }
@@ -33,10 +39,13 @@ x(p.comb)
 
 #expected: "p20"
 y(p.comb)
+
+#list of x & y data descriptors
+xy(p.comb)
 }
 \description{
 \code{metabCombiner} alignment is performed in a pairwise manner
-between two datasets generically termed "X" & "Y". These methods prints the
-identifier associated with dataset X and Y, contained within the xy slot of
-a constructed \code{metabCombiner} object.
+between two datasets generically termed "x" & "y". These methods print the
+identifier(s) associated with datasets X and Y, contained within the xy slot
+of a constructed \code{metabCombiner} object.
 }

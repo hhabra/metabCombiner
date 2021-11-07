@@ -16,6 +16,7 @@ labelRowsParam(
   rtOrder = TRUE,
   remove = FALSE,
   balanced = TRUE,
+  useID = FALSE,
   brackets_ignore = c("(", "[", "{")
 )
 
@@ -26,6 +27,7 @@ reduceTableParam(
   maxRTerr = 10,
   delta = 0.1,
   rtOrder = TRUE,
+  useID = FALSE,
   brackets_ignore = c("(", "[", "{")
 )
 }
@@ -55,6 +57,9 @@ retention order condition on paired alignments}
 default: FALSE}
 
 \item{balanced}{option to reduce balanced groups; default: TRUE}
+
+\item{useID}{option to annotate identity-matched strings as IDENTITY;
+default: FALSE}
 
 \item{brackets_ignore}{bracket types for ignoring string comparisons}
 }

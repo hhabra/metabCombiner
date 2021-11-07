@@ -188,6 +188,14 @@ setMethod("x", signature = "metabCombiner", function(object){
     return(object@xy[["x"]])
 })
 
+#' @rdname x
+#'
+#' @export
+setMethod("xy", signature = "metabCombiner", function(object){
+    return(object@xy)
+})
+
+
 
 #' @rdname x
 #'
