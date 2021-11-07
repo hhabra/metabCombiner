@@ -64,20 +64,20 @@ combinerNames <- function(){
 
 
 
-
-
 #' @title Determine \code{combinedTable} Validity
 #'
 #' @description Checks whether input object is a valid metabData.Returns an
 #' integer code if invalid. Function is used alongside \code{combinerCheck}.
 #'
-#' @details a proper combinedTable must have the following characteristics to
+#' @details a proper \code{combinedTable} must have these characteristics to
 #' be deemed valid for \code{metabCombiner} operations:
 #'
 #' 1) It must be a data.frame with at least 16 columns and at least 1 row
+#'
 #' 2) The first 16 columns must be named "rowID", "idx","idy","mzx","mzy","rtx",
 #'    "rty", "rtProj","Qx","Qy","group","score","rankX","rankY","adductx", &
 #'    "adducty" in this exact order
+#'
 #' 3) The first 16 columns must be of class: "numeric" "character","character",
 #'    "numeric","numeric","numeric", "numeric", "numeric","numeric","numeric",
 #'    "integer", "numeric", "integer", "integer","character", "character"
@@ -139,7 +139,7 @@ isMetabCombiner <- function(object){
     if(any(duplicated(datasets(object))))
         return(3)
 
-    if(!identical(combinedTable(object)[["rowID"]], featdata(object)[["rowID"]]))
+    if(!identical(combinedTable(object)[["rowID"]],featdata(object)[["rowID"]]))
         return(4)
 
     return(0)
