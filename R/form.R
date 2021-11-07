@@ -1,5 +1,6 @@
+#' @title Determine Averaging Options
 #'
-#'
+#' @param means logical vector or list of logicals
 #'
 #' @noRd
 form_means <- function(means){
@@ -27,9 +28,14 @@ form_means <- function(means){
 #'
 #' @param values data.frame combinedTable with sample (+ extra) columns
 #'
+#' @param group0 data.frame consisting of "group 0" features (obtained using
+#'  update_MC method) to be appended
+#'
 #' @noRd
-formLabeledTable <- function(fields, values, remove)
+formLabeledTable <- function(fields, values, remove, group0 = NULL)
 {
+    fields$labels <- ifelse(is.na(fields$labels), "", fields$labels)
+
     #option to eliminate rows labeled as removables
     if(remove == TRUE){
         keepRows <- which(fields[["labels"]] != "REMOVE")
@@ -40,12 +46,18 @@ formLabeledTable <- function(fields, values, remove)
     #eliminating potential duplicate columns
     labnames <- c("labels", "subgroup", "alt", "resolveScore")
     if(any(labnames %in% utils::head(names(values)))){
-        duplicates <- grep(paste(labnames, collapse = "|"), head(names(values)))
+        duplicates <- which(head(names(values)) %in% labnames)
         values <- values[,-duplicates]
     }
-
     cTable <- data.frame(fields, values, stringsAsFactors = FALSE,
                          check.names = FALSE)
+
+    if(!is.null(group0)){
+        if("resolveScore" %in% names(fields))
+            group0$fields[["resolveScore"]] <- 0
+        group0 <- cbind.data.frame(group0[["fields"]], group0[["values"]])
+        cTable <- rbind.data.frame(cTable, group0)
+    }
 
     return(cTable)
 }
@@ -54,9 +66,9 @@ formLabeledTable <- function(fields, values, remove)
 #' @title Form Single Dataset from Object
 #'
 #' @description When a metabCombiner object is supplied as input for a new
-#' metabCombiner construction, information from one dataset or the mean of all
-#' constituent datasets is chosen to represent that object. Only one row is
-#' allowed for each feature, with duplicates discarded.
+#' \code{metabCombiner} construction, information from one dataset or the mean
+#' of all constituent datasets is chosen to represent that object. Only one row
+#' is allowed for each feature, with duplicates discarded.
 #'
 #' @param object metabCombiner object
 #'
@@ -65,29 +77,63 @@ formLabeledTable <- function(fields, values, remove)
 #' @param means logical length 3 vector or list indicating whether to take means
 #'              of m/z, RT, or Q, respectively;
 #'
+#' @param impute logical. Should features with missing values
+#' be imputed (currently only mean-value imputation available)
+#'
+#' @details These are the steps executed in this function:
+#'
+#' 1) resolving conflicting feature pair alignment (FPA) subgroups
+#'
+#' 2) removal of all FPAs annotated as "REMOVE" in the labels column
+#'
+#' 3) Reforming the combinedTable and matching the corresponding featdata
+#'
+#' 4) selection of meta-data from a single dataset
+#'
 #' @noRd
-form_dataset <- function(object, data, means, rtOrder)
+form_dataset <- function(object, data, means, rtOrder, impute)
 {
     cTable <- combinedTable(object)
-    fields <- resolveRows(cTable[,seq(1,19)], rtOrder = rtOrder)
-    values <- cTable[,seq(20,ncol(cTable))]
-    cTable <- formLabeledTable(fields, values, remove = TRUE)
-
-    fdata <- featdata(object, data = data)
-    fdata <- fdata[match(cTable[["rowID"]], fdata[["rowID"]]),]
-
-    samples_extras <- unlist(lapply(datasets(object), function(d)
-        c(getSamples(object, d), getExtra(object,d))))
-    names(fdata) <- c("rowID", "id","mz","rt","Q","adduct")
+    fnames <- c(combinerNames(), "labels", "subgroup", "alt")
+    fields <- resolveRows(cTable[fnames], rtOrder = rtOrder)
+    values <- cTable[,-seq(1,length(fnames))]
+    cTable <- formLabeledTable(fields, values, remove = TRUE, group0 = NULL)
+    fulldata <- featdata(object)
+    fulldata <- fulldata[match(cTable[["rowID"]], fulldata[["rowID"]]),]
+    fdata <- fulldata[grep(paste("rowID|_", data, "$", sep = ""),
+                           names(fulldata), value = TRUE)]
+    names(fdata) <- c("rowID","id","mz","rt","Q","adduct")
+    samps_extras <- rmbrackets(paste(unlist(lapply(datasets(object), function(d)
+        c(getSamples(object, d), getExtra(object,d)))), collapse = "|"))
+    vnames <- names(values)[grep(samps_extras, rmbrackets(names(values)))]
+    dataset <- cbind.data.frame(fdata, cTable[,names(cTable) %in% vnames])
+    ave_mz <- matrixStats::rowMeans2(as.matrix(
+        fulldata[grep("^mz_", names(fulldata), value = TRUE)]), na.rm = TRUE)
+    ave_rt <- matrixStats::rowMeans2(as.matrix(
+        fulldata[grep("^rt_", names(fulldata), value = TRUE)]), na.rm = TRUE)
+    ave_Q <- matrixStats::rowMeans2(as.matrix(
+        fulldata[grep("^Q_", names(fulldata), value = TRUE)]), na.rm = TRUE)
+    naInds <- which(is.na(dataset$mz) | is.na(dataset$rt) | is.na(dataset$Q))
+    if(length(naInds) > 0){
+        if(isTRUE(impute)){
+            dataset$mz <- ifelse(is.na(dataset$mz), ave_mz, dataset$mz)
+            dataset$rt <- ifelse(is.na(dataset$rt), ave_rt, dataset$rt)
+            dataset$Q <- ifelse(is.na(dataset$Q), ave_Q, dataset$Q)
+        }
+        else{
+            dataset <- dataset[-naInds,]
+            ave_mz <- ave_mz[-naInds]
+            ave_rt <- ave_rt[-naInds]
+            ave_Q <- ave_Q[-naInds]
+        }
+    }
     means <- form_means(means)
-    if(means[1] == TRUE)  fdata[["mz"]] <- mzdata(object, value = "mean")
-    if(means[2] == TRUE)  fdata[["rt"]] <- rtdata(object, value = "mean")
-    if(means[3] == TRUE)  fdata[["Q"]] <- Qdata(object, value = "mean")
-    dataset <- cbind.data.frame(fdata, cTable[samples_extras])
+    if(isTRUE(means[1]))  fdata[["mz"]] <- ave_mz
+    if(isTRUE(means[2]))  fdata[["rt"]] <- ave_rt
+    if(isTRUE(means[3]))  fdata[["Q"]] <- ave_Q
     duplicates <- findDuplicates(dataset, missing = rep(0, nrow(dataset)),
-                                 counts = dataset$Q, duplicate = c(1E-4, 1E-4))
-    if(length(duplicates) > 0)
-        dataset <- dataset[-duplicates,]
+                                counts = dataset$Q, duplicate = c(1E-4, 1E-4))
+    if(length(duplicates) > 0) dataset <- dataset[-duplicates,]
     return(dataset)
 }
 
@@ -113,11 +159,12 @@ form_dataset <- function(object, data, means, rtOrder)
 ##
 formCombinedTable <- function(object, xset, yset, xreps, yreps){
     xComb <- dplyr::slice(xset, rep(seq(1,n()), times = xreps))
-    yComb = yset[yreps,]
-    samples_extras <- unlist(lapply(datasets(object), function(d)
+    yComb <- yset[yreps,]
+    samps_extras <- unlist(lapply(datasets(object), function(d)
         c(getSamples(object, d), getExtra(object,d))))
-    x_samples_extras <- intersect(names(xComb), samples_extras)
-    y_samples_extras <- intersect(names(yComb), samples_extras)
+    samps_extras <- rmbrackets(paste(samps_extras, collapse = "|"))
+    x_sa_ext <- setdiff(grep(samps_extras, rmbrackets(names(xComb))),seq(1,5))
+    y_sa_ext <- setdiff(grep(samps_extras, rmbrackets(names(yComb))),seq(1,5))
     cTable <- data.frame(idx = xComb[["id"]], idy = yComb[["id"]],
                     mzx = round(xComb[["mz"]],5), mzy = round(yComb[["mz"]],5),
                     rtx = round(xComb[["rt"]],4), rty = round(yComb[["rt"]],4),
@@ -127,7 +174,7 @@ formCombinedTable <- function(object, xset, yset, xreps, yreps){
                     score = rep(1, nrow(xComb)),
                     rankX = as.integer(1), rankY = as.integer(1),
                     adductx = xComb[["adduct"]], adducty = yComb[["adduct"]],
-                    xComb[x_samples_extras], yComb[y_samples_extras],
+                    xComb[,sort(x_sa_ext)], yComb[,sort(y_sa_ext)],
                     stringsAsFactors = FALSE, check.names = FALSE)
     consec <- lapply(rle(cTable[["group"]])[["lengths"]], function(l) seq(1,l))
     consec <- unlist(consec)
