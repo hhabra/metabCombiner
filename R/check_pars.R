@@ -2,13 +2,13 @@
 check_combine_pars <- function(binGap, means, xid, yid)
 {
     if(is.null(binGap) | length(binGap) == 0)
-        stop("argument 'binGap' must be defined")
+        stop("'binGap' argument must be a defined constant")
     if(binGap <= 0 | !is.numeric(binGap))
-        stop("argument 'binGap' must be a positive numeric constant")
+        stop("'binGap' argument must be a positive numeric constant")
     if(binGap >= 0.1)
-        stop("argument 'binGap' is too large")
+        stop("'binGap' argument is too large; recommended range: 0.005-0.01")
     if(binGap > 0.05)
-        warning("large 'binGap' argument value; binGap < 0.01 is recommended")
+        warning("large 'binGap' argument value; recommended range: 0.005-0.01")
     if(!is.logical(unlist(means)))
         stop("arguments means must contain only logicals")
 }
@@ -91,6 +91,9 @@ check_score_pars <- function(cTable, A, B, C, model, fit, groups,
     if(any(!groups %in% cTable[["group"]]))
         stop("invalid argument 'groups'- one or more groups not found")
 
+    if(any(groups <= 0))
+        stop("'groups' argument must be strictly positive")
+
     if(!is.numeric(adduct) | adduct < 1)
         stop("argument 'adduct' must be a numeric greater than 1")
 
@@ -131,7 +134,6 @@ check_lblrows_pars <- function(maxRankX, maxRankY, minScore, maxRTerr, balanced,
     if(method == "score"){
         if(!is.numeric(delta) | delta > 1 | delta < 0)
             stop("argument 'delta' must be a numeric value between 0 & 1")
-
         if(length(delta) > 1)
             stop("constant value expected for argument 'delta'")
     }
