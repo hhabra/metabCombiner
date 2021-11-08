@@ -24,6 +24,7 @@
 #' @return data.frame of \code{combinedTable} fields, replacing "CONFLICT"
 #' labels with "RESOLVED" or "REMOVE", depending on the computations performed.
 #'
+#'
 resolveRows <- function(fields, rtOrder){
     if(is.null(fields[["labels"]]))
         stop("labelRows() has not been called on object")
