@@ -29,7 +29,7 @@ formatAnchors <- function(object, anchors, weights, useID, rtx, rty){
         anchors <- dplyr::filter(anchors, .data$rtx >= rtx_min &
                                 .data$rtx <= rtx_max & .data$rty >= rty_min,
                                 .data$rty <= rty_max)
-        cTable <- dplyr::filter(anchors, .data$rtx >= rtx_min &
+        cTable <- dplyr::filter(cTable, .data$rtx >= rtx_min &
                                 .data$rtx <= rtx_max & .data$rty >= rty_min,
                                 .data$rty <= rty_max)
         if(nrow(anchors) < 20)
