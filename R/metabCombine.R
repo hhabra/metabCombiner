@@ -137,7 +137,7 @@ metabCombine <- function(xdata, ydata, binGap = 0.005, xid = NULL, yid = NULL,
                         usePPM = scores$usePPM, useAdduct = scores$useAdduct,
                         brackets_ignore = scores$brackets_ignore)
 
-    object <- labelRows(object, minScore = labels$minScore,
+    object <- labelRows(object, useID = labels$useID,minScore = labels$minScore,
                         maxRankX = labels$maxRankX, maxRankY = labels$maxRankY,
                         method = labels$method, balanced = labels$balanced,
                         remove = labels$remove, delta = labels$delta,
