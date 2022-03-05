@@ -170,6 +170,8 @@ calcScoresParam <- function(A = 75, B = 10, C = 0.25, fit = "gam",
 #'
 #' @return list of labelRows parameters
 #'
+#' @param useID option to annotate identity-matched strings as IDENTITY;
+#' default: FALSE
 #' @param maxRankX  maximum rank allowable for X features
 #' @param maxRankY  maximum rank allowable for Y features
 #' @param minScore  minimum score threshold; default: 0.5
@@ -187,9 +189,6 @@ calcScoresParam <- function(A = 75, B = 10, C = 0.25, fit = "gam",
 #'     default: FALSE
 #' @param balanced option to reduce balanced groups; default: TRUE
 #'
-#' @param useID option to annotate identity-matched strings as IDENTITY;
-#'     default: FALSE
-#'
 #' @param brackets_ignore bracket types for ignoring string comparisons
 #'
 #' @examples
@@ -200,10 +199,10 @@ calcScoresParam <- function(A = 75, B = 10, C = 0.25, fit = "gam",
 #' \code{\link{batchCombine}}, \code{\link{reduceTable}}
 #'
 #' @export
-labelRowsParam <- function(maxRankX = 3, maxRankY = 3, minScore = 0.5,
-                            delta = 0.1, method = "score", maxRTerr = 10,
-                            resolveConflicts = FALSE, rtOrder = TRUE,
-                            remove = FALSE,  balanced = TRUE, useID = FALSE,
+labelRowsParam <- function(useID = FALSE, maxRankX = 3, maxRankY = 3,
+                            minScore = 0.5, delta = 0.1, method = "score",
+                            maxRTerr = 10, resolveConflicts = FALSE,
+                            rtOrder = TRUE, remove = FALSE,  balanced = TRUE,
                             brackets_ignore = c("(", "[", "{"))
 {
     params <- list(maxRankX = maxRankX, maxRankY = maxRankY,
@@ -217,11 +216,12 @@ labelRowsParam <- function(maxRankX = 3, maxRankY = 3, minScore = 0.5,
 #' @rdname labelRowsParam
 #'
 #' @export
-reduceTableParam <- function(maxRankX = 2, maxRankY = 2, minScore = 0.5,
-                            maxRTerr = 10, delta = 0.1, rtOrder = TRUE,
-                            useID = FALSE, brackets_ignore = c("(", "[", "{"))
+reduceTableParam <- function(useID = FALSE, maxRankX = 2, maxRankY = 2,
+                            minScore = 0.5, maxRTerr = 10, delta = 0.1,
+                            rtOrder = TRUE,
+                            brackets_ignore = c("(", "[", "{"))
 {
-    params <- list(maxRankX = maxRankX, maxRankY = maxRankY,
+    params <- list(useID = useID, maxRankX = maxRankX, maxRankY = maxRankY,
                    minScore = minScore, method = "score", delta = delta,
                    maxRTerr = maxRTerr, balanced = TRUE, remove = TRUE,
                    resolveConflicts = TRUE, rtOrder = rtOrder,
