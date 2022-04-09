@@ -120,7 +120,8 @@ batchCombine <- function(batches, binGap = 0.005, fitMethod = "gam",
         stop("duplicate names detected in batches argument")
     if(length(batches) < 2)
         stop("expected more than one batch dataset as input")
-    reduceParam[["remove"]] <- TRUE;   reduceParam[["method"]] <- "score"
+    reduceParam[["remove"]] <- TRUE
+    reduceParam[["method"]] <- "score"
     reduceParam[["resolveConflicts"]] <- TRUE
     object <- batches[[1]]
 
