@@ -1,5 +1,15 @@
 Updates:
 
+Version 1.5.2
+-----------------------
+Bug Fix in fit_model():
+    + previously, modified rtx & rty parameters incorrectly altered cTable
+
+Changes in labelRowsParam()/ reduceTableParam()/ metabCombine():
+    + useID argument added for labelRows functionality
+
+
+
 Version 1.5.1
 -----------------------
 New function updateTables():
