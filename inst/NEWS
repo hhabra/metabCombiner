@@ -1,218 +1,156 @@
-Updates:
-
 Version 1.5.2
 -----------------------
-Bug Fix in fit_model():
-    + previously, modified rtx & rty parameters incorrectly altered cTable
-
-Changes in labelRowsParam()/ reduceTableParam()/ metabCombine():
-    + useID argument added for labelRows functionality
-
-
+o Bug Fix in fit_model():
+  + rtx & rty parameter issue resolved
 
 Version 1.5.1
 -----------------------
-New function updateTables():
-    + allows user-changes to combinedTable report
-    + inclusion of non-intersected features lost from original xdata & ydata
-      objects used as input for metabCombiner object construction
+o New function updateTables():
+  + user changes to combinedTable report
+  + inclusion of non-intersected features
 
-Changes in metabCombiner():
-    + handling of missing features enabled (i.e. when update() is used)
-    + new argument "impute": if TRUE, mean m/z, RT, and Q imputed wherever a
-      feature is missing (note: for similarly acquired data only!)
-    + rtOrder parameter bug fix
+o Changes in metabCombiner():
+  + handling of missing features enabled (i.e. when update() is used)
+  + new argument "impute"
+  + rtOrder argument bug fix
 
-Changes in metabCombine():
-    + new argument "union" performs the update method on input xdata & ydata
-    + new argument "impute" uses the mean m/z, RT, and Q information whenever
-      information is missing from active dataset
+o Changes in metabCombine():
+  + new arguments "union" & "impute"
 
-Changes in fit_model/ fit_gam()/ fit_loess():
-    + new arguments rtx & rty limit the range of X & Y retention times
+o Changes in fit_model/ fit_gam()/ fit_loess():
+  + new arguments rtx & rty
 
-Changes in batchCombine():
-    + new argument "union" performs the update method on input xdata & ydata
-      (similar to batchCombine)
-    + if union set to TRUE, imputation is performed at each step (impute = TRUE)
-    + multiple (2 or more) datasets expected as input
-    + ending message added ("batchCombine Process Complete")
+o Changes in batchCombine():
+  + new argument "union"
+  + expected multiple (2 or more) datasets as input
+  + end message added
 
-Changes in labelRows()/ reduceTable()/ labelRowParam()/ reduceTableParam():
-    + new argument 'useID'- controls whether matched identifiers should be used
-      (identity-matched rows will be labeled as "identity"); default: FALSE
-    + 'resolveConflicts' and 'remove' hard-coded as TRUE in reduceTable()
+o Changes in labelRows()/ reduceTable()/ labelRowParam()/ reduceTableParam():
+  + new argument 'useID'
+  + 'resolveConflicts' and 'remove' set to TRUE in reduceTable()
 
-Changes to metabData objects:
-    + "extra"" column count added to show() message
+o Changes to metabData objects:
+  + "extra"" column count added to show() message
 
-Package functions updated to handle "group 0"
+o Package functions updated to handle "group 0"
 
 Version 1.3.2
 ---------------------
-Changes to labelRows():
-    + new resolveConflicts + rtOrder argument added for automated resolution of
-      conflicting feature pair alignment fows in combinedTable, with embedded
-      C function (resolveRows.c)
-    + new argument rtOrder paired with resolveConflicts determines if RT order
-      consistency is expected when resolving alignment conflicts
-    + duplicate column names for {labels, subgroup, alt} removed and no longer
-      allowed in resulting combinedTable
+o Changes to labelRows():
+  + new resolveConflicts + rtOrder arguments
+  + column names duplication of {labels, subgroup, alt} eliminated
 
-Changes to metabCombiner()/ metabCombine():
-    + new check for metabCombiner object inputs: labelRows must be called before
-      aligning a metabCombiner object with a new dataset
-    + resolveConflicts method applied to metabCombiner object to eliminate
-      conflicting alignments/ attain 1-1 matches for all features
-    + new rtOrder argument controlling resolveConflicts similar to above
-
-
+o Changes to metabCombiner()/ metabCombine():
+  + resolveConflicts method applied to metabCombiner object
+  + new rtOrder argument
 
 Version 1.3.1
 ----------------------
-Changes to fit_gam()/ fit_loess():
-    + messages changed from using cat() to using message()
+o Changes to fit_gam()/ fit_loess():
+  + message() used in place of cat()
 
-Changes to metabCombiner() & combinedTable / featdata slots:
-    + rowID column now the first column in both tables instead of having this
-      information be the row names
+o Changes to metabCombiner() & combinedTable / featdata slots:
+  + new rowID column added
 
-Changes to calcScores() / evaluateParams() / labelRows():
-    + updated to reflect above changes to keep rowID identical between
-      combinedTable & featdata
+o Changes to calcScores() / evaluateParams() / labelRows()/ reduceTable():
+  + new rowID checks
 
-Changes to write2file():
-    + combinedTable & featdata merged by rowID column when metabCombiner objects
-      used as input
-
+o Changes to write2file():
+  + combinedTable & featdata merged by rowID column (metabCombiner inputs)
 
 Version 1.1.4 (2021-5-18)
 -------------------------------
-Multi-dataset support and batchCombine added to metabCombiner package.
+o Multi-dataset support and batchCombine added to metabCombiner package.
 
-Changes to metabCombiner-class:
-    + new slot "featdata" for feature descriptor (id,mz,rt,Q,adduct) tracking
-    + new slot "datasets" for dataset ID tracking
-    + new slot "xy" for tracking current x & y dataset labels
+o Changes to metabCombiner-class:
+  + new slots "featdata", "datasets", "xy"
 
-New metabCombiner methods:
-    + datasets: retrieves dataset identifiers from metabCombiner object
-    + x: retrieves identifier of current x dataset
-    + y: retrieves identifier of current y dataset
-    + featdata: retrieves all feature meta-data or from one dataset
-    + iddata: retrieves all feature identities or identities from one dataset
-    + mzdata: retrieves all feature m/z values or m/z values from one dataset
-    + rtdata: retrieves all feature rt values or rt values from one dataset
-    + Qdata: retrieves all feature Q values or Q values from one dataset
-    + adductdata: retrieves all adduct labels or adduct labels from one dataset
+o New metabCombiner object methods:
+  + datasets, x, y, featdata, iddata, mzdata, rtdata, Qdata, adductdata
 
-New reduceTable()/ reduceTableParam() functions:
-    + variant of labelRows where reduce argument automatically set to TRUE
-    + defaults are the same as labelRows()/ labelRowsParam(), except for rank
-      thresholds (set to 2 for maxRankX & maxRankY)
+o New reduceTable()/ reduceTableParam() function
 
-New batchCombine() function:
-    + method for automated sequential alignment of metabolomics batch datasets
-    + modeled after metabCombine function, but takes a list of metabData objects
-      as input and applies reduceTable with reduceTableParam() parameter inputs
+o New batchCombine() function
 
-Changes to object methods (getExtra, getSamples, nonmatched):
-    + default data argument value changed to NULL
-    + if data = NULL, returns full list pertaining to object slot
+o Changes to object methods (getExtra, getSamples, nonmatched):
+  + default data argument value changed to NULL
+  + if data = NULL, returns full list pertaining to object slot
 
-Changes to data.R:
-    + new object "metabBatches" - a list of three batch data frame for use as an
-      example dataset for batchCombine()
+o Changes to data.R:
+  + new object "metabBatches"
 
-Changes to metabCombiner():
-    + xdata & ydata arguments now accept metabCombiner objects as inputs
-    + featdata slot constructed alongside combinedTable at this step
-    + xid & yid arguments added for individual dataset naming (metabData) or
-      specifying active x & y dataset to use for analysis (metabCombiner)
-    + option to average m/z, rt, & Q for metabCombiner object inputs
-    + faster metabCombiner table construction
+o Changes to metabCombiner():
+  + xdata & ydata arguments accept metabCombiner objects as inputs
+  + featdata constructed alongside combinedTable
+  + new arguments: xid, yid, means
+  + faster combinedTable construction
 
-Changes to labelRows()/ labelRowsParam():
-    + new argument maxRTerr for annotating/ removing feature pair alignment rows
-      with excessive retention time fitting errors
+o Changes to labelRows()/ labelRowsParam():
+  + new argument "maxRTerr""
 
-Changes to plot_fit():
-    + bug fix for highlighting outliers
-    + new legend argument for specifying points on the legend
+o Changes to plot_fit():
+  + bug fix for outlier highliting
+  + new "legend" argument
 
-Changes to write2file():
-    + when metabCombiner objects provided as input, merges the combinedTable with
-      featdata in output file for printing
-    + faster data pasting with tidyr::unite
+o Changes to write2file():
+  + merges combinedTable with featdata (metabCombiner object inputs)
+  + faster data parsing with tidyr::unite
 
-CITATION added
+o CITATION added
 
-numerous other changes to documentation, parameter & error checking
-
+o numerous changes to documentation, parameter & error checking
 
 Version 1.1.3 (2021-1-13)
 -------------------------------
-Package additions:
-    + metabCombine(): main package workflow wrapper function
-    + Parameter list functions for loading defaults of main workflow methods
+o new metabCombine() wrapper function
 
-Changes to labelRows():
-    + "conflict" argument replaced with "delta", with default value (0.2)
-    + default value of "minScore" argument increased to 0.5
+o new parameter list functions for loading main function defaults
 
-Changes to calcScores():
-    + default argument values for A (75), B (10), C (0.25)
+o Changes to labelRows():
+  + "conflict" argument replaced with "delta", with default value (0.2)
+  + default value of "minScore" argument increased to 0.5
 
-Changes to fit_loess():
-    + new argument "control" for controlling loess fit (list argument)
-    - eliminated "iterLoess" parameter
+o Changes to calcScores():
+  + default argument values set: A (75), B (10), C (0.25)
 
-Changes to selectAnchors():
-    + default for "tolrtq" argument changed from 0.5 to 0.3
+o Changes to fit_loess():
+  + new argument "control"
+  - "iterLoess" parameter removed
 
+o Changes to selectAnchors():
+  + default "tolrtq" value changed: 0.5 -> 0.3
 
 Version 1.1.2 (2020-12-28)
 -------------------------------
-Changes to fit_gam()/ fit_loess():
-    + new outlier detection method based on boxplot / IQR added
-    + new argument: outlier, which accepts "MAD" or "boxplot" as a value
-    + altered argument names: "frac" to "prop", "ratio" to "coef"
-    + documentation and minor code changes to main and supporting functions
+o Changes to fit_gam()/ fit_loess():
+  + new "outlier" argument
+  + altered argument names: "frac" -> "prop", "ratio" -> "coef"
+  + documentation and minor code changes
 
-Changes to plot_fit():
-    + new options for showing, hiding, or highlighting (with a legend) outliers
-    + new arguments: outlier, which accepts "show" / "s", "remove" / "r", or
-      "highlight" / "h" as arguments ; ocol, outlier point color if outlier
-      argument set to "highlight" / "h"
-    - remove.outliers argument removed
+o Changes to plot_fit():
+  + new outlier argument
+  - remove.outliers argument removed
 
-Other changes:
-    + new test case for fit_gam()
-
+o new test case for fit_gam()
 
 Version 1.1.1 (2020-12-02)
 -------------------------------
-Bug Fixes:
-    + combinedTable check for missing group values (Issue #7)
-    + calcScores / evaluateParams groups bug (Issue #8)
-    + Warning for column names with bracket characters "{ ( [ ] ) }" (Issue #9)
-    + QCol bug (Issue #10)
+o Bug Fixes:
+  + combinedTable check for missing group values
+  + calcScores / evaluateParams groups argument fix
+  + warning for column names with bracket characters "{ ( [ ] ) }"
+  + QCol bug in metabData
 
-New Functionality
-    + getExtra method added to metabCombiner objects (Issue #11)
-
+o New Functionality
+  + getExtra method added to metabCombiner objects (Issue #11)
 
 Version 1.0.0 (2020-10-20)
 ------------------------------
-   +Accepted to Bioconductor
+o Accepted to Bioconductor
 
-    Functionality changes:
-    + matrixStats function implementations for matrix calculations replace base
-      implementations where appropriate, with notable improvements in adjustData()
-      function within metabData()
-    + filterRT() now gives an error rather than a warning if rtmin or rtmax are out
-      of the bounds of the dataset RTs
-
+o Changes to metabData():
+  + matrixStats package used with notable improvements to metabData()
+  + rtmin or rtmax out of bounds warning replaced with error
 
 Changes in version 0.99.0 (2020-09-11)
 ------------------------------------------
