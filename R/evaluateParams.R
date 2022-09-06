@@ -233,11 +233,8 @@ objective <- function(cTable, idtable, A, B, C, minScore, mzdiff, rtdiff,
 #' scores = evaluateParams(p.comb, A = seq(60,100,10), B = seq(10,15), C = 0.5,
 #'     minScore = 0.7, penalty = 10)
 #'
-#' ##example 2: using PPM mass deviation (note change to A argument)
-#' scores = evaluateParams(p.comb, usePPM = TRUE, A = seq(0.01,0.05,0.01))
-#'
-#' ##example 3: limiting to groups 1-2000
-#' scores = evaluateParams(p.comb, minScore = 0.5, groups = 1:2000)
+#' ##example 2: limiting to groups 1-2000
+#' scores = evaluateParams(p.comb, minScore = 0.5, groups = seq(1,2000))
 #'
 #' @seealso \code{\link{calcScores}}, \code{\link{objective}}
 #'
@@ -253,7 +250,7 @@ evaluateParams <- function(object, A = seq(60,150,by = 10), B = seq(6,15),
     model <- getModel(object, fit = fit)
     if(is.null(groups))  groups <- setdiff(unique(cTable[["group"]]),0)
     check_score_pars(cTable, A, B, C, model, fit, groups, minScore, penalty)
-    rtrange <- max(cTable[["rty"]]) - min(cTable[["rty"]])
+    rtrange <- max(cTable$rty, na.rm = TRUE) - min(cTable$rty, na.rm = TRUE)
     rows <- which(cTable[["group"]] %in% groups)
     cTable <- cTable[rows,]
     cTable[["label"]] <- compare_strings(cTable[["idx"]], cTable[["idy"]],

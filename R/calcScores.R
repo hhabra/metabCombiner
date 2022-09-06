@@ -227,7 +227,7 @@ calcScores <- function(object, A = 75, B = 10, C = 0.25, fit = c("gam", "loess")
         A <- A[1];   B <- B[1];   C <- C[1]
     }
 
-    rtrange <- max(cTable[["rty"]]) - min(cTable[["rty"]])
+    rtrange <- max(cTable$rty, na.rm = TRUE) - min(cTable$rty, na.rm = TRUE)
     rows <-  which(cTable[["group"]] %in% groups)
     cTable$rtProj[rows] <- stats::predict(model, newdata = cTable[rows,])
 
