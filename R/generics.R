@@ -136,11 +136,39 @@ setGeneric("datasets", function(object, list = FALSE)
 setGeneric("featdata",function(object, data = NULL) standardGeneric("featdata"))
 
 
+#' @title Retrieve Filtered Features
+#'
+#' @description Returns a data frame of metabolomics features eliminated in the
+#' \code{\link{metabData}} step. Features are returned based on the specific
+#' filter used for their elimination (RT, missingness, or duplicate).
+#'
+#' @param object \code{metabData} object
+#'
+#' @param type one of three filter types used for feature removal
+#'
+#' @return data frame of features removed due to specified filter
+#'
+#' @examples
+#' data(plasma20)
+#'
+#' p20 <- metabData(plasma20, samples = "CHEAR", zero = TRUE, misspc = 20,
+#'                   rtmax = 17)
+#'
+#' filtered_by_rt <- filtered(p20, type = "rt")
+#'
+#' filtered_by_missingness <- filtered(p20, type = "missing")
+#'
+#' @export
+##
+setGeneric("filtered", function(object, type = c("rt", "missing", "duplicate"))
+    standardGeneric("filtered"))
+
+
+
 #' @title Get Ordered Retention Time Pairs
 #'
-#' @description
-#' This returns the data frame of feature alignments used to anchor a retention
-#' time projection model, constructed by \code{\link{selectAnchors}}.
+#' @description Returns the data frame of feature alignments used to anchor the
+#' retention time projection model, constructed by \code{\link{selectAnchors}}.
 #'
 #' @param object metabCombiner object
 #'
@@ -501,7 +529,7 @@ setGeneric("update_mc",function(object, combinedTable, featdata, anchors, model,
                           values, coefficients) standardGeneric("update_mc"))
 
 
-setGeneric("update_md", function(object, data, samples, extra, stats)
+setGeneric("update_md", function(object, data, samples, extra, stats, filtered)
             standardGeneric("update_md"))
 
 

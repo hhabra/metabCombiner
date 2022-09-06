@@ -1,6 +1,22 @@
 ##Methods For metabData Objects
 #' @include generics.R classes.R
 
+
+
+#' @rdname filtered
+#'
+#' @export
+##
+setMethod("filtered", signature = "metabData",
+          function(object, type = c("rt", "missing", "duplicate"))
+{
+    ftype <- match.arg(type)
+    filtered_data <- object@filtered[[ftype]]
+    return(filtered_data)
+})
+
+
+
 #' @rdname getData
 #'
 #' @export
@@ -63,7 +79,7 @@ setMethod("show", signature = "metabData", function(object){
 
 
 setMethod("update_md", signature = "metabData",
-        function(object, data, samples, extra, stats)
+        function(object, data, samples, extra, stats, filtered)
 {
     if(!missing(data))
         object@data <- data
@@ -76,6 +92,10 @@ setMethod("update_md", signature = "metabData",
 
     if(!missing(stats)){
         object@stats <- stats
+    }
+
+    if(!missing(filtered)){
+        object@filtered <- filtered
     }
 
     return(object)
