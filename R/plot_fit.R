@@ -80,13 +80,11 @@ plot_fit <- function(object, fit = c("gam","loess"), pcol = "black",
         data <- dplyr::filter(data, .data$weights > 0)
     }
 
-    rtx <- data[["rtx"]];  rty <- data[["rty"]]
-    graphics::plot(rtx, rty, type = "p", col = pcol, pch = pch, ...)
-    graphics::lines(x = data[["rtx"]], y = data[["preds"]],
-                    col = lcol, lwd = lwd,...)
+    graphics::plot(data$rtx, data$rty, type = "p", col = pcol, pch = pch, ...)
+    graphics::lines(data$rtx, data$preds, col = lcol, lwd = lwd,...)
 
     if(outlier %in% c("highlight", "h")){
-        graphics::points(data2[["rtx"]],data2[["rty"]], col = ocol,
+        graphics::points(data2[["rtx"]], data2[["rty"]], col = ocol,
                         pch = pch,...)
         graphics::legend("topleft", legend = legend, col = c(pcol, ocol),
                         pch = pch)
