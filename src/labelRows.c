@@ -164,6 +164,9 @@ void detect_con_score(SEXP labels, int* sub, int* alt, int ri, int rj, double* d
 	if(fabs(score[rj] - scoreHead) > scoreGap){
 		if(strcmp("", CHAR(STRING_ELT(labels,rj))) == 0)
 		    SET_STRING_ELT(labels, rj, mkChar("REMOVE"));
+		    
+		else if(strcmp("CONFLICT", CHAR(STRING_ELT(labels,rj))) == 0)
+			alt[rj] = sub[ri];
 
 		return;
 	}
@@ -207,7 +210,12 @@ void detect_con_mzrt(SEXP labels, int* sub, int* alt, int ri, int rj, double* de
 
 	if(fabs(mz[rj] - mz[ri]) > mzTol || fabs(rt[rj] - rt[ri]) > rtTol){
 		if(strcmp("", CHAR(STRING_ELT(labels,rj))) == 0)
-		    SET_STRING_ELT(labels, rj, mkChar("REMOVE"));
+			SET_STRING_ELT(labels, rj, mkChar("REMOVE"));
+		
+		//NEWLY ADDED CODE
+		else if(strcmp("CONFLICT", CHAR(STRING_ELT(labels,rj))) == 0)
+		    alt[rj] = sub[ri];
+		
 
 		return;
 	}
