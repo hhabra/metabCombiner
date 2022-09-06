@@ -1,3 +1,21 @@
+Version 1.7.1
+----------------------------
+o Addition of filtered features to metabData objects and filtered method
+
+o Bug Fix in metabData():
+  + zero values now treated as missing in Q calculations (zero = TRUE)
+
+o Bug Fix in calcScores()/ evaluateParams():
+  + rtrange calculations now account for missing values
+
+o Bug Fix in reduceTable()/ reduceTableParam():
+  + method argument included with "mzrt" option
+
+o small logic fix in labelRows() / reduceTable()
+  + previous version caused duplicate feature matches in rare cases
+
+
+
 Version 1.5.2
 -----------------------
 o Bug Fix in fit_model():
