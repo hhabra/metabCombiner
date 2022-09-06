@@ -132,7 +132,7 @@ findDuplicates <- function(data, missing, counts, duplicate)
 #' The pre-analysis adjustment steps include:
 #' 1) Restriction to a feature retention time range \code{rtmin} \eqn{\le}
 #'    rt \eqn{\le} \code{rtmax}
-#' 2) Removal of features with a percent missingness exceeding \code{misspc}
+#' 2) Removal of features with missingness percentage exceeding \code{misspc}
 #' 3) Removal of duplicate metabolomics features.
 #'
 #' After processing, abundance quantile (Q) values are calculated between 0 & 1
@@ -152,32 +152,34 @@ findDuplicates <- function(data, missing, counts, duplicate)
 adjustData <- function(Data, misspc, measure, rtmin, rtmax, zero,duplicate)
 {
     data <- getData(Data)
-    samples <- getSamples(Data)
     stats <- list()
+    filtered <- list()
     stats[["input_size"]] <- nrow(data)
-
     data <- filterRT(data, rtmin = rtmin, rtmax = rtmax)
+    filtered[["rt"]] <- setdiff(getData(Data), data)
     stats[["filtered_by_rt"]] = stats[["input_size"]] - nrow(data)
-
-    mpc <- matrixStats::rowCounts(as.matrix(data[samples]), value = NA)
+    sampleData <- data[getSamples(Data)]
     if(zero == TRUE)
-        mpc <- mpc + matrixStats::rowCounts(as.matrix(data[samples]),
-                                            value = 0, na.rm = TRUE)
-    keepIndices <- which((mpc / length(samples) * 100) <= misspc)
+        sampleData[sampleData == 0] <- NA
+    mpc <- matrixStats::rowCounts(as.matrix(sampleData), value = NA)
+    keepIndices <- which((mpc / ncol(sampleData) * 100) <= misspc)
     stats[["filtered_by_missingness"]] <- nrow(data) - length(keepIndices)
+    filtered[["missing"]] <- data[-keepIndices,]
     data <- data[keepIndices,]
     if(nrow(data) == 0)
         stop("empty dataset following missingness filter")
-    mpc <- mpc[keepIndices] / length(samples) * 100
+    mpc <- mpc[keepIndices] / ncol(sampleData) * 100
+    sampleData <- sampleData[keepIndices,]
 
     if(measure == "median")
-        counts <- matrixStats::rowMedians(as.matrix(data[samples]),na.rm = TRUE)
+        counts <- matrixStats::rowMedians(as.matrix(sampleData),na.rm = TRUE)
     else if(measure == "mean")
-        counts <- matrixStats::rowMeans2(as.matrix(data[samples]),na.rm = TRUE)
+        counts <- matrixStats::rowMeans2(as.matrix(sampleData),na.rm = TRUE)
 
     duplicates <- findDuplicates(data = data, counts = counts, missing = mpc,
                                 duplicate = duplicate)
     if(length(duplicates) > 0){
+        filtered[["duplicate"]] <- data[duplicates,]
         data <- data[-duplicates,]
         counts <- counts[-duplicates]
     }
@@ -186,7 +188,6 @@ adjustData <- function(Data, misspc, measure, rtmin, rtmax, zero,duplicate)
 
     if(identical(data[["Q"]], rep(0, nrow(data))))
         data["Q"] <- round((rank(counts) - 0.5) / length(counts),4)
-
-    Data <- update_md(Data, data = data, stats = stats)
+    Data <- update_md(Data, data = data, stats = stats, filtered = filtered)
     return(Data)
 }

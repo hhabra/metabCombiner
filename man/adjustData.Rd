@@ -35,7 +35,7 @@ metabolomics feature tables individually
 The pre-analysis adjustment steps include:
 1) Restriction to a feature retention time range \code{rtmin} \eqn{\le}
    rt \eqn{\le} \code{rtmax}
-2) Removal of features with a percent missingness exceeding \code{misspc}
+2) Removal of features with missingness percentage exceeding \code{misspc}
 3) Removal of duplicate metabolomics features.
 
 After processing, abundance quantile (Q) values are calculated between 0 & 1
