@@ -16,8 +16,8 @@ getAnchors(object)
 Data frame of anchor features
 }
 \description{
-This returns the data frame of feature alignments used to anchor a retention
-time projection model, constructed by \code{\link{selectAnchors}}.
+Returns the data frame of feature alignments used to anchor the
+retention time projection model, constructed by \code{\link{selectAnchors}}.
 }
 \examples{
 data(plasma30)
