@@ -83,11 +83,8 @@ p.comb = fit_gam(p.comb, k = 20, iterFilter = 2)
 scores = evaluateParams(p.comb, A = seq(60,100,10), B = seq(10,15), C = 0.5,
     minScore = 0.7, penalty = 10)
 
-##example 2: using PPM mass deviation (note change to A argument)
-scores = evaluateParams(p.comb, usePPM = TRUE, A = seq(0.01,0.05,0.01))
-
-##example 3: limiting to groups 1-2000
-scores = evaluateParams(p.comb, minScore = 0.5, groups = 1:2000)
+##example 2: limiting to groups 1-2000
+scores = evaluateParams(p.comb, minScore = 0.5, groups = seq(1,2000))
 
 }
 \seealso{
