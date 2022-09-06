@@ -176,7 +176,7 @@ prepare_fields_values <- function(cTable, useID, brackets_ignore)
 #'
 #' @export
 labelRows <- function(object, useID = FALSE, minScore = 0.5, maxRankX = 3,
-                    maxRankY = 3, method = c("score", "mzrt"), delta = 0.1,
+                    maxRankY = 3, delta = 0.1, method = c("score", "mzrt"),
                     maxRTerr = 10, resolveConflicts = FALSE, rtOrder = TRUE,
                     remove = FALSE, balanced = TRUE,
                     brackets_ignore = c("(", "[", "{"))
@@ -218,8 +218,9 @@ labelRows <- function(object, useID = FALSE, minScore = 0.5, maxRankX = 3,
 #'
 #'@export
 reduceTable <- function(object, useID = FALSE, maxRankX = 2, maxRankY = 2,
-                        minScore = 0.5, delta = 0.1, maxRTerr = 10,
-                        rtOrder = TRUE, brackets_ignore = c("(", "[", "{"))
+                        minScore = 0.5, delta = 0.1, method = c("score", "mzrt"),
+                        maxRTerr = 10, rtOrder = TRUE,
+                        brackets_ignore = c("(", "[", "{"))
 {
     object <- labelRows(object, useID = useID, maxRankX = maxRankX,
                         maxRankY = maxRankY, minScore = minScore,

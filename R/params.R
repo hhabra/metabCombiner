@@ -200,12 +200,12 @@ calcScoresParam <- function(A = 75, B = 10, C = 0.25, fit = "gam",
 #'
 #' @export
 labelRowsParam <- function(useID = FALSE, maxRankX = 3, maxRankY = 3,
-                            minScore = 0.5, delta = 0.1, method = "score",
+                            minScore = 0.5, method = "score", delta = 0.1,
                             maxRTerr = 10, resolveConflicts = FALSE,
                             rtOrder = TRUE, remove = FALSE,  balanced = TRUE,
                             brackets_ignore = c("(", "[", "{"))
 {
-    params <- list(maxRankX = maxRankX, maxRankY = maxRankY,
+    params <- list(useID = useID, maxRankX = maxRankX, maxRankY = maxRankY,
                   minScore = minScore, method = method, delta = delta,
                   maxRTerr = maxRTerr, balanced = balanced, remove = remove,
                   resolveConflicts = resolveConflicts, rtOrder = rtOrder,
@@ -218,11 +218,11 @@ labelRowsParam <- function(useID = FALSE, maxRankX = 3, maxRankY = 3,
 #' @export
 reduceTableParam <- function(useID = FALSE, maxRankX = 2, maxRankY = 2,
                             minScore = 0.5, maxRTerr = 10, delta = 0.1,
-                            rtOrder = TRUE,
+                            rtOrder = TRUE, method = "score",
                             brackets_ignore = c("(", "[", "{"))
 {
     params <- list(useID = useID, maxRankX = maxRankX, maxRankY = maxRankY,
-                   minScore = minScore, method = "score", delta = delta,
+                   minScore = minScore, delta = delta, method = method,
                    maxRTerr = maxRTerr, balanced = TRUE, remove = TRUE,
                    resolveConflicts = TRUE, rtOrder = rtOrder,
                    brackets_ignore = brackets_ignore)

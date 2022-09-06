@@ -11,8 +11,8 @@ labelRows(
   minScore = 0.5,
   maxRankX = 3,
   maxRankY = 3,
-  method = c("score", "mzrt"),
   delta = 0.1,
+  method = c("score", "mzrt"),
   maxRTerr = 10,
   resolveConflicts = FALSE,
   rtOrder = TRUE,
@@ -28,6 +28,7 @@ reduceTable(
   maxRankY = 2,
   minScore = 0.5,
   delta = 0.1,
+  method = c("score", "mzrt"),
   maxRTerr = 10,
   rtOrder = TRUE,
   brackets_ignore = c("(", "[", "{")
@@ -45,17 +46,17 @@ metabolomics feature pair alignments}
 
 \item{maxRankY}{integer maximum allowable rank for Y dataset features.}
 
-\item{method}{Conflict detection method. If equal to "score" (default),
-assigns a conflict subgroup if score of lower-ranking FPA is
-within some tolerance of higher-ranking FPA. If set to "mzrt",
-assigns a conflicting subgroup if within a small m/z & rt
-distance of the top-ranked FPA.}
-
 \item{delta}{numeric score or mz/rt distances used to define subgroups. If
 method = "score", a value (between 0 & 1) score difference
 between a pair of conflicting FPAs. If method = "mzrt", a length
 4 numeric: (m/z, rt, m/z, rt) tolerances, the first pair for X
 dataset features and the second pair for Y dataset features.}
+
+\item{method}{Conflict detection method. If equal to "score" (default),
+assigns a conflict subgroup if score of lower-ranking FPA is
+within some tolerance of higher-ranking FPA. If set to "mzrt",
+assigns a conflicting subgroup if within a small m/z & rt
+distance of the top-ranked FPA.}
 
 \item{maxRTerr}{numeric maximum allowable error between model-projected
 retention time (rtProj) and observed retention time (rty)}

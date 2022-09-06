@@ -6,43 +6,47 @@
 \title{List labelRows & reduceTable Defaults}
 \usage{
 labelRowsParam(
+  useID = FALSE,
   maxRankX = 3,
   maxRankY = 3,
   minScore = 0.5,
-  delta = 0.1,
   method = "score",
+  delta = 0.1,
   maxRTerr = 10,
   resolveConflicts = FALSE,
   rtOrder = TRUE,
   remove = FALSE,
   balanced = TRUE,
-  useID = FALSE,
   brackets_ignore = c("(", "[", "{")
 )
 
 reduceTableParam(
+  useID = FALSE,
   maxRankX = 2,
   maxRankY = 2,
   minScore = 0.5,
   maxRTerr = 10,
   delta = 0.1,
   rtOrder = TRUE,
-  useID = FALSE,
+  method = "score",
   brackets_ignore = c("(", "[", "{")
 )
 }
 \arguments{
+\item{useID}{option to annotate identity-matched strings as IDENTITY;
+default: FALSE}
+
 \item{maxRankX}{maximum rank allowable for X features}
 
 \item{maxRankY}{maximum rank allowable for Y features}
 
 \item{minScore}{minimum score threshold; default: 0.5}
 
-\item{delta}{score distance or mz/rt difference tolerances for subgrouping;
-default: 0.1}
-
 \item{method}{thresholding method for subgroup detection ("score" or "mzrt");
 default: "score"}
+
+\item{delta}{score distance or mz/rt difference tolerances for subgrouping;
+default: 0.1}
 
 \item{maxRTerr}{maximum allowable difference between predicted RT (rtProj) &
 observed RT (rty); default: 10 minutes}
@@ -57,9 +61,6 @@ retention order condition on paired alignments}
 default: FALSE}
 
 \item{balanced}{option to reduce balanced groups; default: TRUE}
-
-\item{useID}{option to annotate identity-matched strings as IDENTITY;
-default: FALSE}
 
 \item{brackets_ignore}{bracket types for ignoring string comparisons}
 }
