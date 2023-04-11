@@ -205,7 +205,7 @@ objective <- function(cTable, idtable, A, B, C, minScore, mzdiff, rtdiff,
 #' \item{A}{m/z weight values}
 #' \item{B}{rt weight values}
 #' \item{C}{Q weight values}
-#' \item{score}{objective function evaluation of (A,B,C) weights}
+#' \item{totalScore}{objective function evaluation of (A,B,C) weights}
 #'
 #' @details
 #' This uses an objective function, based on the accurate and inaccurate
@@ -224,17 +224,17 @@ objective <- function(cTable, idtable, A, B, C, minScore, mzdiff, rtdiff,
 #'
 #' p30 <- metabData(plasma30, samples = "CHEAR")
 #' p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
-#' p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+#' p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
 #'
-#' p.comb = selectAnchors(p.comb, windx = 0.03, windy = 0.02)
-#' p.comb = fit_gam(p.comb, k = 20, iterFilter = 2)
+#' p.comb <- selectAnchors(p.comb, windx = 0.03, windy = 0.02)
+#' p.comb <- fit_gam(p.comb, k = 20, iterFilter = 2)
 #'
 #' #example 1
-#' scores = evaluateParams(p.comb, A = seq(60,100,10), B = seq(10,15), C = 0.5,
+#' scores <- evaluateParams(p.comb, A = seq(60,100,10), B = seq(10,15), C = 0.5,
 #'     minScore = 0.7, penalty = 10)
 #'
 #' ##example 2: limiting to groups 1-2000
-#' scores = evaluateParams(p.comb, minScore = 0.5, groups = seq(1,2000))
+#' scores <- evaluateParams(p.comb, minScore = 0.5, groups = seq(1,2000))
 #'
 #' @seealso \code{\link{calcScores}}, \code{\link{objective}}
 #'
@@ -276,7 +276,7 @@ evaluateParams <- function(object, A = seq(60,150,by = 10), B = seq(6,15),
     matches <- which(cTable[["label"]] == "IDENTITY")
     mismatches <- lapply(idtable[["id"]], function(id) mismatchfind(cTable,id))
 
-    scores[["score"]] <- mapply(function(A,B,C)
+    scores[["totalScore"]] <- mapply(function(A,B,C)
                     objective(cTable = cTable, idtable = idtable,
                                 A = A, B = B, C = C, minScore = minScore,
                                 mzdiff = massdiff, rtdiff = rtdiff,
@@ -285,6 +285,6 @@ evaluateParams <- function(object, A = seq(60,150,by = 10), B = seq(6,15),
                                 mismatches = mismatches, penalty = penalty),
                                 scores[["A"]],  scores[["B"]], scores[["C"]])
 
-    scores <- dplyr::arrange(scores, desc(.data$score))
+    scores <- dplyr::arrange(scores, desc(.data$totalScore))
     return(scores)
 }
