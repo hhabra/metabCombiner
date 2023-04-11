@@ -48,7 +48,7 @@ A data frame with the following columns:
 \item{A}{m/z weight values}
 \item{B}{rt weight values}
 \item{C}{Q weight values}
-\item{score}{objective function evaluation of (A,B,C) weights}
+\item{totalScore}{objective function evaluation of (A,B,C) weights}
 }
 \description{
 This function provides a method for guiding selection of suitable values for
@@ -74,17 +74,17 @@ data(plasma20)
 
 p30 <- metabData(plasma30, samples = "CHEAR")
 p20 <- metabData(plasma20, samples = "Red", rtmax = 17.25)
-p.comb = metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
+p.comb <- metabCombiner(xdata = p30, ydata = p20, binGap = 0.0075)
 
-p.comb = selectAnchors(p.comb, windx = 0.03, windy = 0.02)
-p.comb = fit_gam(p.comb, k = 20, iterFilter = 2)
+p.comb <- selectAnchors(p.comb, windx = 0.03, windy = 0.02)
+p.comb <- fit_gam(p.comb, k = 20, iterFilter = 2)
 
 #example 1
-scores = evaluateParams(p.comb, A = seq(60,100,10), B = seq(10,15), C = 0.5,
+scores <- evaluateParams(p.comb, A = seq(60,100,10), B = seq(10,15), C = 0.5,
     minScore = 0.7, penalty = 10)
 
 ##example 2: limiting to groups 1-2000
-scores = evaluateParams(p.comb, minScore = 0.5, groups = seq(1,2000))
+scores <- evaluateParams(p.comb, minScore = 0.5, groups = seq(1,2000))
 
 }
 \seealso{
