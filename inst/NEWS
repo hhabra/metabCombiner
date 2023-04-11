@@ -1,3 +1,20 @@
+Version 1.9.1
+----------------------------
+o Update to duplicate feature handling in metabData()
+    + bug fix to existing duplicate filtering code
+    + duplicate argument reworked to accept a list of parameters
+    + new function opts.duplicate() lists default parameters
+    + new duplicate feature merging option (opts.duplicate(resolve = "merge"))
+    + duplicate features are filtered or merged before missingness filter
+
+o New rowID column added to metabData objects
+
+o Minor Change to evaluateParams
+    + "score" column changed to "totalScore" (for clarity)
+
+
+
+
 Version 1.7.1
 ----------------------------
 o Addition of filtered features to metabData objects and filtered method

@@ -1,6 +1,6 @@
 Package: metabCombiner
-Version: 1.7.1
-Date: 2022-09-06
+Version: 1.9.1
+Date: 2023-04-11
 Title: Method for Combining LC-MS Metabolomics Feature Measurements
 Authors@R: c(
 	   person("Hani", "Habra", email = "hhabra1@gmail.com",role = c("aut","cre")),
@@ -15,8 +15,9 @@ Description: This package aligns LC-HRMS metabolomics datasets acquired from
     into groups of similar m/z, and ranked by a similarity score. Input tables 
     are assumed to be  acquired using similar (but not necessarily identical) 
     analytical methods.
-Depends: R (>= 4.0), dplyr (>= 1.0)
-Imports: 
+Depends: R (>= 4.0) 
+Imports:
+    dplyr (>= 1.0),
     methods, 
     mgcv, 
     caret, 
