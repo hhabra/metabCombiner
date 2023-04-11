@@ -2,7 +2,7 @@
 % Please edit documentation in R/adjustData.R
 \name{filterRT}
 \alias{filterRT}
-\title{Filter Features by Retention Time}
+\title{Filter Features by Retention Time Range}
 \usage{
 filterRT(data, rtmin, rtmax)
 }
