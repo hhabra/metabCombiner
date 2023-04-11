@@ -58,7 +58,7 @@ combinerCheck <- function(errNo, type, error = "stop"){
 
 
 combinerNames <- function(){
-    return(c("rowID", "idx","idy","mzx","mzy","rtx","rty","rtProj","Qx", "Qy",
+    return(c("rowID", "idx","idy","mzx","mzy","rtx","rty","rtProj","Qx","Qy",
       "group","score","rankX","rankY","adductx","adducty"))
 }
 
@@ -161,7 +161,7 @@ isMetabData <- function(object){
 
     data <- getData(object)
 
-    expected <- c("id", "mz", "rt", "adduct", "Q")
+    expected <- c("rowID","id", "mz", "rt", "adduct", "Q")
 
     if(ncol(data) <= length(expected))
         return(2)
@@ -173,7 +173,8 @@ isMetabData <- function(object){
         return(4)
 
     coltypes <- as.character(lapply(data, class))
-    expected_types <- c("character","numeric","numeric","character","numeric")
+    expected_types <- c("integer","character","numeric","numeric",
+                        "character","numeric")
 
     if(!identical(coltypes[seq(1,length(expected))], expected_types))
         return(5)

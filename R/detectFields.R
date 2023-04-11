@@ -46,13 +46,10 @@ readData <- function(file){
 detect <- function(keywords, names, type){
     if(is.null(keywords))
         return(NULL)
-
     keywords <- paste(keywords, collapse = "|")
     indices <- grep(keywords, names)
     if(length(indices) == 0)
         return(NULL)
-
-    #searching for a single column (m/z, rt,...) or multiple (samples, extra)
     if(type == "single")
         return(indices[1])
     else
@@ -71,7 +68,6 @@ detect <- function(keywords, names, type){
 #' @noRd
 detectSamples <- function(colnames, coltypes){
     coltypes <- base::gsub("integer", "numeric", coltypes)
-
     if(all(coltypes == "numeric"))
         return(colnames)
     if (base::all(coltypes != "numeric"))
@@ -109,10 +105,10 @@ selectMZ <- function(table, col){
     if(!is.numeric(mzs))
         stop("m/z column must be numeric")
 
-    if(any(mzs <= 0))
-        stop("all m/z values must be strictly positive")
+    if(any(mzs <= 0) | any(is.na(mzs)))
+        stop("all m/z values must be positive and not missing")
 
-    if(any(mzs >= 2000) | any(mzs <= 50))
+    if(any(mzs >= 2000) | any(mzs <= 20))
         warning("Unusual m/z values detected. Be sure that m/z column
                 is correctly chosen.")
 
@@ -141,12 +137,11 @@ selectRT <- function(table, col){
         stop("retention time column must be numeric")
 
     if(any(rts <= 0) | any(is.na(rts)))
-        stop("retention time values must be positive with no missing values")
+        stop("retention time values must be positive and not missing")
 
     if(any(rts > 500))
-        warning("program defaults expect time in minutes, ",
+        warning("program defaults expect time in minutes; ",
                 "adjust values if time units are in seconds")
-
     return(rts)
 }
 
@@ -167,15 +162,11 @@ selectQ <- function(table, col){
         Q <- rep(0, nrow(table))
         return(Q)
     }
-
     Q <- table[,col]
-
     if(!is.numeric(Q))
         stop("Q column must be numeric")
-
     if(any(is.na(Q)))
         stop("Q column must not have missing values")
-
     return(Q)
 }
 
@@ -191,14 +182,14 @@ selectQ <- function(table, col){
 #' @return  vector of characters
 #'
 #' @noRd
+#'
+#'
 selectColumn <- function(table, col = NULL){
     if (is.null(col)){
         column <- rep("", nrow(table))
         return(column)
     }
-
-    column <- table[,col] %>% as.character()
-
+    column <- as.character(table[,col])
     return(column)
 }
 
@@ -250,19 +241,19 @@ detectFields <- function(Data, table, mz, rt, id, adduct, samples, extra, Q)
 
     rtCol <- detect(rt, names(table), type = "single")
     new_rt <- round(selectRT(table, col = rtCol),4)
-    table = table[-rtCol]
+    table <- table[-rtCol]
 
     idCol <- detect(id, names(table), type = "single")
     new_id <- selectColumn(table, col = idCol)
-    if(!is.null(idCol)) table = table[-idCol]
+    if(!is.null(idCol)) table <- table[-idCol]
 
     adductCol <- detect(adduct, names(table), type = "single")
     new_adduct <- selectColumn(table, col = adductCol)
-    if(!is.null(adductCol)) table = table[-adductCol]
+    if(!is.null(adductCol)) table <- table[-adductCol]
 
     QCol <- detect(Q, names(table), type = "single")
     new_Q <- selectQ(table, col = QCol)
-    if(!is.null(QCol)) table = table[-QCol]
+    if(!is.null(QCol)) table <- table[-QCol]
 
     sampleCols <- detect(samples, names(table), type = "multiple")
     if(is.null(sampleCols)){
@@ -277,18 +268,16 @@ detectFields <- function(Data, table, mz, rt, id, adduct, samples, extra, Q)
             stop("no numeric columns found using 'samples' argument")
         samples <- names(table)[sampleCols]
     }
-    new_values <- table[samples]
-    data <- data.frame(id = new_id, mz = new_mz, rt = new_rt,
-                        adduct = new_adduct, Q = new_Q, new_values,
-                        check.names = FALSE, stringsAsFactors = FALSE)
+    data <- data.frame(rowID = seq_along(new_mz), id = new_id, mz = new_mz,
+                        rt = new_rt, adduct = new_adduct, Q = new_Q,
+                        table[samples], check.names = FALSE,
+                        stringsAsFactors = FALSE)
     table <- dplyr::select(table, -dplyr::all_of(samples))
-
     extraCols <- detect(extra, names(table), type = "multiple")
     extra <- names(table)[extraCols]
     if(!is.null(extraCols))
         data[extra] <- table[extraCols]
-
-    Data = update_md(Data, data = data, samples = samples, extra = extra)
+    Data <- update_md(Data, data = data, samples = samples, extra = extra)
     return(Data)
 }
 
