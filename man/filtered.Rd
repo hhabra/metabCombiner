@@ -5,7 +5,7 @@
 \alias{filtered,metabData-method}
 \title{Retrieve Filtered Features}
 \usage{
-filtered(object, type = c("rt", "missing", "duplicate"))
+filtered(object, type = c("rt", "duplicates", "missing"))
 
 \S4method{filtered}{metabData}(object, type = c("rt", "missing", "duplicates"))
 }
@@ -20,7 +20,7 @@ data frame of features removed due to specified filter
 \description{
 Returns a data frame of metabolomics features eliminated in the
 \code{\link{metabData}} step. Features are returned based on the specific
-filter used for their elimination (RT, missingness, or duplicate).
+filter used for their elimination (RT, missingness, or duplicates).
 }
 \examples{
 data(plasma20)
