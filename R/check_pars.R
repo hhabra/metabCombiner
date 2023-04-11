@@ -1,4 +1,5 @@
 
+#parameter checks for metabCombiner() constructor step
 check_combine_pars <- function(binGap, means, xid, yid)
 {
     if(is.null(binGap) | length(binGap) == 0)
@@ -140,7 +141,7 @@ check_lblrows_pars <- function(maxRankX, maxRankY, minScore, maxRTerr, balanced,
 
     else if(method == "mzrt"){
         if(length(delta) != 4)
-            stop("with method = mzrt, length 4 vector expected for delta)")
+            stop("with method = 'mzrt', length 4 vector expected for delta)")
 
         if(!is.numeric(delta) | any(delta < 0))
             stop("values in 'delta' argument must be non-negative")
