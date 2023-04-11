@@ -1,3 +1,24 @@
+findDuplicates <- function(data, missing, counts, duplicate)
+{
+    tolMZ <- duplicate[1];  tolRT <- duplicate[2]
+    datMatrix <- dplyr::select(data, .data$mz,.data$rt) %>%
+                dplyr::mutate(counts = counts,
+                            missing = missing,
+                            index = seq(1,nrow(data))) %>%
+                dplyr::arrange(.data$mz)
+    datMatrix[["labels"]] <- .Call("findDuplicates",
+                                   mz = datMatrix[["mz"]],
+                                   rt = datMatrix[["rt"]],
+                                   tolMZ = as.numeric(tolMZ),
+                                   tolRT = as.numeric(tolRT),
+                                   missing = as.numeric(datMatrix[["missing"]]),
+                                   counts = as.numeric(datMatrix[["counts"]]),
+                                   PACKAGE = "metabCombiner")
+    duplicates <- datMatrix[["index"]][datMatrix[["labels"]] == 1]
+
+    return(duplicates)
+}
+
 #' @title Determine Averaging Options
 #'
 #' @param means logical vector or list of logicals
