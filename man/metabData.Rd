@@ -18,7 +18,7 @@ metabData(
   misspc = 50,
   measure = c("median", "mean"),
   zero = FALSE,
-  duplicate = c(0.0025, 0.05)
+  duplicate = opts.duplicate()
 )
 }
 \arguments{
@@ -60,13 +60,12 @@ keywords selected and will be displayed in the final output.}
 
 \item{misspc}{Numeric. Threshold missingness percentage for analysis.}
 
-\item{measure}{Central quantitation measure, either "median" or "mean".}
+\item{measure}{Central sample abundance measure, either "median" or "mean".}
 
 \item{zero}{Logical. Whether to consider zero values as missing.}
 
-\item{duplicate}{Numeric ordered pair (m/z, rt) duplicate feature
-tolerances. Pairs of features within these tolerances are deemed duplicates
-and one of the pair is removed (see: \code{\link{findDuplicates}})}
+\item{duplicate}{list of duplicate feature removal parameters.
+(see: \code{\link{opts.duplicate}})}
 }
 \value{
 An object of class metabData containing the specific information
@@ -88,8 +87,8 @@ at most once, column types are valid, etc...).
 Following this is a pre-analysis filtering of rows that are either:
 1) Outside of a specified retention time range (\code{rtmin},\code{rtmax}),
 2) Missing in excess of \code{misspc} percent of analyzed samples, or
-3) deemed duplicates by small pairwise <m/z, rt> differences  as specified
-by the \code{duplicate} argument.
+3) deemed duplicates by small pairwise <m/z, rt> differences.
+See: \code{\link{opts.duplicate}} on duplicate feature removal
 
 Remaining features are ranked by abundance quantiles, Q, using a central
 \code{measure}, either "median" or "mean." Alternatively, the abundance
@@ -97,6 +96,7 @@ quantiles column can be specified in the argument \code{Q}.
 }
 \examples{
 data(plasma30)
+data(plasma20)
 
 #samples: CHEAR; RedCross samples non-analyzed "extra" columns
 p30 <- metabData(plasma30, mz = "mz", rt = "rt", id = "identity",
@@ -109,12 +109,12 @@ getExtra(p30)    #should print names of 5 Red Cross Sample column names
 p30 <- metabData(plasma30, id = "id", samples = "CHEAR", extra = "Red")
 
 #analyzing Red Cross samples with retention time limitations (0.5-17.5min)
-p30 <- metabData(plasma30, samples = "Red", rtmin = 0.5, rtmax = 17.5)
-data = getData(p30)
+p20 <- metabData(plasma20, samples = "Red", rtmin = 0.5, rtmax = 17.5)
+data = getData(p20)
 range(data$rt)
 
 #using regular expressions for field searches
-p30.2 <- metabData(plasma30, id = "identity|id|ID", samples = ".[3-5]$")
-getSamples(p30.2)    #should print all column names ending in .3, .4, .5
+p30 <- metabData(plasma30, id = "identity|id|ID", samples = ".[3-5]$")
+getSamples(p30)    #should print all column names ending in .3, .4, .5
 
 }

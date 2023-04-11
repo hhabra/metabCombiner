@@ -43,7 +43,5 @@ for the remaining features, as ranked by the \code{measure} argument, unless
 provided by the user.
 }
 \seealso{
-\code{\link{metabData}}: the constructor for metabData objects,
-\code{\link{filterRT}}: function for filtering by retention times,
-\code{\link{findDuplicates}}: function for finding duplicates
+\code{\link{metabData}}, \code{\link{filterRT}}
 }

@@ -18,6 +18,12 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r}
+head(list.files())
+
+
+```
+
 # Introduction
 
 In the computational analysis of LC-MS metabolomics data, a key step is to align the measurements of identical compounds commonly represented as <mass-to-charge ratio (m/z), retention time (RT)> features. Feature alignment between datasets acquired under non-identical conditions presents numerous opportunities in untargeted metabolomics. The key challenge is achieving a correspondence between identical features, most of which are not easily identified. `metabCombiner` determines a list possible feature pair alignments (FPAs) and determines their validity through a pairwise similarity score. We will show here how to use the basic `metabCombiner` workflow to perform cross-dataset alignment analysis.
@@ -37,7 +43,7 @@ There are four major assumptions that these datasets must conform to:
 
 1) They have been acquired in the same ionization mode (positive or negative)
 2) The samples in both datasets are biologically similar and possess a strong overlap in terms of their metabolomic composition
-3) The elution order of metabolites is mostly preserved. Datasets acquired from excessively disparate chromatographic techniques (such as between RPLC and HILIC methods) are not suitable for this workflow.
+3) The elution order of metabolites is mostly preserved. Datasets acquired from excessively disparate chromatographic techniques (such as between an RPLC dataset and a HILIC dataset) are not suitable for this workflow.
 4) Abundance values are not normalized or transformed in such a way that would remove information about their ranked abundance order
 
 For certain functionality described here, we also recommend that sample columns across all 
@@ -90,7 +96,7 @@ For the first five of these (mz, rt, id, adduct, Q), `metabData` searches for th
 Examples of keyword uses are below:
 ```{r, eval = FALSE}
 p20 = metabData(plasma20, mz = "mz", rt = "rt", id = "id", adduct = "adduct", 
-                samples = "CHEAR.20min", ...)
+                samples = "CHEAR.20min",...)
 
 ##all of the following values for id argument give the same result
 p20 = metabData(plasma20, ..., id = "identity", ...)    #full column name   

@@ -43,11 +43,10 @@
 #'
 #' @param zero Logical. Whether to consider zero values as missing.
 #'
-#' @param measure Central quantitation measure, either "median" or "mean".
+#' @param measure Central sample abundance measure, either "median" or "mean".
 #'
-#' @param duplicate  Numeric ordered pair (m/z, rt) duplicate feature
-#' tolerances. Pairs of features within these tolerances are deemed duplicates
-#' and one of the pair is removed (see: \code{\link{findDuplicates}})
+#' @param duplicate list of duplicate feature removal parameters.
+#' (see: \code{\link{opts.duplicate}})
 #'
 #' @details
 #' Processed metabolomics feature table must contain columns for m/z, rt,
@@ -61,8 +60,8 @@
 #' Following this is a pre-analysis filtering of rows that are either:
 #' 1) Outside of a specified retention time range (\code{rtmin},\code{rtmax}),
 #' 2) Missing in excess of \code{misspc} percent of analyzed samples, or
-#' 3) deemed duplicates by small pairwise <m/z, rt> differences  as specified
-#' by the \code{duplicate} argument.
+#' 3) deemed duplicates by small pairwise <m/z, rt> differences.
+#' See: \code{\link{opts.duplicate}} on duplicate feature removal
 #'
 #' Remaining features are ranked by abundance quantiles, Q, using a central
 #' \code{measure}, either "median" or "mean." Alternatively, the abundance
@@ -74,6 +73,7 @@
 #'
 #' @examples
 #' data(plasma30)
+#' data(plasma20)
 #'
 #' #samples: CHEAR; RedCross samples non-analyzed "extra" columns
 #' p30 <- metabData(plasma30, mz = "mz", rt = "rt", id = "identity",
@@ -86,20 +86,20 @@
 #' p30 <- metabData(plasma30, id = "id", samples = "CHEAR", extra = "Red")
 #'
 #' #analyzing Red Cross samples with retention time limitations (0.5-17.5min)
-#' p30 <- metabData(plasma30, samples = "Red", rtmin = 0.5, rtmax = 17.5)
-#' data = getData(p30)
+#' p20 <- metabData(plasma20, samples = "Red", rtmin = 0.5, rtmax = 17.5)
+#' data = getData(p20)
 #' range(data$rt)
 #'
 #' #using regular expressions for field searches
-#' p30.2 <- metabData(plasma30, id = "identity|id|ID", samples = ".[3-5]$")
-#' getSamples(p30.2)    #should print all column names ending in .3, .4, .5
+#' p30 <- metabData(plasma30, id = "identity|id|ID", samples = ".[3-5]$")
+#' getSamples(p30)    #should print all column names ending in .3, .4, .5
 #'
 #' @export
 metabData <- function(table, mz = "mz", rt = "rt", id = "id",
                         adduct = "adduct", samples = NULL, Q = NULL,
                         extra = NULL, rtmin = "min", rtmax = "max",
                         misspc = 50, measure = c("median", "mean"),
-                        zero = FALSE, duplicate = c(0.0025, 0.05))
+                        zero = FALSE, duplicate = opts.duplicate())
 {
     if(missing(table))
         stop("required argument 'table' is missing with no default")
@@ -117,20 +117,17 @@ metabData <- function(table, mz = "mz", rt = "rt", id = "id",
         extra <- NULL
     if (misspc >= 100 | misspc < 0 | !is.numeric(misspc))
         stop("Parameter 'misspc' must be a numeric value from [0,100)")
-
     if(is.character(table))
         table <- readData(table)
     else if(dplyr::is.tbl(table))     #handling tbl error
         table <- as.data.frame(table)
     else if(!is.data.frame(table))
         stop("argument 'table' must be a data.frame or path to data file")
-
     if(!is.logical(zero))
         stop("argument 'zero' must be a logical")
     if(any(grepl("\\{|\\[|\\(|\\)|\\]|\\}", names(table))))
         warning("bracket characters in data column names may affect column",
                 " detection accuracy")
-
     measure <- match.arg(measure)
     newData <- new("metabData")
     newData <- detectFields(Data = newData, table = table, mz = mz, rt = rt,

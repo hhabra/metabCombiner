@@ -1,5 +1,5 @@
 ##
-#' @title Filter Features by Retention Time
+#' @title Filter Features by Retention Time Range
 #'
 #' @description
 #' Restricts input metabolomics feature table in \code{metabData} object to a
@@ -38,72 +38,238 @@ filterRT <- function(data, rtmin, rtmax)
     if(!is.numeric(rtmax) | rtmax < min(rts) | rtmax < 0)
         stop("invalid value supplied for 'rtmax' argument")
     data <- dplyr::filter(data, .data$rt >= rtmin & .data$rt <= rtmax)
-
     if(nrow(data) == 0)
         stop("empty dataset following retention time filter")
-
     return(data)
 }
 
-##
-#' @title Find and Remove Duplicate Features
+
+#' Duplicate Feature Detection Parameters
 #'
-#' @description
-#' Pairs of features with nearly identical m/z and retention time values are
-#' removed in this step.
+#' @description Lists the parameters for detection of two or more rows that
+#' represent the same entity, based on similar m/z and retention time values.
 #'
-#' @param data     Constructed metabolomics data frame.
+#' @param mz m/z tolerance for duplicate feature detection
 #'
-#' @param duplicate   Ordered numeric pair (m/z, rt) tolerance parameters for
-#' duplicate feature search.
+#' @param rt RT tolerance for duplicate feature
 #'
-#' @param missing  Numeric vector. Percent missingness for each feature.
+#' @param resolve character. Either "single" (default) or "merge".
 #'
-#' @param counts   Numeric vector. Central measure for each feature.
+#' @param weighted logical. Option to weight m/z, RT, Q by mean abundance of
+#' each row (TRUE) or take single representative values (FALSE).
 #'
 #' @details
-#' Pairs of features are deemed duplicates if pairwise differences in m/z & rt
-#' fall within tolerances defined by the \code{duplicate} argument. If a pair
-#' of duplicate features is found, one member is removed. The determination of
-#' which feature to remove is first by percent missingness, followed by central
-#' abundance measure (median or mean). If the features have equal missingness
-#' and abundance, then row order determines the feature to be removed.
+#' The presence of duplicate features has negative consequences for the LC-MS
+#' alignment task. The package offers several options for resolving the issue
+#' of feature duplication. Pairwise m/z and RT tolerances define which features
+#' are to be considered as duplicates within a single data set. Setting
+#' \code{mz} or \code{rt} to 0 skips duplicate feature filtering altogether.
 #'
-#' @return  integer indices of removable duplicate features
-##
-findDuplicates <- function(data, missing, counts, duplicate)
+#' When duplicates are detected, either a single master copy is retained
+#' (\code{resolve} = "single") or merged into a single row
+#' (\code{resolve} = "merge").The master copy is the copy with lower proportion
+#' of missingness, followed by the most abundant (by median or mean). If %
+#' missingness and abundance is equivalent for duplicates, the first copy that
+#' appears is retained. The "merge" option fuses duplicate feature rows, with
+#' quantitative descriptors (m/z, RT) either calculated as a weighted average
+#' (\code{weighted} = TRUE) or otherwise taken from the top representative row;
+#' id and adduct values are concatenated; the maximum feature value is used for
+#' each sample; and all 'extra' values are taken from the 'master copy' row,
+#' similar to the "single" option.
+#'
+#' @export
+#'
+#' @examples
+#' data(plasma20)
+#' pars.duplicate <- opts.duplicate(mz = 0.01, rt = 0.05, resolve = "single")
+#' p20 <- metabData(plasma20, samples = "Red", duplicate = pars.duplicate)
+#'
+#' #to prevent removal of duplicate features
+#' p20 <- metabData(plasma20, samples = "Red", duplicate = opts.duplicate(0))
+#'
+#' ##merge option
+#' pars.duplicate <- opts.duplicate(mz = 0.01, rt = 0.05, resolve = "merge")
+#' p20 <- metabData(plasma20, samples = "Red", duplicate = pars.duplicate)
+#'
+#'
+opts.duplicate <- function(mz = 0.0025, rt = 0.05,
+                           resolve = c("single", "merge"), weighted = FALSE)
 {
-    if(length(duplicate)!= 2)
-        stop("'duplicate' argument must be a numeric, positive ordered pair")
-
-    tolMZ <- duplicate[1]
-    tolRT <- duplicate[2]
-
-    if(!is.numeric(tolMZ) | !is.numeric(tolRT) | tolMZ < 0 | tolRT < 0)
-        stop("'duplicate' argument must be a numeric, positive ordered pair")
-
-    if(tolMZ == 0 | tolRT == 0 | nrow(data) == 0)
-        return(numeric(0))
-
-    datMatrix <- dplyr::select(data, .data$mz,.data$rt) %>%
-                dplyr::mutate(counts = counts,
-                            missing = missing,
-                            index = seq(1,nrow(data))) %>%
-                dplyr::arrange(.data$mz)
-
-    datMatrix[["labels"]] <- .Call("findDuplicates",
-                                mz = datMatrix[["mz"]],
-                                rt = datMatrix[["rt"]],
-                                tolMZ = as.numeric(tolMZ),
-                                tolRT = as.numeric(tolRT),
-                                missing = as.numeric(datMatrix[["missing"]]),
-                                counts = as.numeric(datMatrix[["counts"]]),
-                                PACKAGE = "metabCombiner")
-
-    duplicates <- datMatrix[["index"]][datMatrix[["labels"]] == 1]
-
-    return(duplicates)
+    list(mz = mz, rt = rt, resolve = match.arg(resolve), weighted = weighted)
 }
+
+
+duplicate.pars <- function(duplicate)
+{
+    if(is.vector(duplicate) & length(duplicate) == 2){
+        tolMZ <- duplicate[[1]]; tolRT <- duplicate[[2]]
+        resolve <- "single"; weighted = FALSE
+    }
+    else{
+        tolMZ <- duplicate$mz; tolRT <- duplicate$rt; resolve <- duplicate$resolve
+        weighted <- duplicate$weighted
+    }
+    if(!is.numeric(tolMZ) | !is.numeric(tolRT) | tolMZ < 0 | tolRT < 0)
+        stop("duplicate tolerances must be numeric and positive")
+
+    return(list(tolMZ = tolMZ, tolRT = tolRT, resolve = resolve,
+                weighted = weighted))
+}
+
+cat.strings <- function(x){
+    x <- unique(x[!x %in% c(NA, "")])
+    if(length(x) == 0) return("")
+    else if(length(x) == 1) return(x)
+    else
+        paste0("{", paste(x, collapse = "; "), "}")
+}
+
+summaryCounts <- function(sampleData, measure)
+{
+    if(measure == "median")
+        counts <- matrixStats::rowMedians(as.matrix(sampleData), na.rm = TRUE)
+    else if(measure == "mean")
+        counts <- matrixStats::rowMeans2(as.matrix(sampleData), na.rm = TRUE)
+    counts <- ifelse(is.na(counts), 0, counts)
+    return(counts)
+}
+
+sampleData <- function(Data, data, zero)
+{
+    samples <- data[getSamples(Data)]
+    if(isTRUE(zero))  samples[samples == 0] <- NA
+    return(samples)
+}
+
+
+groupDuplicates <- function(mzrt, tolMZ, tolRT)
+{
+    mzrt[["dupbin"]] <- .Call("binDuplicates",
+                                mz = mzrt[["mz"]],
+                                tolMZ = as.numeric(tolMZ),
+                                PACKAGE = "metabCombiner")
+    mzrt <- dplyr::arrange(mzrt, .data$dupbin, .data$missing,
+                           desc(.data$counts))
+    dupdata <- .Call("groupDuplicates",
+                     mz = mzrt[["mz"]],
+                     rt = mzrt[["rt"]],
+                     tolMZ = as.numeric(tolMZ),
+                     tolRT = as.numeric(tolRT),
+                     dupbin = as.integer(mzrt[["dupbin"]]),
+                     PACKAGE = "metabCombiner")
+    mzrt[["dupgroup"]] = dupdata[[1]];
+    mzrt[["dupremove"]] = dupdata[[2]];
+    return(mzrt);
+}
+
+drop.dup.columns <- function(data)
+{
+    data[!names(data) %in% c("dupgroup", "dupremove")]
+}
+
+merge_duplicate_mzrtQ <- function(dup, nondup, weighted)
+{
+    if(weighted)
+        mzrtQ_dup <- dup[c("dupgroup", "mz", "rt", "Q", "wt")] %>%
+            dplyr::group_by(.data$dupgroup) %>%
+            dplyr::summarize(mz = stats::weighted.mean(.data$mz, w = .data$wt),
+                             rt = stats::weighted.mean(.data$rt, w = .data$wt),
+                             Q = stats::weighted.mean(.data$Q, w = .data$wt))
+    else
+        mzrtQ_dup <- dup[c("dupgroup", "mz", "rt", "Q")][dup$dupremove == 0,]
+    mzrtQ_nondup <- nondup[c("dupgroup","mz","rt","Q")]
+    mzrtQ <- rbind.data.frame(mzrtQ_dup, mzrtQ_nondup) %>%
+            dplyr::arrange(.data$dupgroup)
+    return(mzrtQ)
+}
+
+merge_duplicate_idadd <-function(dup, nondup)
+{
+    idadd_dup <- stats::aggregate(x = dup[c("dupgroup", "id", "adduct")],
+                            by = list(dup$dupgroup), FUN = cat.strings)
+    idadd_nondup <- nondup[c("dupgroup","id","adduct")]
+    idadd <- rbind.data.frame(idadd_dup[,-1], idadd_nondup) %>%
+            dplyr::arrange(.data$dupgroup)
+    return(idadd)
+}
+
+merge_duplicate_values <- function(dup, nondup, sampnames)
+{
+    n <- length(sampnames)
+    ngroup <- length(unique(dup[["dupgroup"]]))
+    values_dup <- dup[c("dupgroup", sampnames)]
+    values_nondup <- nondup[c("dupgroup", sampnames)]
+    values_vector <- as.vector(as.matrix(dup[sampnames]))
+    dupgroup_vector <- rep(values_dup[["dupgroup"]], length(sampnames))
+    merged_vector <- .Call("merge_duplicate_values",
+                           values = as.numeric(values_vector),
+                           dupgroup = dupgroup_vector,
+                           ngroup = as.integer(ngroup),
+                           n = n, PACKAGE = "metabCombiner")
+    merged_values <- cbind.data.frame(unique(values_dup[["dupgroup"]]),
+                        matrix(merged_vector, nrow = ngroup, ncol = n))
+    colnames(merged_values) <- names(values_dup)
+    merged_values <- rbind.data.frame(merged_values, values_nondup) %>%
+                    dplyr::arrange(.data$dupgroup)
+    return(merged_values[-1])
+}
+
+mergeDuplicates <- function(Data, data, samples, measure, zero, weighted)
+{
+    n <- ncol(samples)
+    data <- data[with(data, order(`dupgroup`)),]
+    data[["wt"]] <- matrixStats::rowSums2(as.matrix(samples), na.rm = TRUE) / n
+    data[["wt"]] <- ifelse(data[["wt"]] > 0, data[["wt"]], 1e-5)
+    rowID <- data[["rowID"]][!data$dupremove]
+    groupsWithDups <- unique(data[["dupgroup"]][data[["dupremove"]] != 0])
+    nondup <- data[!data[["dupgroup"]] %in% groupsWithDups,]
+    dup <- data[data[["dupgroup"]] %in% groupsWithDups,]
+    mzrtQ <- merge_duplicate_mzrtQ(dup, nondup, weighted)
+    idadd <- merge_duplicate_idadd(dup, nondup)
+    merged_values <- merge_duplicate_values(dup, nondup, names(samples))
+    extra <- data[getExtra(Data)][!data$dupremove,]
+    data <- data.frame(rowID = rowID,id = idadd$id,mz = mzrtQ$mz,rt = mzrtQ$rt,
+                       adduct = idadd$adduct, Q = mzrtQ$Q, merged_values,
+                       drop.dup.columns(extra), check.names = FALSE)
+    samples <- sampleData(Data, data, zero)
+    missing <- matrixStats::rowCounts(as.matrix(samples), value = NA)
+    counts <- summaryCounts(samples, measure)
+    return(list(data = data, counts = counts, missing = missing))
+}
+
+filterDuplicates <- function(Data, data, missing, counts)
+{
+    counts <- counts[data$dupremove == 0]
+    missing <- missing[data$dupremove == 0]
+    data <- drop.dup.columns(data[data$dupremove == 0,])
+    return(list(data = data, counts = counts, missing = missing))
+}
+
+
+duplicateHandler <- function(Data, data, samples, filtered, duplicate,
+                             measure, missing, counts, zero)
+{
+    pars <- duplicate.pars(duplicate)
+    if(pars[["tolMZ"]] == 0 | pars[["tolRT"]] == 0 | nrow(data) == 0)
+        return(list(data = data, missing = missing, counts = counts,
+                    filtered = filtered))
+    mzrt <- dplyr::select(data, .data$rowID,.data$mz,.data$rt) %>%
+            dplyr::mutate(missing = as.numeric(missing),
+                        counts = as.numeric(counts)) %>%
+            dplyr::arrange(.data$mz)
+    mzrt <- groupDuplicates(mzrt, pars[["tolMZ"]], pars[["tolRT"]])
+    mzrt <- dplyr::arrange(mzrt, .data$rowID)
+    data[c("dupgroup", "dupremove")] <- mzrt[c("dupgroup", "dupremove")]
+    filtered[["duplicates"]] <- drop.dup.columns(data[data$dupremove == 1,])
+    weighted <- pars[["weighted"]]
+    if(pars[["resolve"]] == "merge" & sum(data[["dupremove"]]) > 0)
+        dupData <- mergeDuplicates(Data, data, samples, measure, zero, weighted)
+    else
+        dupData <- filterDuplicates(Data, data, missing, counts)
+    dupData[["filtered"]] <- filtered
+    return(dupData)
+}
+
 
 ##
 #' Process and Filter Metabolomics Feature Lists
@@ -144,12 +310,10 @@ findDuplicates <- function(data, missing, counts, duplicate)
 #' listed steps and \code{stats} list updated to contain feature statistics.
 #'
 #' @seealso
-#' \code{\link{metabData}}: the constructor for metabData objects,
-#' \code{\link{filterRT}}: function for filtering by retention times,
-#' \code{\link{findDuplicates}}: function for finding duplicates
+#' \code{\link{metabData}}, \code{\link{filterRT}}
 #'
 ##
-adjustData <- function(Data, misspc, measure, rtmin, rtmax, zero,duplicate)
+adjustData <- function(Data, misspc, measure, rtmin, rtmax, zero, duplicate)
 {
     data <- getData(Data)
     stats <- list()
@@ -157,37 +321,27 @@ adjustData <- function(Data, misspc, measure, rtmin, rtmax, zero,duplicate)
     stats[["input_size"]] <- nrow(data)
     data <- filterRT(data, rtmin = rtmin, rtmax = rtmax)
     filtered[["rt"]] <- setdiff(getData(Data), data)
-    stats[["filtered_by_rt"]] = stats[["input_size"]] - nrow(data)
-    sampleData <- data[getSamples(Data)]
-    if(zero == TRUE)
-        sampleData[sampleData == 0] <- NA
-    mpc <- matrixStats::rowCounts(as.matrix(sampleData), value = NA)
-    keepIndices <- which((mpc / ncol(sampleData) * 100) <= misspc)
-    stats[["filtered_by_missingness"]] <- nrow(data) - length(keepIndices)
-    filtered[["missing"]] <- data[-keepIndices,]
-    data <- data[keepIndices,]
-    if(nrow(data) == 0)
-        stop("empty dataset following missingness filter")
-    mpc <- mpc[keepIndices] / ncol(sampleData) * 100
-    sampleData <- sampleData[keepIndices,]
-
-    if(measure == "median")
-        counts <- matrixStats::rowMedians(as.matrix(sampleData),na.rm = TRUE)
-    else if(measure == "mean")
-        counts <- matrixStats::rowMeans2(as.matrix(sampleData),na.rm = TRUE)
-
-    duplicates <- findDuplicates(data = data, counts = counts, missing = mpc,
-                                duplicate = duplicate)
-    if(length(duplicates) > 0){
-        filtered[["duplicate"]] <- data[duplicates,]
-        data <- data[-duplicates,]
-        counts <- counts[-duplicates]
-    }
-    stats[["filtered_as_duplicates"]] <- length(duplicates)
+    stats[["filtered_by_rt"]] <- stats[["input_size"]] - nrow(data)
+    samples <- sampleData(Data, data, zero)
+    missing <- matrixStats::rowCounts(as.matrix(samples), value = NA)
+    counts <- summaryCounts(samples, measure)
+    dd <- duplicateHandler(Data, data, samples, filtered, duplicate, measure,
+                           missing, counts, zero)
+    filtered <- dd[["filtered"]]
+    stats[["filtered_as_duplicates"]] <- nrow(filtered[["duplicates"]])
+    keepIndices <- which((dd[["missing"]] / ncol(samples) * 100) <= misspc)
+    stats[["filtered_by_missingness"]] <- nrow(dd$data) - length(keepIndices)
+    filtered[["missing"]] <- dd$data[-keepIndices,]
+    data <- dd$data[keepIndices,]
+    counts <- dd$counts[keepIndices]
+    if(nrow(data) == 0) stop("empty dataset following missingness filter")
     stats[["final_count"]] <- nrow(data)
-
     if(identical(data[["Q"]], rep(0, nrow(data))))
-        data["Q"] <- round((rank(counts) - 0.5) / length(counts),4)
+        data["Q"] <- round((rank(counts) - 0.5) / length(counts), 4)
     Data <- update_md(Data, data = data, stats = stats, filtered = filtered)
     return(Data)
 }
+
+
+
+
