@@ -8,7 +8,7 @@
 #' @export
 ##
 setMethod("filtered", signature = "metabData",
-          function(object, type = c("rt", "missing", "duplicate"))
+          function(object, type = c("rt", "missing", "duplicates"))
 {
     ftype <- match.arg(type)
     filtered_data <- object@filtered[[ftype]]
@@ -68,8 +68,8 @@ setMethod("show", signature = "metabData", function(object){
     cat("-------------------------\n")
     cat("Total Samples:", length(samples), "  Total Extra:", length(extra),"\n")
 
-    cat("Mass Range: ", min(data[["mz"]]), "-", max(data[["mz"]]), " ",
-        "m/z\n", sep = "" )
+    cat("Mass Range: ", min(data[["mz"]]), "-", max(data[["mz"]]), " Da\n",
+        sep = "")
     cat("Time Range: ", min(data[["rt"]]), "-", max(data[["rt"]]), " ", unit,
         "\n", sep = "")
 

@@ -7,7 +7,7 @@
 \usage{
 filtered(object, type = c("rt", "missing", "duplicate"))
 
-\S4method{filtered}{metabData}(object, type = c("rt", "missing", "duplicate"))
+\S4method{filtered}{metabData}(object, type = c("rt", "missing", "duplicates"))
 }
 \arguments{
 \item{object}{\code{metabData} object}

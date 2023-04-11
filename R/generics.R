@@ -140,7 +140,7 @@ setGeneric("featdata",function(object, data = NULL) standardGeneric("featdata"))
 #'
 #' @description Returns a data frame of metabolomics features eliminated in the
 #' \code{\link{metabData}} step. Features are returned based on the specific
-#' filter used for their elimination (RT, missingness, or duplicate).
+#' filter used for their elimination (RT, missingness, or duplicates).
 #'
 #' @param object \code{metabData} object
 #'
@@ -160,7 +160,7 @@ setGeneric("featdata",function(object, data = NULL) standardGeneric("featdata"))
 #'
 #' @export
 ##
-setGeneric("filtered", function(object, type = c("rt", "missing", "duplicate"))
+setGeneric("filtered", function(object, type = c("rt", "duplicates", "missing"))
     standardGeneric("filtered"))
 
 
