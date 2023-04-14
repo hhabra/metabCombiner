@@ -92,7 +92,7 @@ setGeneric("combinedTable", function(object) standardGeneric("combinedTable"))
 #' p20 <- metabData(head(plasma20,500), samples = "Red")
 #'
 #' p.comb <- metabCombiner(p30, p20)
-#' p.comb.table <- combinedData(p.comb)
+#' p.comb.table <- combineData(p.comb)
 #'
 #' @export
 setGeneric("combineData", function(object) standardGeneric("combineData"))

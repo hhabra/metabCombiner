@@ -2,7 +2,7 @@
 #' @include generics.R classes.R
 
 
-#' @rdname adductdata
+#' @rdname adductData
 #'
 #' @export
 setMethod("adductData",signature = "metabCombiner",
@@ -23,6 +23,21 @@ setMethod("idData", signature = "metabCombiner", function(object, data = NULL)
     return(fdata[c("rowID", cols)])
 })
 
+#' @rdname combineData
+#'
+#' @export
+setMethod("combineData", signature = "metabCombiner", function(object)
+{
+    fdata <- featData(object)
+    samples_extras <- unlist(lapply(datasets(object), function(d)
+        c(getSamples(object, d), getExtra(object, d))))
+    seTable <- combinedTable(object)[samples_extras]
+    table <- cbind.data.frame(fdata, seTable)
+    return(table)
+})
+
+
+
 #' @rdname featData
 #'
 #' @export
@@ -40,18 +55,7 @@ setMethod("featData", signature = "metabCombiner", function(object, data = NULL)
 })
 
 
-#' @rdname combineData
-#'
-#' @export
-setMethod("combineData", signature = "metabCombiner", function(object)
-{
-    fdata <- featData(object)
-    samples_extras <- unlist(lapply(datasets(object), function(d)
-        c(getSamples(object, d), getExtra(object, d))))
-    seTable <- combinedTable(object)[samples_extras]
-    table <- cbind.data.frame(fdata, seTable)
-    return(table)
-})
+
 
 
 #' @rdname mzData
