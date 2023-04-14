@@ -134,10 +134,7 @@ batchCombine <- function(batches, binGap = 0.005, fitMethod = "gam",
                             impute = union, anchorParam =  anchorParam,
                             scoreParam = scoreParam, labelParam = reduceParam)
     }
-    samples_extras <- unlist(lapply(datasets(object), function(d)
-        c(getSamples(object, d), getExtra(object, d))))
-    cTable <- combinedTable(object)[samples_extras]
-    table <- cbind.data.frame(featdata(object), cTable)
+    table <- combineData(object)
     output <- list(object = object, table = table)
     message("batchCombine Process Complete")
     return(output)
