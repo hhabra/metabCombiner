@@ -34,8 +34,7 @@ are as follows:
 \item{...}{Sample and extra columns from both datasets X & Y}
 }
 \description{
-Obtain constructed table reporting every possible metabolomics
-feature pair alignment.
+Obtain constructed table reporting every feature pair alignment.
 }
 \examples{
 data(plasma30)

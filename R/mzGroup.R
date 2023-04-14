@@ -38,14 +38,12 @@ mzGroup <- function(xset, yset, binGap)
                                 datasets = mzGroups[["set"]],
                                 gap = binGap,
                                 PACKAGE = "metabCombiner")
-
     if(all(mzGroups[["group"]] == 0))
         stop("no m/z groups formed; check m/z values")
     xgroups <- dplyr::filter(mzGroups, .data$set == "x") %>%
                 dplyr::arrange(.data$index)
     ygroups <- dplyr::filter(mzGroups, .data$set == "y") %>%
                 dplyr::arrange(.data$index)
-
     xset[["group"]] <- xgroups[["group"]]
     yset[["group"]] <- ygroups[["group"]]
 

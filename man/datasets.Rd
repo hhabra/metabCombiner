@@ -24,7 +24,6 @@ a character identifier. The datasets slot contains all these ids in a single
 vector, which can be obtained in sequential order with this accessor method
 }
 \examples{
-#' @examples
 data(plasma30)
 data(plasma20)
 
