@@ -39,7 +39,7 @@
 write2file <- function(object, file, sep = ","){
     if(isCombinedTable(object) == 0) cTable = object
     else if(isMetabCombiner(object) == 0)
-        cTable = merge(combinedTable(object), featdata(object), by = "rowID")
+        cTable <- merge(combinedTable(object), featData(object), by = "rowID")
     else{
         combinerCheck(isMetabCombiner(object), "metabCombiner", "warning")
         combinerCheck(isCombinedTable(object), "combinedTable", "warning")

@@ -23,7 +23,7 @@ have the \code{combinedTable} format to be valid (see: ?isCombinedTable)}
 include features that have been missed or changes by the user.
 }
 \description{
-This method updates the feature list (featdata) and aligned
+This method updates the feature list (featData) and aligned
 table (\code{combinedTable}) within a \code{metabCombiner} object. Manual
 changes to the (\code{combinedTable}) as well as unmatched X & Y dataset
 features can be incorporated into the object and the corresponding results.
@@ -37,7 +37,7 @@ reduction step. It is also possible for user-specified changes to the report
 to remove certain features entirely. This function allows for the missed
 features to be brought back into the table as non-matched entities. For xdata
 features, the Y columns will be entirely missing values, and ydata features
-will have missing X information. The feature data (featdata) will also be
+will have missing X information. The feature data (featData) will also be
 updated for use in subsequent alignments, but only features present in the
 representative dataset will be retained by default.
 }
@@ -68,6 +68,6 @@ p.comb <- updateTables(p.comb, xdata = p30, ydata = p20)
 
 #view results
 cTable <- combinedTable(p.comb)
-fdata <- featdata(p.comb)
+fdata <- featData(p.comb)
 
 }

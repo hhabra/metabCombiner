@@ -107,7 +107,7 @@ formLabeledTable <- function(fields, values, remove, group0 = NULL)
 #'
 #' 2) removal of all FPAs annotated as "REMOVE" in the labels column
 #'
-#' 3) Reforming the combinedTable and matching the corresponding featdata
+#' 3) Reforming the combinedTable and matching the corresponding featData
 #'
 #' 4) selection of meta-data from a single dataset
 #'
@@ -116,10 +116,12 @@ form_dataset <- function(object, data, means, rtOrder, impute)
 {
     cTable <- combinedTable(object)
     fnames <- c(combinerNames(), "labels", "subgroup", "alt")
+    if(length(setdiff(fnames, names(cTable))) > 0)
+        stop("labelRows() has not been called on object")
     fields <- resolveRows(cTable[fnames], rtOrder = rtOrder)
-    values <- cTable[,-seq(1,length(fnames))]
+    values <- cTable[-seq(1,length(fnames))]
     cTable <- formLabeledTable(fields, values, remove = TRUE, group0 = NULL)
-    fulldata <- featdata(object)
+    fulldata <- featData(object)
     fulldata <- fulldata[match(cTable[["rowID"]], fulldata[["rowID"]]),]
     fdata <- fulldata[grep(paste("rowID|_", data, "$", sep = ""),
                            names(fulldata), value = TRUE)]
@@ -205,9 +207,9 @@ formCombinedTable <- function(object, xset, yset, xreps, yreps){
     return(cTable)
 }
 
-#' @title Form Feature Metadata
+#' @title Form Feature Meta-data
 #'
-#' @description This forms the featdata slot of a metabCombiner object,
+#' @description This forms the featData slot of a metabCombiner object,
 #' consisting of feature descriptors from all constituent datasets.
 #'
 #' @param object metabCombiner object
@@ -221,17 +223,17 @@ formCombinedTable <- function(object, xset, yset, xreps, yreps){
 #' @param yreps Number of repeat for Y dataset features
 #'
 #' @noRd
-form_featdata <- function(object, cTable, xfeat, yfeat, xreps, yreps)
+form_featData <- function(object, cTable, xfeat, yfeat, xreps, yreps)
 {
     if(is.null(xfeat) & is.null(yfeat))
-        featdata <- cbind.data.frame(cTable[["idx"]], cTable[["idy"]],
+        featData <- cbind.data.frame(cTable[["idx"]], cTable[["idy"]],
                                      cTable[["mzx"]], cTable[["mzy"]],
                                      cTable[["rtx"]], cTable[["rty"]],
                                      cTable[["Qx"]], cTable[["Qy"]],
                                      cTable[["adductx"]], cTable[["adducty"]])
     else if(!is.null(xfeat) & is.null(yfeat)){
         xfeat <- dplyr::slice(xfeat, rep(seq(1,n()), times = xreps))
-        featdata <- cbind.data.frame(
+        featData <- cbind.data.frame(
             dplyr::select(xfeat, starts_with("id_")), cTable[["idy"]],
             dplyr::select(xfeat, starts_with("mz_")), cTable[["mzy"]],
             dplyr::select(xfeat, starts_with("rt_")), cTable[["rty"]],
@@ -240,7 +242,7 @@ form_featdata <- function(object, cTable, xfeat, yfeat, xreps, yreps)
     }
     else if(is.null(xfeat) & !is.null(yfeat)){
         yfeat <- yfeat[yreps,]
-        featdata <- cbind.data.frame(
+        featData <- cbind.data.frame(
             cTable[["idx"]], dplyr::select(yfeat, starts_with("id_")),
             cTable[["mzx"]], dplyr::select(yfeat, starts_with("mz_")),
             cTable[["rtx"]], dplyr::select(yfeat, starts_with("rt_")),
@@ -250,7 +252,7 @@ form_featdata <- function(object, cTable, xfeat, yfeat, xreps, yreps)
     else if(!is.null(xfeat) & !is.null(yfeat)){
         xfeat <- dplyr::slice(xfeat, rep(seq(1,n()), times = xreps))
         yfeat <- yfeat[yreps,]
-        featdata <- cbind.data.frame(
+        featData <- cbind.data.frame(
                                 dplyr::select(xfeat, starts_with("id_")),
                                 dplyr::select(yfeat, starts_with("id_")),
                                 dplyr::select(xfeat, starts_with("mz_")),
@@ -263,16 +265,16 @@ form_featdata <- function(object, cTable, xfeat, yfeat, xreps, yreps)
                                 dplyr::select(yfeat, starts_with("adduct_")))
     }
     fields <- c("id","mz","rt","Q","adduct")
-    names(featdata) <- paste(rep(fields, each = length(datasets(object))),
+    names(featData) <- paste(rep(fields, each = length(datasets(object))),
                              rep(datasets(object),length(fields)), sep = "_")
-    featdata <- cbind.data.frame(rowID = cTable[["rowID"]], featdata)
-    return(featdata)
+    featData <- cbind.data.frame(rowID = cTable[["rowID"]], featData)
+    return(featData)
 }
 
 #' @title Form combinedTable and featData
 #'
 #' @description This wraps together the formation of the combinedTable and
-#' featdata from the input datasets used to construct the metabCombiner object.
+#' featData from the input datasets used to construct the metabCombiner object.
 #' This completes the initial object formation from the features previously
 #' grouped by m/z.
 #'
@@ -304,7 +306,7 @@ form_tables <- function(object, xset, yset, xfeat = NULL, yfeat = NULL, nGroups)
         rep(seq(ends[number], ends[number+1]-1), times = groupCountX[number])
     }))
     cTable <- formCombinedTable(object, xset, yset, xreps, yreps)
-    featdata <- form_featdata(object, cTable, xfeat, yfeat, xreps, yreps)
-    object <- update_mc(object, combinedTable = cTable, featdata = featdata)
+    featData <- form_featData(object, cTable, xfeat, yfeat, xreps, yreps)
+    object <- update_mc(object, combinedTable = cTable, featData = featData)
     return(object)
 }

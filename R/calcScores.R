@@ -216,7 +216,7 @@ calcScores <- function(object, A = 75, B = 10, C = 0.25, fit = c("gam", "loess")
 {
     combinerCheck(isMetabCombiner(object), "metabCombiner")
     cTable <- combinedTable(object)
-    fdata <- featdata(object)
+    fdata <- featData(object)
     fit <- match.arg(fit)
     model <- getModel(object, fit = fit)
     if(is.null(groups)) groups <- setdiff(unique(cTable[["group"]]),0)
@@ -252,7 +252,7 @@ calcScores <- function(object, A = 75, B = 10, C = 0.25, fit = c("gam", "loess")
     cTable <- calculateRanks(cTable, rows)
     fdata <- fdata[match(cTable[["rowID"]], fdata[["rowID"]]),]
 
-    object <- update_mc(object, combinedTable = cTable, featdata = fdata,
+    object <- update_mc(object, combinedTable = cTable, featData = fdata,
                         coefficients = list(`A` = A, `B` = B, `C` = C))
     return(object)
 }

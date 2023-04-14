@@ -46,7 +46,7 @@ setClass("metabData", slots = c(data = "data.frame",
 #' @slot combinedTable data frame displaying all feature pair alignments,
 #' combining measurements of all possible shared compounds
 #'
-#' @slot featdata data frame of feature metadata (id, m/z, rt, Q, adduct)
+#' @slot featData data frame of feature metadata (id, m/z, rt, Q, adduct)
 #'
 #' @slot anchors data frame of feature pairs used for RT warping model
 #'
@@ -68,7 +68,7 @@ setClass("metabData", slots = c(data = "data.frame",
 #'
 #' @export
 setClass("metabCombiner", slots = c(combinedTable = "data.frame",
-                                    featdata = "data.frame",
+                                    featData = "data.frame",
                                     anchors = "data.frame",
                                     model = "list",
                                     datasets = "list",
@@ -81,7 +81,7 @@ setClass("metabCombiner", slots = c(combinedTable = "data.frame",
                             ),
                             prototype = prototype(
                                     combinedTable = data.frame(),
-                                    featdata = data.frame(),
+                                    featData = data.frame(),
                                     anchors = data.frame(),
                                     model = list(),
                                     datasets = list(),

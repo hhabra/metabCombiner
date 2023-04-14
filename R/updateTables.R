@@ -20,7 +20,7 @@ find_lost_features <- function(fdata, forig, type, di)
 #' Fill Feature Data
 #'
 #' @noRd
-fill_featdata <- function(fdata, forig, lostfeats, type, di)
+fill_featData <- function(fdata, forig, lostfeats, type, di)
 {
     forig <- forig[lostfeats,]
     lost <- seq(nrow(fdata) - length(lostfeats) + 1, nrow(fdata))
@@ -85,11 +85,11 @@ fill_combinedTable <- function(cTable, origTable, forig, lostfeats,
 
 
 
-#' Update combinedTable & featdata
+#' Update combinedTable & featData
 #'
 #' @param cTable combinedTable data frame of the current metabCombiner object
 #'
-#' @param fdata featdata of the current metabCombiner object
+#' @param fdata featData of the current metabCombiner object
 #'
 #' @param origdata xdata or ydata used to update the metabCombiner object
 #'
@@ -108,7 +108,7 @@ updateCombiner <- function(object, cTable, fdata, origdata, datasets, type)
             stop("expected ", n, " datasets in input argument '",
                 paste(type,"data", sep = ""),"'; found ",
                 length(datasets(origdata)))
-        forig <- featdata(origdata)
+        forig <- featData(origdata)
         origTable <- combinedTable(origdata)
     }
 
@@ -127,7 +127,7 @@ updateCombiner <- function(object, cTable, fdata, origdata, datasets, type)
     lostfeats <- find_lost_features(fdata, forig, type, di)
     fdata[seq(nrow(fdata)+1, nrow(fdata) + length(lostfeats)),] <- NA
     cTable[seq(nrow(cTable)+1, nrow(cTable) + length(lostfeats)),] <- NA
-    fdata <- fill_featdata(fdata, forig, lostfeats, type, di)
+    fdata <- fill_featData(fdata, forig, lostfeats, type, di)
     cTable <- fill_combinedTable(cTable, origTable, forig, lostfeats, datasets,
                                  type, object)
     return(list(fdata = fdata, cTable = cTable))
@@ -137,7 +137,7 @@ updateCombiner <- function(object, cTable, fdata, origdata, datasets, type)
 
 #' @title Update \code{metabCombiner} Objects
 #'
-#' @description This method updates the feature list (featdata) and aligned
+#' @description This method updates the feature list (featData) and aligned
 #' table (\code{combinedTable}) within a \code{metabCombiner} object. Manual
 #' changes to the (\code{combinedTable}) as well as unmatched X & Y dataset
 #' features can be incorporated into the object and the corresponding results.
@@ -164,7 +164,7 @@ updateCombiner <- function(object, cTable, fdata, origdata, datasets, type)
 #' to remove certain features entirely. This function allows for the missed
 #' features to be brought back into the table as non-matched entities. For xdata
 #' features, the Y columns will be entirely missing values, and ydata features
-#' will have missing X information. The feature data (featdata) will also be
+#' will have missing X information. The feature data (featData) will also be
 #' updated for use in subsequent alignments, but only features present in the
 #' representative dataset will be retained by default.
 #'
@@ -194,7 +194,7 @@ updateCombiner <- function(object, cTable, fdata, origdata, datasets, type)
 #'
 #' #view results
 #' cTable <- combinedTable(p.comb)
-#' fdata <- featdata(p.comb)
+#' fdata <- featData(p.comb)
 #'
 #' @export
 updateTables <- function(object, xdata = NULL, ydata = NULL,
@@ -203,7 +203,7 @@ updateTables <- function(object, xdata = NULL, ydata = NULL,
     combinerCheck(isMetabCombiner(object), "metabCombiner")
     if(is.null(combinedTable)) cTable <- combinedTable(object)
     else cTable <- combinedTable
-    fdata <- featdata(object)
+    fdata <- featData(object)
     xy <- xy(object)
     dats <- datasets(object, list = TRUE)
 
@@ -231,7 +231,7 @@ updateTables <- function(object, xdata = NULL, ydata = NULL,
         fdata <- updated_with_Y[["fdata"]]
     }
 
-    object <- update_mc(object, combinedTable = cTable, featdata = fdata)
+    object <- update_mc(object, combinedTable = cTable, featData = fdata)
     return(object)
 }
 

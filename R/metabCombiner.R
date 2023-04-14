@@ -209,7 +209,7 @@ combine_X_y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder, impute)
     object <- update_mc(object, nonmatched = nonmatched, datasets = datasets,
                         stats = c("grouped_X", "grouped_Y", "nGroups"),
                         values = c(nrow(xset), nrow(yset), nGroups))
-    xfeat <- featdata(xdata)[match(xset[["rowID"]],featdata(xdata)[["rowID"]]),]
+    xfeat <- featData(xdata)[match(xset[["rowID"]],featData(xdata)[["rowID"]]),]
     object <- form_tables(object, xset, yset, xfeat, NULL, nGroups)
     return(object)
 }
@@ -254,7 +254,7 @@ combine_x_Y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder, impute)
     object <- update_mc(object, nonmatched = nn, datasets = datasets,
                         stats = c("grouped_X", "grouped_Y", "nGroups"),
                         values = c(nrow(xset), nrow(yset), nGroups))
-    yfeat <- featdata(ydata)[match(yset[["rowID"]],featdata(ydata)[["rowID"]]),]
+    yfeat <- featData(ydata)[match(yset[["rowID"]],featData(ydata)[["rowID"]]),]
     object <- form_tables(object, xset, yset, NULL, yfeat, nGroups)
     return(object)
 }
@@ -304,8 +304,8 @@ combine_X_Y <- function(xdata, ydata, binGap, xid, yid, means, rtOrder, impute)
     object <- update_mc(object, nonmatched = nonmatched, datasets = datasets,
                         stats = c("grouped_X", "grouped_Y", "nGroups"),
                         values = c(nrow(xset), nrow(yset), nGroups))
-    xfeat <- featdata(xdata)[match(xset[["rowID"]],featdata(xdata)[["rowID"]]),]
-    yfeat <- featdata(ydata)[match(yset[["rowID"]],featdata(ydata)[["rowID"]]),]
+    xfeat <- featData(xdata)[match(xset[["rowID"]],featData(xdata)[["rowID"]]),]
+    yfeat <- featData(ydata)[match(yset[["rowID"]],featData(ydata)[["rowID"]]),]
     object <- form_tables(object, xset, yset, xfeat, yfeat, nGroups)
     return(object)
 }

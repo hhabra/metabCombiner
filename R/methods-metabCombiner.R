@@ -149,13 +149,13 @@ setMethod("show", signature = "metabCombiner", function(object){
 
 #update method
 setMethod("update_mc", signature = "metabCombiner",
-        function(object, combinedTable, featdata, anchors, model, fit, samples,
+        function(object, combinedTable, featData, anchors, model, fit, samples,
                  extra, xy, datasets, nonmatched, stats, values, coefficients)
 {
     if(!missing(combinedTable))
         object@combinedTable <- combinedTable
-    if(!missing(featdata))
-        object@featdata <- featdata
+    if(!missing(featData))
+        object@featData <- featData
     if(!missing(anchors))
         object@anchors <- anchors
     if(!missing(nonmatched))

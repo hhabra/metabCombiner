@@ -148,12 +148,12 @@ p.comb.2 <- labelRows(p.comb, resolveConflicts = FALSE, remove = FALSE)
 #this is identical to the previous command
 p.comb.2 <- reduceTable(p.comb)
 
-p.comb = labelRows(p.comb, method = "mzrt", delta = c(0.005, 0.5, 0.005,0.3))
+p.comb <- labelRows(p.comb, method = "mzrt", delta = c(0.005, 0.5, 0.005,0.3))
 
 ##this function may be applied to combinedTable inputs as well
-cTable = cbind.data.frame(combinedTable(p.comb), featdata(p.comb))
+cTable <- cbind.data.frame(combinedTable(p.comb), featData(p.comb))
 
-lTable = labelRows(cTable, maxRankX = 3, maxRankY = 2, minScore = 0.5,
+lTable <- labelRows(cTable, maxRankX = 3, maxRankY = 2, minScore = 0.5,
          method = "score", maxRTerr = 0.5, delta = 0.2)
 
 }

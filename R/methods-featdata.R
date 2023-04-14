@@ -5,42 +5,30 @@
 #' @rdname adductdata
 #'
 #' @export
-setMethod("adductdata",signature = "metabCombiner",
+setMethod("adductData",signature = "metabCombiner",
     function(object, data = NULL)
 {
-    fdata <- featdata(object)
-    if(is.null(data))
-        data <- datasets(object)
-    else if(data == "x") data <- x(object)
-    else if(data == "y") data <- y(object)
-    else if(!(data %in% datasets(object)))
-        stop("no dataset identifer found for 'data' argument")
-    cols <- paste("adduct", data, sep = "_")
+      fdata <- featData(object, data = data)
+      cols <- grep("^adduct", names(fdata), value = TRUE)
+      return(fdata[c("rowID", cols)])
+})
+
+#' @rdname idData
+#'
+#' @export
+setMethod("idData", signature = "metabCombiner", function(object, data = NULL)
+{
+    fdata <- featData(object, data = data)
+    cols <- grep("^id", names(fdata), value = TRUE)
     return(fdata[c("rowID", cols)])
 })
 
-#' @rdname iddata
+#' @rdname featData
 #'
 #' @export
-setMethod("iddata", signature = "metabCombiner", function(object, data = NULL)
+setMethod("featData", signature = "metabCombiner", function(object, data = NULL)
 {
-    fdata <- featdata(object)
-    if(is.null(data))
-        data <- datasets(object)
-    else if(data == "x") data <- x(object)
-    else if(data == "y") data <- y(object)
-    else if(!(data %in% datasets(object)))
-        stop("no dataset found with identifer in data argument")
-    cols <- paste("id", data, sep = "_")
-    return(fdata[c("rowID", cols)])
-})
-
-#' @rdname featdata
-#'
-#' @export
-setMethod("featdata", signature = "metabCombiner", function(object, data = NULL)
-{
-    fdata <- object@featdata
+    fdata <- object@featData
     if(is.null(data))
         return(fdata)
     else if(data == "x") data <- x(object)
@@ -52,66 +40,63 @@ setMethod("featdata", signature = "metabCombiner", function(object, data = NULL)
 })
 
 
-#' @rdname mzdata
+#' @rdname combineData
 #'
 #' @export
-setMethod("mzdata", signature = "metabCombiner",
-    function(object, data = NULL, value = c("obs", "mean"))
+setMethod("combineData", signature = "metabCombiner", function(object)
 {
-    value = match.arg(value)
-    fdata <- featdata(object)
-    if(is.null(data) | value == "mean") data <- datasets(object)
-    else if(data == "x") data <- x(object)
-    else if(data == "y") data <- y(object)
-    else if(!(data %in% datasets(object)))
-        stop("no dataset identifer found for 'data' argument")
+    fdata <- featData(object)
+    samples_extras <- unlist(lapply(datasets(object), function(d)
+        c(getSamples(object, d), getExtra(object, d))))
+    seTable <- combinedTable(object)[samples_extras]
+    table <- cbind.data.frame(fdata, seTable)
+    return(table)
+})
 
-    cols <- paste("mz", data, sep = "_")
-    if(value == "obs")
+
+#' @rdname mzData
+#'
+#' @export
+setMethod("mzData", signature = "metabCombiner",
+    function(object, data = NULL, value = c("observed", "mean"))
+{
+    value <- match.arg(value)
+    if(value == "mean") data <- NULL
+    fdata <- featData(object, data = data)
+    cols <- grep("^mz", names(fdata), value = TRUE)
+    if(value == "observed")
         return(fdata[c("rowID", cols)])
     else
         return(matrixStats::rowMeans2(as.matrix(fdata[cols])))
 })
 
-#' @rdname Qdata
+#' @rdname QData
 #'
 #'@export
-setMethod("Qdata", signature = "metabCombiner",
-    function(object, data = NULL, value = c("obs", "mean"))
+setMethod("QData", signature = "metabCombiner",
+    function(object, data = NULL, value = c("observed", "mean"))
 {
-    value = match.arg(value)
-    fdata <- featdata(object)
-    if(is.null(data) | value == "mean")
-        data <- datasets(object)
-    else if(data == "x") data <- x(object)
-    else if(data == "y") data <- y(object)
-    else if(!(data %in% datasets(object)))
-        stop("no dataset identifer found for 'data' argument")
-    cols <- paste("Q", data, sep = "_")
-
-    if(value == "obs")
-        return(fdata[c("rowID", cols)])
-    else
-        return(matrixStats::rowMeans2(as.matrix(fdata[cols])))
+      value <- match.arg(value)
+      if(value == "mean") data <- NULL
+      fdata <- featData(object, data = data)
+      cols <- grep("^Q", names(fdata), value = TRUE)
+      if(value == "observed")
+          return(fdata[c("rowID", cols)])
+      else
+          return(matrixStats::rowMeans2(as.matrix(fdata[cols])))
 })
 
-#' @rdname rtdata
+#' @rdname rtData
 #'
 #'@export
-setMethod("rtdata", signature = "metabCombiner",
-    function(object, data = NULL, value = c("obs", "mean"))
+setMethod("rtData", signature = "metabCombiner",
+    function(object, data = NULL, value = c("observed", "mean"))
 {
-    value = match.arg(value)
-    fdata <- featdata(object)
-    if(is.null(data) | value == "mean")
-        data <- datasets(object)
-    else if(data == "x") data <- x(object)
-    else if(data == "y") data <- y(object)
-    else if(!(data %in% datasets(object)))
-        stop("no dataset identifer found for 'data' argument")
-    cols <- paste("rt", data, sep = "_")
-
-    if(value == "obs")
+    value <- match.arg(value)
+    if(value == "mean") data <- NULL
+    fdata <- featData(object, data = data)
+    cols <- grep("^rt", names(fdata), value = TRUE)
+    if(value == "observed")
         return(fdata[c("rowID", cols)])
     else
         return(matrixStats::rowMeans2(as.matrix(fdata[cols])))

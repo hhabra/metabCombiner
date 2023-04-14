@@ -16,7 +16,7 @@ information organized by dataset, and key object statistics.
 \item{\code{combinedTable}}{data frame displaying all feature pair alignments,
 combining measurements of all possible shared compounds}
 
-\item{\code{featdata}}{data frame of feature metadata (id, m/z, rt, Q, adduct)}
+\item{\code{featData}}{data frame of feature metadata (id, m/z, rt, Q, adduct)}
 
 \item{\code{anchors}}{data frame of feature pairs used for RT warping model}
 

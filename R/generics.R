@@ -22,20 +22,19 @@
 #' p.comb <- metabCombiner(p30, p20, xid = "p30", yid = "p20")
 #'
 #' ##retrieve all adduct data
-#' adducts <- adductdata(p.comb, data = NULL)
+#' adducts <- adductData(p.comb, data = NULL)
 #'
 #' ##retrieve adduct data from p30
-#' adducts <- adductdata(p.comb, data = "p30")
+#' adducts <- adductData(p.comb, data = "p30")
 #'
 #' @export
-setGeneric("adductdata", function(object, data = NULL)
-            standardGeneric("adductdata"))
+setGeneric("adductData", function(object, data = NULL)
+            standardGeneric("adductData"))
 
 
 #' @title Obtain Feature Alignment Report
 #'
-#' @description Obtain constructed table reporting every possible metabolomics
-#' feature pair alignment.
+#' @description Obtain constructed table reporting every feature pair alignment.
 #'
 #' @param object \code{metabCombiner} object.
 #'
@@ -73,6 +72,34 @@ setGeneric("adductdata", function(object, data = NULL)
 setGeneric("combinedTable", function(object) standardGeneric("combinedTable"))
 
 
+#' @title Obtain All Feature Data
+#'
+#' @description Obtain all meta-data (m/z, RT, Q, id, adduct) alongside their
+#' respective sample (+ extra) values for aligned features. This is a
+#' (quasi)merge of the /code{/link{combinedTable}} and /code{/link{featData}}
+#' tables and methods.
+#'
+#' @param object \code{metabCombiner} object
+#'
+#' @return A data.frame containing meta-data columns as well as sample + extra
+#' columns for each of the constituent data sets.
+#'
+#' @examples
+#' data(plasma30)
+#' data(plasma20)
+#'
+#' p30 <- metabData(head(plasma30,500), samples = "CHEAR")
+#' p20 <- metabData(head(plasma20,500), samples = "Red")
+#'
+#' p.comb <- metabCombiner(p30, p20)
+#' p.comb.table <- combinedData(p.comb)
+#'
+#' @export
+setGeneric("combineData", function(object) standardGeneric("combineData"))
+
+
+
+
 #' @title Obtain Dataset IDs
 #'
 #' @description Each dataset in a \code{metabCombiner} object is represented by
@@ -87,7 +114,6 @@ setGeneric("combinedTable", function(object) standardGeneric("combinedTable"))
 #' @return character vector of dataset identifiers
 #'
 #' @examples
-#' #' @examples
 #' data(plasma30)
 #' data(plasma20)
 #'
@@ -106,16 +132,20 @@ setGeneric("datasets", function(object, list = FALSE)
 
 #' @title Obtain Feature Metadata
 #'
-#' @description \code{metabCombiner} objects organize metabolomics feature
-#' information in the "featdata" slot. This method retrieves all metadata
-#' or that of one dataset. The rows should identically correspond to the same
-#' rows from the combinedTable data frame.
+#' @description  This method retrieves all feature meta-data or that of one
+#' data set. The rowIDs identically correspond to the rows from the
+#' \code{combinedTable} data frame.
 #'
 #' @param object a \code{metabCombiner} object
 #'
 #' @param data character dataset identifier
 #'
 #' @return data frame of feature metadata from one or all datasets
+#'
+#' @details \code{metabCombiner} objects organized metabolomics feature
+#' information in the "featData" slot. This table and method is primarily useful
+#' for alignment analyses involving three or more data sets.
+#'
 #'
 #' @examples
 #' data(plasma30)
@@ -127,13 +157,13 @@ setGeneric("datasets", function(object, list = FALSE)
 #' p.comb <- metabCombiner(p30, p20, xid = "p30", yid = "p20")
 #'
 #' #full metadata extraction
-#' fdata <- featdata(p.comb, data = NULL)
+#' fdata <- featData(p.comb, data = NULL)
 #'
 #' #single dataset feature information extraction
-#' fdata <- featdata(p.comb, data = "p20")
+#' fdata <- featData(p.comb, data = "p20")
 #'
 #'@export
-setGeneric("featdata",function(object, data = NULL) standardGeneric("featdata"))
+setGeneric("featData",function(object, data = NULL) standardGeneric("featData"))
 
 
 #' @title Retrieve Filtered Features
@@ -373,14 +403,14 @@ setGeneric("getStats", function(object) standardGeneric("getStats"))
 #' p.comb <- metabCombiner(p30, p20, xid = "p30", yid = "p20")
 #'
 #' ##retrieve all ids
-#' ids <- iddata(p.comb, data = NULL)
+#' ids <- idData(p.comb, data = NULL)
 #'
 #' ##retrieve ids from p30
-#' ids <- iddata(p.comb, data = "p30")
+#' ids <- idData(p.comb, data = "p30")
 #'
 #' @export
-setGeneric("iddata", function(object, data = NULL)
-    standardGeneric("iddata"))
+setGeneric("idData", function(object, data = NULL)
+    standardGeneric("idData"))
 
 
 #' @title Retrieve m/z Values
@@ -406,17 +436,17 @@ setGeneric("iddata", function(object, data = NULL)
 #' p.comb <- metabCombiner(p30, p20, xid = "p30", yid = "p20")
 #'
 #' ##retrieve all m/z
-#' mz <- mzdata(p.comb, data = NULL)
+#' mzd <- mzData(p.comb, data = NULL)
 #'
 #' ##retrieve m/z from p30
-#' mz <- mzdata(p.comb, data = "p30")
+#' mzd <- mzData(p.comb, data = "p30")
 #'
 #' ##retrieve mean m/z
-#' mz <- mzdata(p.comb, value = "mean")
+#' mzd <- mzData(p.comb, value = "mean")
 #'
 #' @export
-setGeneric("mzdata", function(object, data = NULL, value = c("obs", "mean"))
-    standardGeneric("mzdata"))
+setGeneric("mzData", function(object, data = NULL, value = c("obs", "mean"))
+    standardGeneric("mzData"))
 
 
 #' @title Get Nonmatched Features
@@ -473,17 +503,17 @@ setGeneric("nonmatched", function(object, data = "x")
 #' p.comb <- metabCombiner(p30, p20, xid = "p30", yid = "p20")
 #'
 #' ##retrieve all Q
-#' Q <- Qdata(p.comb, data = NULL)
+#' Q <- QData(p.comb, data = NULL)
 #'
 #' ##retrieve Q from p30
-#' Q <- Qdata(p.comb, data = "p30")
+#' Q <- QData(p.comb, data = "p30")
 #'
 #' ##retrieve mean Q
-#' Q <- Qdata(p.comb, value = "mean")
+#' Q <- QData(p.comb, value = "mean")
 #'
 #' @export
-setGeneric("Qdata", function(object, data = NULL, value = c("obs", "mean"))
-    standardGeneric("Qdata"))
+setGeneric("QData", function(object, data = NULL, value = c("obs", "mean"))
+    standardGeneric("QData"))
 
 
 #' @title Retrieve Retention Time Values
@@ -510,21 +540,21 @@ setGeneric("Qdata", function(object, data = NULL, value = c("obs", "mean"))
 #' p.comb <- metabCombiner(p30, p20, xid = "p30", yid = "p20")
 #'
 #' ##retrieve all RTs
-#' rt <- rtdata(p.comb, data = NULL)
+#' rt <- rtData(p.comb, data = NULL)
 #'
 #' ##retrieve RTs from p30
-#' rt <- rtdata(p.comb, data = "p30")
+#' rt <- rtData(p.comb, data = "p30")
 #'
 #' ##retrieve mean RT
-#' rt <- rtdata(p.comb, value = "mean")
+#' rt <- rtData(p.comb, value = "mean")
 #'
 #' @export
-setGeneric("rtdata", function(object, data = NULL, value = c("obs", "mean"))
-    standardGeneric("rtdata"))
+setGeneric("rtData", function(object, data = NULL, value = c("obs", "mean"))
+    standardGeneric("rtData"))
 
 
 ##updater methods
-setGeneric("update_mc",function(object, combinedTable, featdata, anchors, model,
+setGeneric("update_mc",function(object, combinedTable, featData, anchors, model,
                           fit, samples, extra, xy, datasets, nonmatched, stats,
                           values, coefficients) standardGeneric("update_mc"))
 

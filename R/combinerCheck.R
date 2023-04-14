@@ -38,7 +38,7 @@ combinerCheck <- function(errNo, type, error = "stop"){
             c("input object is not of class 'metabCombiner'",
             "combinedTable in input object is invalid",
             "duplicate dataset identifiers not allowed",
-            "rowID mismatch between combinedTable and featdata"
+            "rowID mismatch between combinedTable and featData"
             ),
         "metabData" =
             c("input object is not of class 'metabData'",
@@ -139,7 +139,7 @@ isMetabCombiner <- function(object){
     if(any(duplicated(datasets(object))))
         return(3)
 
-    if(!identical(combinedTable(object)[["rowID"]],featdata(object)[["rowID"]]))
+    if(!identical(combinedTable(object)[["rowID"]],featData(object)[["rowID"]]))
         return(4)
 
     return(0)
@@ -158,24 +158,17 @@ isMetabCombiner <- function(object){
 isMetabData <- function(object){
     if(!methods::is(object, "metabData"))
         return(1)
-
     data <- getData(object)
-
     expected <- c("rowID","id", "mz", "rt", "adduct", "Q")
-
     if(ncol(data) <= length(expected))
         return(2)
-
     if(nrow(data) == 0)
         return(3)
-
     if(!identical(names(data)[seq(1,length(expected))], expected))
         return(4)
-
     coltypes <- as.character(lapply(data, class))
     expected_types <- c("integer","character","numeric","numeric",
                         "character","numeric")
-
     if(!identical(coltypes[seq(1,length(expected))], expected_types))
         return(5)
 

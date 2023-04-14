@@ -166,12 +166,12 @@ prepare_fields_values <- function(cTable, useID, brackets_ignore)
 #' #this is identical to the previous command
 #' p.comb.2 <- reduceTable(p.comb)
 #'
-#' p.comb = labelRows(p.comb, method = "mzrt", delta = c(0.005, 0.5, 0.005,0.3))
+#' p.comb <- labelRows(p.comb, method = "mzrt", delta = c(0.005, 0.5, 0.005,0.3))
 #'
 #' ##this function may be applied to combinedTable inputs as well
-#' cTable = cbind.data.frame(combinedTable(p.comb), featdata(p.comb))
+#' cTable <- cbind.data.frame(combinedTable(p.comb), featData(p.comb))
 #'
-#' lTable = labelRows(cTable, maxRankX = 3, maxRankY = 2, minScore = 0.5,
+#' lTable <- labelRows(cTable, maxRankX = 3, maxRankY = 2, minScore = 0.5,
 #'          method = "score", maxRTerr = 0.5, delta = 0.2)
 #'
 #' @export
@@ -204,9 +204,9 @@ labelRows <- function(object, useID = FALSE, minScore = 0.5, maxRankX = 3,
     cTable <- formLabeledTable(fields, values, remove, fvs[["group0"]])
 
     if(methods::is(object, "metabCombiner")){
-        fdata <- featdata(object)
+        fdata <- featData(object)
         fdata <- fdata[match(cTable[["rowID"]], fdata[["rowID"]]),]
-        object <- update_mc(object, combinedTable = cTable, featdata = fdata)
+        object <- update_mc(object, combinedTable = cTable, featData = fdata)
     }
     else
         object <- cTable
