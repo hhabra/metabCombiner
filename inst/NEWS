@@ -1,15 +1,36 @@
+
+
+Version 1.9.2
+----------------------------
+o featdata renamed to featData
+
+o associated methods also renamed:
+    + adductdata() -> adductData()
+    + iddata() -> idData()
+    + mzdata() -> mzData()
+    + Qdata() -> QData()
+    + rtdata() -> rtData()
+
+o new method combineData():
+    + merges columns from combinedTable() and featData()
+
+
 Version 1.9.1
 ----------------------------
-o Update to duplicate feature handling in metabData()
+o Changes to metabData():
+    + Major changes to duplicate feature handling
     + bug fix to existing duplicate filtering code
     + duplicate argument reworked to accept a list of parameters
-    + new function opts.duplicate() lists default parameters
-    + new duplicate feature merging option (opts.duplicate(resolve = "merge"))
+    + option to merge duplicate feature rows added
     + duplicate features are filtered or merged before missingness filter
+    + new rowID column added to metabData objects
 
-o New rowID column added to metabData objects
 
-o Minor Change to evaluateParams
+o new function opts.duplicate():
+    + lists default parameters for duplicate feature handling in metabData()
+    + new duplicate feature merging option (opts.duplicate(resolve = "merge"))
+
+o Minor Change to evaluateParams():
     + "score" column changed to "totalScore" (for clarity)
 
 

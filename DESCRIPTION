@@ -1,10 +1,10 @@
 Package: metabCombiner
-Version: 1.9.1
-Date: 2023-04-11
+Version: 1.9.2
+Date: 2023-04-14
 Title: Method for Combining LC-MS Metabolomics Feature Measurements
 Authors@R: c(
 	   person("Hani", "Habra", email = "hhabra1@gmail.com",role = c("aut","cre")),
-	   person("Alla", "Karnovsky", email = "akarnovs@med.umich.edu",role = "ths"))
+	   person("Alla", "Karnovsky", email = "akarnovs@med.umich.edu", role = "ths"))
 License: GPL-3
 Description: This package aligns LC-HRMS metabolomics datasets acquired from 
     biologically similar specimens analyzed under similar, but not necessarily 
