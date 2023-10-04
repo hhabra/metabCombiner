@@ -1,12 +1,17 @@
+Version 1.11.1
+----------------------------
+o m/z group size limit eliminated (previous: 10000 maximum)
+
 
 
 Version 1.9.2
 ----------------------------
-o featdata renamed to featData
+o featdata slot renamed to featData
 
 o associated methods also renamed:
     + adductdata() -> adductData()
     + iddata() -> idData()
+    + featdata() -> featData()
     + mzdata() -> mzData()
     + Qdata() -> QData()
     + rtdata() -> rtData()
@@ -34,8 +39,6 @@ o Minor Change to evaluateParams():
     + "score" column changed to "totalScore" (for clarity)
 
 
-
-
 Version 1.7.1
 ----------------------------
 o Addition of filtered features to metabData objects and filtered method
@@ -51,7 +54,6 @@ o Bug Fix in reduceTable()/ reduceTableParam():
 
 o small logic fix in labelRows() / reduceTable()
   + previous version caused duplicate feature matches in rare cases
-
 
 
 Version 1.5.2
