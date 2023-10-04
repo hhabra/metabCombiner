@@ -298,8 +298,6 @@ form_tables <- function(object, xset, yset, xfeat = NULL, yfeat = NULL, nGroups)
 {
     groupCountX <- as.integer(table(xset[["group"]]))
     groupCountY <- as.integer(table(yset[["group"]]))
-    if(any(groupCountX * groupCountY >= 10000))
-        stop("irregular group size detected (n > 10000); check m/z values")
     xreps <- rep(groupCountY, times = groupCountX)
     ends <- c(which(!duplicated(yset[["group"]])),nrow(yset)+1)
     yreps <- unlist(lapply(seq(1,nGroups), function(number){
