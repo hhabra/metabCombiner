@@ -36,8 +36,7 @@ identityAnchorSelection <- function(cTable, windx, windy, useID, brackets)
     if(!useID)
         return(cTable)
 
-    cTable[["labels"]] = compare_strings(cTable[["idx"]],
-                                        cTable[["idy"]],
+    cTable[["labels"]] = compare_strings(cTable[["idx"]], cTable[["idy"]],
                                         "I", "P", brackets)
 
     if(any(cTable[["labels"]] == "I"))
@@ -66,6 +65,9 @@ identityAnchorSelection <- function(cTable, windx, windy, useID, brackets)
 
     return(cTable)
 }
+
+
+
 
 #' @title Iterative Selection of Ordered Pairs
 #'
@@ -112,7 +114,6 @@ iterativeAnchorSelection <- function(cTable, windx, windy, swap = FALSE){
                                     windy = windy,
                                     PACKAGE = "metabCombiner")
 
-
     cTable <- dplyr::filter(cTable, .data$labels != "N")
 
     return(cTable)
@@ -140,6 +141,7 @@ iterativeAnchorSelection <- function(cTable, windx, windy, swap = FALSE){
 #'     X dataset. Optimal values are between 0.01 and 0.05 min (1-3s)
 #' @param windy numeric. Retention time exclusion window around each anchor in
 #'     dataset Y. Optimal values are between 0.01 and 0.05 min (1-3s)
+#'
 #' @param brackets_ignore If useID = TRUE, bracketed identity strings of the
 #'     types included in this argument will be ignored.
 #' @details
@@ -207,30 +209,27 @@ iterativeAnchorSelection <- function(cTable, windx, windy, swap = FALSE){
 #'
 #' @export
 selectAnchors <- function(object, useID = FALSE, tolmz = 0.003, tolQ = 0.3,
-    tolrtq = 0.3, windx = 0.03, windy = 0.03,
-    brackets_ignore = c("(", "[", "{"))
+    tolrtq = 0.3, windx = 0.03, windy = 0.03, brackets_ignore = c("(", "[", "{"))
 {
     combinerCheck(isMetabCombiner(object), "metabCombiner")
     check_anchors_pars(useID, tolmz, tolQ, tolrtq, windx, windy)
-
     cTable <- dplyr::filter(combinedTable(object)[combinerNames()],
                             .data$group > 0)
     rte <- c(min(cTable$rtx), min(cTable$rty), max(cTable$rtx), max(cTable$rty))
-
-    cTable <- dplyr::select(cTable, -.data$score, -.data$rankX,-.data$rankY) %>%
-                dplyr::mutate(`rtqx` = (.data$rtx - rte[1])/ (rte[3] - rte[1]),
+    cTable <- dplyr::select(cTable,-.data$score,-.data$rankX,-.data$rankY) %>%
+              dplyr::mutate(`rtqx` = (.data$rtx - rte[1])/ (rte[3] - rte[1]),
                         `rtqy` = (.data$rty - rte[2])/ (rte[4] - rte[2]),
-                        `labels` = rep("P", nrow(cTable)))
-    cTable <- identityAnchorSelection(cTable, windx = windx, windy = windy,
-                                    useID = useID, brackets = brackets_ignore)
-    cTable <- dplyr::filter(cTable, (abs(.data$mzx - .data$mzy) < tolmz &
-                                    abs(.data$Qx - .data$Qy) < tolQ &
-                                    abs(.data$rtqx - .data$rtqy) < tolrtq &
-                                    .data$labels != "N") |.data$labels == "I")
+                        `labels` = rep("P", nrow(cTable))) %>%
+              identityAnchorSelection(windx = windx, windy = windy,
+                          useID = useID, brackets = brackets_ignore) %>%
+              dplyr::filter((abs(.data$mzx - .data$mzy) < tolmz &
+                            abs(.data$Qx - .data$Qy) < tolQ &
+                            abs(.data$rtqx - .data$rtqy) < tolrtq &
+                            .data$labels != "N") |.data$labels == "I")
 
     anchorlistXY <- iterativeAnchorSelection(cTable = cTable, windx = windx,
                                             windy = windy, swap = FALSE)
-    anchorlistYX <- iterativeAnchorSelection(cTable = cTable,windx = windx,
+    anchorlistYX <- iterativeAnchorSelection(cTable = cTable, windx = windx,
                                             windy = windy, swap = TRUE)
     anchorlist <- dplyr::intersect(anchorlistXY, anchorlistYX) %>%
                     dplyr::select(-.data$rtqx, -.data$rtqy)
