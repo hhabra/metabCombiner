@@ -1,5 +1,5 @@
 Package: metabCombiner
-Version: 1.12.0
+Version: 1.13.0
 Date: 2023-10-04
 Title: Method for Combining LC-MS Metabolomics Feature Measurements
 Authors@R: c(
