@@ -44,7 +44,7 @@ anchors <- getAnchors(data.combined)   #to view the results of anchor selection
 
 set.seed(100)
 data.combined <- fit_gam(data.combined, useID = TRUE, k = seq(12, 20, 2),
-                        iterFilter = 2, ratio = 2, frac = 0.5, bs = "bs",
+                        iterFilter = 2, coef = 2, prop = 0.5, bs = "bs",
                         family = "scat", weights = 1, method = "REML",
                         optimizer = "newton")
 
@@ -57,7 +57,7 @@ plot(data.combined, fit = "gam", main = "Example Fit", xlab = "data1",
 # optional function; only run if you have sufficiently representative shared IDs
 scores <- evaluateParams(data.combined, A = seq(60, 150, by = 10),
                         B = seq(6, 20), C = seq(0.1, 1 ,0.1), fit = "gam",
-                        PPM = FALSE, useAdduct = FALSE, minScore = 0.7,
+                        usePPM = FALSE, minScore = 0.7,
                         penalty = 10, groups = NULL)
 
 data.combined <- calcScores(data.combined, A = 90, B = 15, C = 0.5,
@@ -70,22 +70,22 @@ data.combined <- calcScores(data.combined, A = 90, B = 15, C = 0.5,
 
 #option 1: fully reduced table of 1-1 alignments
 data.combined <- reduceTable(data.combined, maxRankX = 2, maxRankY = 2,
-                           minScore = 0.5, conflict = 0.1)
+                           minScore = 0.5, delta = 0.1)
 #this is equivalent to the above reduceTable call
 data.combined <- labelRows(data.combined, maxRankX = 2, maxRankY = 2,
-                           minScore = 0.5, conflict = 0.1, method = "score",
+                           minScore = 0.5, delta = 0.1, method = "score",
                            resolveConflicts = TRUE, remove = TRUE)
 
 
 #options 2 and 3 allow for inspection of program determinations
 #option 2: fully-detailed row labels, including conflicting feature pair rows
 data.combined <- labelRows(data.combined, maxRankX = 2, maxRankY = 2,
-                          minScore = 0.5, conflict = 0.1, method = "score",
+                          minScore = 0.5, delta = 0.1, method = "score",
                           resolveConflicts = FALSE, remove = FALSE)
 
 #option 3: resolved conflicting rows, but no row removal
 data.combined <- labelRows(data.combined, maxRankX = 2, maxRankY = 2,
-                           minScore = 0.5, conflict = 0.1, method = "score",
+                           minScore = 0.5, delta = 0.1, method = "score",
                            resolveConflicts = FALSE, remove = FALSE)
 
 ################### Inclusion of Non-Aligned Features ####################
