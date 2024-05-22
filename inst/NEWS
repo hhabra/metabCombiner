@@ -1,4 +1,4 @@
-Version 1.13.1
+Version 1.15.1
 ----------------------------
 o New m/z shift modeling functionality added:
   + mzFit(): m/z shift modeling and plotting function
