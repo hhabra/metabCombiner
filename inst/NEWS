@@ -1,3 +1,15 @@
+Version 1.13.1
+----------------------------
+o New m/z shift modeling functionality added:
+  + mzFit(): m/z shift modeling and plotting function
+  + mzfitParam(): parameter list function for listing modeling parameters
+
+o update to calcScores():
+  + new arguments (mzshift and mzfit) for m/z correction before scoring
+
+o new citation
+
+
 Version 1.11.1
 ----------------------------
 o m/z group size limit eliminated (previous: 10000 maximum)

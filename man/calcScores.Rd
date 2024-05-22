@@ -9,8 +9,10 @@ calcScores(
   A = 75,
   B = 10,
   C = 0.25,
-  fit = c("gam", "loess"),
   groups = NULL,
+  fit = c("gam", "loess"),
+  mzshift = FALSE,
+  mzfit = mzfitParam(),
   useAdduct = FALSE,
   adduct = 1.25,
   usePPM = FALSE,
@@ -27,10 +29,14 @@ retention times}
 
 \item{C}{Numeric weight for differences in Q (abundance quantiles).}
 
-\item{fit}{Character. Choice of fitted rt model, "gam" or "loess."}
-
 \item{groups}{integer. Vector of feature groups to score. If set to NULL
 (default), will compute scores for all feature groups.}
+
+\item{fit}{Character. Choice of fitted rt model, "gam" or "loess."}
+
+\item{mzshift}{Logical. If TRUE, shifts the m/z values (mzx) before scoring.}
+
+\item{mzfit}{List of parameters for shifting m/z values; see ?mzfitParam}
 
 \item{useAdduct}{logical. Option to penalize mismatches in (non-empty,
 non-bracketed) adduct column annotations.}
@@ -59,25 +65,26 @@ calculation is described in \code{\link{scorePairs}}.
 \details{
 This function updates the \code{rtProj}, \code{score}, \code{rankX}, and
 \code{rankY} columns in the \code{combinedTable} report. First, using the
-RT mapping model computed in the previous step(s), \code{rtx} values are
+RT mapping model computed in the previous steps, \code{rtx} values are
 projected onto \code{rty}. Then similarity scores are calculated based on
-m/z, rt (fitted vs observed), and Q differences, with multiplicative weight
+m/z, rt (rtProj vs rty), and Q differences, with multiplicative weight
 penalties \code{A}, \code{B}, and \code{C}.
 
 If the datasets contain representative set of shared identities (idx = idy),
 \code{\link{evaluateParams}} provides some guidance on appropriate \code{A},
- \code{B}, and \code{C} values to use. In testing, the best values for
- \code{A} should lie between 50 and 120, according to mass accuracy;
- \code{B} should lie between 5 and 15 depending on fitting accuracy (higher
- if datasets processed under roughly identical conditions) ; \code{C} should
-  vary between 0 and 1, depending on sample similarity. See examples below.
+\code{B}, and \code{C} values to use. In testing, the best values for
+\code{A} should lie between 50 and 120, according to mass accuracy; if using
+ppm (\code{usePPM} = TRUE), the suggested range is between 0.01 and 0.05.
+\code{B} should be between 5 and 15 depending on fitting accuracy (higher
+if datasets processed under roughly identical conditions) ; \code{C} should
+vary between 0 and 1, depending on sample similarity. See examples below.
 
-If using ppm (\code{usePPM} = TRUE), do not use the above guidelines for
-\code{A} values. The suggested range is between 0.01 and 0.05, though this
-hasn't been thoroughly tested yet. Also, if using adduct information
-(\code{useAdduct} = TRUE), the score is divided by the numeric \code{adduct}
-argument if non-empty and non-bracketed adduct values do not match. Be sure
-that adduct annotations are accurate before using this functionality.
+Some input datasets exhibit systematic m/z shifts
+
+ If using adduct information (\code{useAdduct} = TRUE), the score is divided
+ by the numeric \code{adduct} argument if non-empty and non-bracketed adduct
+ values do not match. Be sure that adduct annotations are accurate before
+ using this functionality.
 }
 \examples{
 
@@ -94,7 +101,7 @@ p.comb <- fit_gam(p.comb, k = 20, iterFilter = 1, family = "gaussian")
 #example: moderate m/z deviation, accurate rt fit, high sample similarity
 p.comb <- calcScores(p.comb, A = 90, B = 14, C = 0.8, useAdduct = FALSE,
          groups = NULL, fit = "gam", usePPM = FALSE)
-cTable = combinedTable(p.comb)  #to view results
+cTable <- combinedTable(p.comb)  #to view results
 
 \donttest{
 #example 2: high m/z deviation, moderate rt fit, low sample similarity

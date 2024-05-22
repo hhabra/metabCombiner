@@ -267,7 +267,7 @@ evaluateParams <- function(object, A = seq(60,150,by = 10), B = seq(6,15),
                             .data$idy %in% idtable[["id"]])
 
     cTable[["rtProj"]] <- predict(model, newdata = cTable)
-    massdiff <- mzdiff(cTable[["mzx"]], cTable[["mzy"]], usePPM)
+    mzdiff <- massdiff(cTable[["mzx"]], cTable[["mzy"]], usePPM)
     rtdiff <- abs(cTable[["rty"]] - cTable[["rtProj"]])
     qdiff <- abs(cTable[["Qx"]] - cTable[["Qy"]])
     scores <- data.frame(A = rep(A, each = length(B)*length(C)),
@@ -279,7 +279,7 @@ evaluateParams <- function(object, A = seq(60,150,by = 10), B = seq(6,15),
     scores[["totalScore"]] <- mapply(function(A,B,C)
                     objective(cTable = cTable, idtable = idtable,
                                 A = A, B = B, C = C, minScore = minScore,
-                                mzdiff = massdiff, rtdiff = rtdiff,
+                                mzdiff = mzdiff, rtdiff = rtdiff,
                                 qdiff = qdiff, rtrange = rtrange,
                                 adductdiff = 1, matches = matches,
                                 mismatches = mismatches, penalty = penalty),
