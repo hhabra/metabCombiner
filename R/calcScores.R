@@ -125,10 +125,12 @@ mzFit <- function(object, fit = mzfitParam(), plot = TRUE, ...)
         warning("retention time mapping must precede m/z fitting")
         return(mgcv::gam(0 ~ s(mzx)), data = rTable)
     }
-    rtrange <- max(cTable$rty, na.rm = TRUE) - min(cTable$rty, na.rm = TRUE)
-    rTable <- dplyr::filter(cTable, abs(.data$mzy - .data$mzx) < fit[["mz"]],
-                            abs(.data$rty - .data$rtProj) < fit[["rt"]] * rtrange,
-                            abs(.data$Qy - .data$Qx) < fit[["Q"]])
+
+    rTable <- cTable[combinerNames()]
+    rtrange <- max(rTable$rty, na.rm = TRUE) - min(rTable$rty, na.rm = TRUE)
+    rTable <- dplyr::filter(rTable, abs(.data$mzy - .data$mzx) < fit[["mz"]],
+                        abs(.data$rty - .data$rtProj) < fit[["rt"]] * rtrange,
+                        abs(.data$Qy - .data$Qx) < fit[["Q"]])
     model <- mgcv::gam((mzy - mzx) ~ s(mzx, k = fit[["k"]], bs = "tp"),
                        data = rTable)
     if(plot){
