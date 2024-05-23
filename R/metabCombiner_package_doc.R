@@ -12,7 +12,7 @@
 #' @useDynLib metabCombiner
 #' @import dplyr
 #' @importFrom graphics plot lines
-#' @importFrom stats loess loess.control predict setNames
+#' @importFrom stats loess loess.control predict setNames na.omit
 #' @importFrom S4Vectors isSorted
 #' @importFrom methods new is
 #' @importFrom utils read.csv read.delim write.table head
