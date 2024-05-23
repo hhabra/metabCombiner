@@ -1,3 +1,9 @@
+Version 1.15.2
+----------------------------
+o Bug fixes for duplicate column names
+
+
+
 Version 1.15.1
 ----------------------------
 o New m/z shift modeling functionality added:
