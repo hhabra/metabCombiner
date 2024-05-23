@@ -39,7 +39,6 @@ citEntry(entry="article",
 	 volume="14",
 	 issue="2",
 	 url="https://doi.org/10.1021/acs.analchem.0c03693",
-	 textVersion=paste("H. Habra, "J. Meijer", "T. Shen", "O. Fiehn", "D. Gaul", "F. Fernández",
-	 "K. Rempfert", "T. Metz","K. Peterson", "C. Evans", "A. Karnovsky",
+	 textVersion=paste("H. Habra", "J. Meijer", "T. Shen", "O. Fiehn", "D. Gaul", "F. Fernández","K. Rempfert", "T. Metz", "K. Peterson", "C. Evans", "A. Karnovsky",
 	 "metabCombiner 2.0: Disparate Multi-Dataset Feature Alignment for LC-MS Metabolomics",
 	 "Metabolites 14(2):125 (2024)"))
