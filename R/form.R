@@ -185,20 +185,20 @@ formCombinedTable <- function(object, xset, yset, xreps, yreps){
     yComb <- yset[yreps,]
     samps_extras <- unlist(lapply(datasets(object), function(d)
         c(getSamples(object, d), getExtra(object,d))))
-    samps_extras <- rmbrackets(paste(samps_extras, collapse = "|"))
-    x_sa_ext <- setdiff(grep(samps_extras, rmbrackets(names(xComb))),seq(1,5))
-    y_sa_ext <- setdiff(grep(samps_extras, rmbrackets(names(yComb))),seq(1,5))
+    x_samps_extras <- unique(stats::na.omit(match(samps_extras, names(xComb))))
+    x_samps_extras <- x_samps_extras[x_samps_extras > 6]
+    y_samps_extras <- unique(stats::na.omit(match(samps_extras, names(yComb))))
+    y_samps_extras <- y_samps_extras[y_samps_extras > 6]
     cTable <- data.frame(idx = xComb[["id"]], idy = yComb[["id"]],
                     mzx = round(xComb[["mz"]],5), mzy = round(yComb[["mz"]],5),
                     rtx = round(xComb[["rt"]],4), rty = round(yComb[["rt"]],4),
-                    rtProj = numeric(nrow(xComb)),
-                    Qx = round(xComb[["Q"]],4), Qy = round(yComb[["Q"]],4),
-                    group = xComb[["group"]],
-                    score = rep(1, nrow(xComb)),
-                    rankX = as.integer(1), rankY = as.integer(1),
-                    adductx = xComb[["adduct"]], adducty = yComb[["adduct"]],
-                    xComb[,sort(x_sa_ext)], yComb[,sort(y_sa_ext)],
-                    stringsAsFactors = FALSE, check.names = FALSE)
+                    rtProj = numeric(nrow(xComb)), Qx = round(xComb[["Q"]],4),
+                    Qy = round(yComb[["Q"]],4), group = xComb[["group"]],
+                    score = rep(1, nrow(xComb)), rankX = as.integer(1),
+                    rankY = as.integer(1), adductx = xComb[["adduct"]],
+                    adducty = yComb[["adduct"]], xComb[,sort(x_samps_extras)],
+                    yComb[,sort(y_samps_extras)], stringsAsFactors = FALSE,
+                    check.names = FALSE)
     consec <- lapply(rle(cTable[["group"]])[["lengths"]], function(l) seq(1,l))
     consec <- unlist(consec)
     rowID <- sprintf("%s.%s", cTable[["group"]], consec)
