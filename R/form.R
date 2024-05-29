@@ -186,9 +186,9 @@ formCombinedTable <- function(object, xset, yset, xreps, yreps){
     samps_extras <- unlist(lapply(datasets(object), function(d)
         c(getSamples(object, d), getExtra(object,d))))
     x_samps_extras <- unique(stats::na.omit(match(samps_extras, names(xComb))))
-    x_samps_extras <- x_samps_extras[x_samps_extras > 6]
+    x_samps_extras <- x_samps_extras[x_samps_extras %in% seq(7, ncol(xComb)-1)]
     y_samps_extras <- unique(stats::na.omit(match(samps_extras, names(yComb))))
-    y_samps_extras <- y_samps_extras[y_samps_extras > 6]
+    y_samps_extras <- y_samps_extras[y_samps_extras %in% seq(7, ncol(yComb)-1)]
     cTable <- data.frame(idx = xComb[["id"]], idy = yComb[["id"]],
                     mzx = round(xComb[["mz"]],5), mzy = round(yComb[["mz"]],5),
                     rtx = round(xComb[["rt"]],4), rty = round(yComb[["rt"]],4),
